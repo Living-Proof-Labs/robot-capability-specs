@@ -11,6 +11,8 @@
     "preview": "node tooling/preview.mjs"
   },
   "devDependencies": {
+    "@cucumber/gherkin": "42.0.1",
+    "@cucumber/messages": "34.2.1",
     "yaml": "2.8.1"
   }
 }

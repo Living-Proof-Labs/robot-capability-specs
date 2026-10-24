@@ -7,7 +7,7 @@ const workflow = YAML.parse(await readFile(new URL('../.github/workflows/release
 
 test('shared release source is an explicit version tag, never a moving branch or alias', () => {
   assert.equal(workflow.jobs.release.uses,
-    'Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v2.0.0');
+    'Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v2.0.3');
   assert.match(workflow.jobs.release.uses, /@v\d+\.\d+\.\d+$/);
   assert.equal(workflow.jobs.release.steps, undefined);
   assert.equal(workflow.jobs.release.secrets, undefined);
