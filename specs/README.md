@@ -20,3 +20,7 @@ Evaluation requirements to design through issues:
 These are design goals, not a normative schema or implemented grading runtime.
 Catalog releases provide stable references now. Per-capability semantic revisions,
 evidence formats, grader execution, and separate robot adapters are later work.
+
+The [revision 1 reference contracts](v1/README.md) and
+[Gherkin examples](v1/reference.feature) define a bounded fixture demonstration.
+They do not establish a general robot certification schema.
