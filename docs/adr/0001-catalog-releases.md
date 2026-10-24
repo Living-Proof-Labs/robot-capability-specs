@@ -5,10 +5,13 @@ Use upstream initial version 1.0.0. License scope approved.
 
 ## Decision
 
+Implementation ownership moves to the versioned shared workflow in
+[ADR 0002](0002-shared-release-workflow.md); the policy below remains applicable.
+
 Use semantic-release with its official `@semantic-release/commit-analyzer`,
 `@semantic-release/release-notes-generator`, and `@semantic-release/github` plugins.
-The notes generator uses Conventional Changelog. Run the locked installation from
-GitHub Actions after tests; no wrapper Action or custom release engine is needed.
+The notes generator uses Conventional Changelog. The shared workflow owns the locked installation and runs after consumer checks;
+no consumer-local release engine or configuration is needed.
 
 Release notes are generated for the GitHub release body. Do not commit a generated
 changelog or version bump, or create a redundant Markdown notes attachment. No

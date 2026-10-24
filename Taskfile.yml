@@ -16,12 +16,12 @@ tasks:
   check:
     desc: Check JavaScript syntax and patch whitespace with native tools
     cmds:
-      - for: [release.config.mjs, tooling/commit-title.mjs, tooling/preview.mjs, test/engine.test.mjs, test/policy.test.mjs]
+      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs]
         cmd: node --check "{{.ITEM}}"
       - git diff --check
 
   test:
-    desc: Run the Node test suite, including isolated Git release tests
+    desc: Run consumer validation and release-caller contract tests
     cmds:
       - npm test
 

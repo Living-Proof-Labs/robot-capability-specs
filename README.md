@@ -24,8 +24,9 @@ Individual commands are `task setup` (locked dependencies), `task check` (syntax
 and whitespace), and `task test` (tests). `task verify` runs them sequentially.
 Use native `git`, `gh`, or the appropriate provider CLI for repository operations;
 Task standardizes project commands rather than wrapping provider authentication.
-Release orchestration remains in Actions with semantic-release, not a local Task
-publish command.
+Release orchestration remains in the versioned shared Actions workflow, not a
+local Task publish command. Consumer checks retain title and preview validation;
+release-engine tests and dependencies are owned by the shared source.
 
 `artifacts/preview.json` identifies the exact checked-out commit. It is not a stable
 release or a prediction of the next release version. Tooling is private to this
@@ -33,8 +34,9 @@ repository; no npm package is published.
 
 ## Releases
 
-Use upstream semantic-release with its official commit analyzer, release notes
-generator, and GitHub publisher. Conventional Commits determine versions: fixes,
+Use the [shared semantic-release workflow](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.0/docs/releases.md)
+at `v2.0.0`, with upstream official plugins; see
+[ADR 0002](docs/adr/0002-shared-release-workflow.md). Conventional Commits determine versions: fixes,
 documentation and maintenance changes increment patch; features increment minor;
 `!` or a `BREAKING CHANGE:` footer increments major. The first stable catalog release uses upstream
 `1.0.0`.
