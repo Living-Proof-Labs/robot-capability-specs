@@ -8,6 +8,25 @@ universal schema, executable evaluator, or robot adapter yet. Future adapters fo
 ANYmal and Unitree variants belong in separate repositories. See the
 [scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.md).
 
+## Collaboration and mirrors
+
+GitHub is the canonical product origin. Follow the shared
+[working baseline at v2.0.2](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.2/AGENTS.md),
+adopted in [AGENTS.md](AGENTS.md); [CONTRIBUTING.md](CONTRIBUTING.md) adds this
+catalog's process. The [proposed "Fork em all!" guide](https://github.com/Living-Proof-Labs/collaboration-guidelines/pull/9)
+explains clones, faithful mirrors, intentional forks, upstream contributions, and
+release identity. Replace this proposal link with a published version-tagged guide
+when that release is available.
+
+The public anonymous [GitLab pull mirror](https://gitlab.com/living-proof-labs/robot-capability-specs)
+had full canonical ref parity verified on **2026-10-24**. Its downstream-only
+`provider/gitlab-ci` and `provider/gitlab-ci-pilot` branches start from canonical
+source bases and contain no CI implementation commits. GitLab-hosted CI and release
+execution remain unverified, with an account identity gate unresolved. Git mirroring
+does not copy hosted release objects. This dated observation does not establish
+ongoing synchronization or end-to-end GitLab support; see the
+[GitHub support issue](https://github.com/Living-Proof-Labs/collaboration-guidelines/issues/6).
+
 ## Development
 
 Install [Task](https://taskfile.dev/docs/installation), Git, and Node.js 24.10+
