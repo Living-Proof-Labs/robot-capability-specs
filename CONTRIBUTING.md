@@ -12,7 +12,9 @@ migration in the PR body; preserve any `BREAKING CHANGE:` footer in the final
 squash commit. Prefer squash merging so the reviewed title becomes the mainline
 commit. Maintainers must check the final merge message, not just the branch title.
 
-Run `npm ci --ignore-scripts` and `npm test`. CI publishes only a preview artifact
+Install Task, Node.js 24 and Git in your environment, then run `task verify`.
+Use `task setup`, `task check`, or `task test` for individual steps. Native `git`
+and the appropriate provider CLI remain the interface for repository operations. CI publishes only a preview artifact
 for feature branches and PRs. PR code has no release token. Changes to criteria
 that invalidate previously valid consumers or evidence are breaking; clarifications
 that preserve meaning are patches. Additive abilities are features. Per-contract
