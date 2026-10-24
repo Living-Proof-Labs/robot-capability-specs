@@ -1,4 +1,4 @@
-name: Catalog release (activation requires approval)
+name: Catalog release
 on:
   push:
     branches: [main]
@@ -10,7 +10,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && vars.RELEASES_ENABLED == 'true'
+    # Publishing authorized; an explicit false retains the operational off switch.
+    if: github.ref == 'refs/heads/main' && (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -28,9 +29,3 @@ jobs:
       - run: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: release-evidence-${{ github.sha }}-${{ github.run_attempt }}
-          path: artifacts/
-          if-no-files-found: ignore

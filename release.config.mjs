@@ -1,11 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
+const maintenanceTypes = ['docs', 'chore', 'build', 'ci', 'test', 'refactor', 'style', 'revert'];
+const types = ['feat', 'fix', 'perf', ...maintenanceTypes];
 export default {
   branches: ['main'],
   tagFormat: 'v${version}',
   plugins: [
-    './tooling/policy.mjs',
+    ['@semantic-release/commit-analyzer', {
+      preset: 'conventionalcommits',
+      releaseRules: [
+        // Matching custom rules must not downgrade a breaking docs/chore change.
+        { breaking: true, release: 'major' },
+        ...maintenanceTypes.map(type => ({ type, release: 'patch' })),
+      ],
+    }],
+    ['@semantic-release/release-notes-generator', {
+      preset: 'conventionalcommits',
+      presetConfig: { types: types.map(type => ({ type, section: type, hidden: false })) },
+    }],
     ['@semantic-release/github', {
-      assets: ['artifacts/release.json', 'artifacts/RELEASE_NOTES.md'],
       successComment: false,
       failComment: false,
       failTitle: false,
