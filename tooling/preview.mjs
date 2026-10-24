@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { validTitle } from './policy.mjs';
+import { validTitle } from './commit-title.mjs';
 const title = process.env.PR_TITLE;
 if (title !== undefined && !validTitle(title)) {
   throw new Error('PR title must be a supported Conventional Commit (see CONTRIBUTING.md)');

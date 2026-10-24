@@ -3,30 +3,24 @@
 Create these in GitHub when repository access and publication are approved. This
 file is a planning draft, not a record of remotely created issues.
 
-## 1. Establish catalog versions and release notes for every merged change
+## 1. Establish catalog versions and generated GitHub release notes
 
-Problem: capability references must identify a reproducible catalog snapshot and
-explain every change, including documentation and maintenance.
+Use upstream semantic-release for merged mainline work. Multiple accumulated
+merges may share a release. This replaces the earlier per-commit coverage goal.
 
 Acceptance criteria:
 
-- [ ] Approve ADR 0001: first release 1.0.0 and tested push-head releases with complete
-  per-commit coverage. If unique stable versions per commit are required instead,
-  resolve that explicitly before activation.
-- [ ] Review this implementation in a draft PR; authorize merge separately.
-- [ ] Prove fix, feat, breaking (`!` and footer), docs-only, maintenance, unknown
-  messages, and mixed batches select the documented severity and retain note coverage.
-- [ ] Prove release manifest version/tag/full head SHA and every included commit
-  match the Git source; successful retries never move or duplicate tags.
-- [ ] Prove failed tests do not publish, and PR/fork/feature branch execution cannot
-  invoke the privileged release job. Previews identify exact source commits.
-- [ ] In the authorized repository, exercise batched pushes, pending-run coalescing,
-  stale runs, and a failed final head; verify eventual commit coverage after recovery.
-- [ ] Rehearse partial tag/release/asset failure recovery without moving tags.
-- [ ] Verify only scoped runtime `contents: write` is needed; approve any protections
-  and activation independently. No package publication.
-- [ ] Merge/activate only after explicit approval and record the first release URL
-  and its machine-readable evidence in this issue.
+- [x] Use the upstream initial stable catalog version, 1.0.0.
+- [ ] Test fixes, features, breaking changes, documentation-only and maintenance
+  changes with the official analyzer and notes generator; retain breaking precedence.
+- [ ] Preserve upstream batch, unknown-message, revert-filtering and retry behavior.
+- [ ] Generate notes in the GitHub release body; do not commit a changelog, version
+  bump, custom ledger or redundant generated notes file.
+- [ ] Verify immutable tags identify the tested source SHA.
+- [ ] Verify failed tests and PR/fork/branch runs cannot publish stable releases.
+- [ ] Keep CI-only unique run versions/downstream outputs as a small separate follow-up.
+- [ ] Validate live permissions and partial-publication recovery before separately
+  recording the activated release; no package publication or broader credentials.
 
 ## 2. Define one minimal capability contract and its evaluation policies
 

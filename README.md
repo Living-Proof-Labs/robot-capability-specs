@@ -24,19 +24,22 @@ repository; no npm package is published.
 
 ## Releases
 
-The proposed policy uses SemVer and Conventional Commits, with semantic-release
-handling version selection, tags, and GitHub releases. `fix`, documentation, and
-maintenance changes increment patch; `feat` increments minor; `!` or a
-`BREAKING CHANGE:` footer increments major. First release: `1.0.0` of the catalog,
-not a claim of schema maturity. Release notes include every commit and an attached
-`release.json` maps the release version and all included commits to full Git SHAs.
+Use upstream semantic-release with its official commit analyzer, release notes
+generator, and GitHub publisher. Conventional Commits determine versions: fixes,
+documentation and maintenance changes increment patch; features increment minor;
+`!` or a `BREAKING CHANGE:` footer increments major. The first stable catalog release uses upstream
+`1.0.0`.
 
-A release names a tested **push head**: batched commits share that release version.
-This provides per-commit coverage, not a distinct stable release for each commit.
-See [ADR 0001](docs/adr/0001-catalog-releases.md), including the explicit granularity
-tradeoff and recovery procedure. Automation is inert until approval and the
-`RELEASES_ENABLED=true` repository variable are both in place. This foundation
-must first be reviewed as a draft PR; do not merge or activate it without approval.
+Merged mainline changes trigger the standard release process. Accumulated merges
+may share a release; upstream filtering can omit reverted pairs and unclassified
+messages. Complete documentation in the PR before merging. Generated notes belong
+in the GitHub release body, not a committed changelog or version-bump commit.
+The release tag identifies the exact source commit. No custom ledger or release
+manifest is generated.
+
+See [ADR 0001](docs/adr/0001-catalog-releases.md). Publishing is enabled on `main` after passing tests. Set repository variable
+`RELEASES_ENABLED=false` to pause it; unset or `true` enables publishing. CI-only run
+versions/downstream outputs remain a separate follow-up.
 
 ## Licensing
 

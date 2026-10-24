@@ -2,13 +2,16 @@
 // Real semantic-release engine; publishes only to a disposable local bare Git repo.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { Writable } from 'node:stream';
 import semanticRelease from 'semantic-release';
-const policyPath = new URL('../tooling/policy.mjs', import.meta.url).pathname;
+import { fileURLToPath } from 'node:url';
+import config from '../release.config.mjs';
+const plugins = config.plugins.filter(([name]) => name !== '@semantic-release/github')
+  .map(([name, options]) => [fileURLToPath(import.meta.resolve(name)), options]);
 
 test('engine releases tested heads, batches commits and retries without moving tags', async () => {
   const root = await mkdtemp(join(tmpdir(), 'catalog-engine-'));
@@ -27,7 +30,7 @@ test('engine releases tested heads, batches commits and retries without moving t
     git('push', 'origin', 'main');
     const options = {
       branches: ['main'], repositoryUrl, ci: false,
-      extends: [], plugins: [policyPath],
+      extends: [], plugins,
     };
     // Ignore any CI variables of the runner: this is a local, isolated engine test.
     const env = { PATH: process.env.PATH, HOME: root, GIT_AUTHOR_NAME: 'Local Release Test',
@@ -46,18 +49,15 @@ test('engine releases tested heads, batches commits and retries without moving t
     const batch = await run();
     assert.equal(batch.nextRelease.version, '1.0.1');
     assert.equal(batch.commits.length, 2);
-    const evidence = JSON.parse(await readFile(join(cwd, 'artifacts/release.json'), 'utf8'));
-    assert.equal(evidence.version, '1.0.1');
-    assert.equal(evidence.gitHead, git('rev-parse', 'HEAD'));
-    assert.equal(evidence.commits.length, 2);
-    const notes = await readFile(join(cwd, 'artifacts/RELEASE_NOTES.md'), 'utf8');
-    for (const commit of evidence.commits) assert.ok(notes.includes(commit.hash));
+    assert.equal(batch.nextRelease.gitHead, git('rev-parse', 'HEAD'));
+    assert.ok(batch.nextRelease.notes.includes('clarify terms'));
+    assert.ok(batch.nextRelease.notes.includes('maintenance'));
     assert.equal(git('rev-parse', 'v1.0.1'), git('rev-parse', 'HEAD'));
     git('commit', '--allow-empty', '-m', 'feat: add ability');
     git('push', 'origin', 'main');
     const failurePlugin = join(root, 'failure.cjs');
     await writeFile(failurePlugin, "exports.prepare = () => { throw new Error('simulated preparation failure'); };\n");
-    await assert.rejects(semanticRelease({ ...options, plugins: [policyPath, failurePlugin] },
+    await assert.rejects(semanticRelease({ ...options, plugins: [...plugins, failurePlugin] },
       { cwd, env, stdout: sink, stderr: sink }), /simulated preparation failure/);
     assert.equal(git('tag', '--list', 'v1.1.0'), '');
     assert.equal((await run()).nextRelease.version, '1.1.0');
