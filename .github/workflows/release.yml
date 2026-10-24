@@ -5,20 +5,12 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-concurrency:
-  group: catalog-release
-  cancel-in-progress: false
 jobs:
-  release:
-    # Publishing authorized; an explicit false retains the operational off switch.
-    if: github.ref == 'refs/heads/main' && (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
+  verify:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -28,6 +20,11 @@ jobs:
         with:
           version: '3.54.0'
       - run: task verify
-      - run: npm run release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
+    permissions:
+      contents: write
+    # Do not retarget published source tags; adopt updates through a new PR.
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v2.0.0
