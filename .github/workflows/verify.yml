@@ -1,0 +1,29 @@
+name: Verify
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: ['**']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run preview
+        env:
+          PR_TITLE: "${{ github.event.pull_request.title || 'chore: branch preview' }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preview-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/preview.json
