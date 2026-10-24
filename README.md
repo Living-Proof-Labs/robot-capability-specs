@@ -3,10 +3,28 @@
 An open Living Proof Labs catalog of granular robot abilities, operating conditions,
 and acceptance criteria, independent of any robot implementation.
 
-The first deliverable is **catalog versioning and release evidence**. There is no
-universal schema, executable evaluator, or robot adapter yet. Future adapters for
-ANYmal and Unitree variants belong in separate repositories. See the
-[scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.md).
+The catalog provides versioned, document-only capability contracts and Gherkin
+scenarios. Start with the [pause and verifier reference contracts](specs/v1/README.md)
+and their [five fixture scenarios](specs/v1/reference.feature). There is no universal
+schema or robot adapter here; runtime implementations belong in separate repositories.
+See the [scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.md).
+
+To execute the thin reference demo, follow
+[capability-verifier v1.0.1](https://github.com/Living-Proof-Labs/capability-verifier/tree/v1.0.1).
+With Git, Docker Compose v2 and Task 3.54.0 installed, and Docker running:
+
+```sh
+git clone --branch v1.0.1 https://github.com/Living-Proof-Labs/capability-verifier.git
+cd capability-verifier
+task demo
+```
+
+That released verifier consumes catalog **v1.1.0** with commit and content-hash
+verification. It does not automatically consume newer catalog releases.
+[View its 26-test report](https://github.com/Living-Proof-Labs/capability-verifier/runs/120847135184).
+Passing expectation tests include correctly detected FAIL and INSUFFICIENT_EVIDENCE
+fixture verdicts; they are not robot safety certification. The catalog's capability checks cover
+document formatting and Gherkin parsing, not runtime robot behavior.
 
 ## Collaboration and mirrors
 
@@ -51,8 +69,8 @@ repository; no npm package is published.
 
 ## Releases
 
-Use the [shared semantic-release workflow](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.0/docs/releases.md)
-at `v2.0.0`, with upstream official plugins; see
+Use the [shared semantic-release workflow](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/docs/releases.md)
+at `v2.0.3`, with upstream official plugins; see
 [ADR 0002](docs/adr/0002-shared-release-workflow.md). Conventional Commits determine versions: fixes,
 documentation and maintenance changes increment patch; features increment minor;
 `!` or a `BREAKING CHANGE:` footer increments major. The first stable catalog release uses upstream
