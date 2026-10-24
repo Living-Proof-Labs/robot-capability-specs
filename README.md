@@ -10,13 +10,22 @@ ANYmal and Unitree variants belong in separate repositories. See the
 
 ## Development
 
-Use Node.js 24.10 or newer in the 24.x line:
+Install [Task](https://taskfile.dev/docs/installation), Git, and Node.js 24.10+
+in the 24.x line (including npm) in your environment. CI installs Task 3.54.0.
+Task installs this project's locked development tools; it does not install a new
+system runtime or credentials. Then run:
 
 ```sh
-npm ci --ignore-scripts
-npm test
+task verify
 npm run preview
 ```
+
+Individual commands are `task setup` (locked dependencies), `task check` (syntax
+and whitespace), and `task test` (tests). `task verify` runs them sequentially.
+Use native `git`, `gh`, or the appropriate provider CLI for repository operations;
+Task standardizes project commands rather than wrapping provider authentication.
+Release orchestration remains in Actions with semantic-release, not a local Task
+publish command.
 
 `artifacts/preview.json` identifies the exact checked-out commit. It is not a stable
 release or a prediction of the next release version. Tooling is private to this
