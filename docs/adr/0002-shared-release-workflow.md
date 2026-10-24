@@ -1,9 +1,9 @@
 # ADR 0002: Adopt the released shared workflow
 
-Status: draft migration. **Do not merge until collaboration-guidelines is public
-and public caller access is independently verified.** The source was private when
-this draft was prepared; authenticated maintainer access does not establish public
-Actions access. Do not add credentials or change access settings to bypass this.
+Status: accepted. On 2026-10-24, unauthenticated HTTPS retrieval of the released
+workflow and a credential-free Git tag lookup confirmed public source access.
+The source was private when the draft was prepared; migration waited for the owner
+to make it public. No credentials or access settings were changed by this migration.
 
 Use the reusable workflow at:
 

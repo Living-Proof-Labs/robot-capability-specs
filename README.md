@@ -35,8 +35,8 @@ repository; no npm package is published.
 ## Releases
 
 Use the [shared semantic-release workflow](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.0/docs/releases.md)
-at `v2.0.0`, with upstream official plugins. This draft migration is blocked until
-the source is public; see [ADR 0002](docs/adr/0002-shared-release-workflow.md). Conventional Commits determine versions: fixes,
+at `v2.0.0`, with upstream official plugins; see
+[ADR 0002](docs/adr/0002-shared-release-workflow.md). Conventional Commits determine versions: fixes,
 documentation and maintenance changes increment patch; features increment minor;
 `!` or a `BREAKING CHANGE:` footer increments major. The first stable catalog release uses upstream
 `1.0.0`.
