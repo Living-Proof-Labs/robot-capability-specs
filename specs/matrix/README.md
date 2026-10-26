@@ -34,9 +34,9 @@ observations. None substitutes for another. Keep every coordinate separate and
 never derive a single overall capability grade from this matrix.
 
 The accompanying Gherkin is explanatory and parser-tested here. Actual execution,
-portable records and expectation tests belong in capability-verifier issue
-[#7](https://github.com/Living-Proof-Labs/capability-verifier/issues/7).
-Until reviewed and released, its `feat/released-execution-matrix` adapter is an
-explicit feature-branch preview, not a released product dependency. The exception
-ends with publication of the reviewed adapter; its inputs already use released
-version tags. No new catalog tag or future release number is assumed.
+portable records and expectation tests are available in
+[capability-verifier v1.2.0](https://github.com/Living-Proof-Labs/capability-verifier/tree/v1.2.0),
+released from commit `b5bab777978c81e03f52ab98c082158816a72975`.
+Run `task matrix` and `task matrix:report` from that released checkout.
+The temporary feature-branch exception has ended; the adapter and all its matrix
+inputs use published version tags.
