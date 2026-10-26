@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+services:
+  tooling:
+    build:
+      context: .
+      secrets:
+        - ca
+    environment:
+      PR_TITLE: "${PR_TITLE:-chore: branch preview}"
+    volumes:
+      - ./artifacts:/work/artifacts
+secrets:
+  ca:
+    file: ${HOST_BUILD_CA_FILE:-./tools/empty-ca.pem}

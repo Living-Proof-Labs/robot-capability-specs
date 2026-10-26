@@ -14,18 +14,32 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
       - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2
         with:
           version: '3.54.0'
       - run: task verify
-      - run: npm run preview
+      - run: task preview
         env:
           PR_TITLE: "${{ github.event.pull_request.title || 'chore: branch preview' }}"
       - uses: actions/upload-artifact@v4
         with:
           name: preview-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/preview.json
+      - name: Individual catalog test results
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@8861569aa5348397e7a26b6dda744c17c9265478 # v2.1.1
+        with:
+          name: Catalog expectation tests
+          path: artifacts/tests.xml
+          reporter: java-junit
+          use-actions-summary: 'true'
+          list-tests: all
+          fail-on-error: 'true'
+          fail-on-empty: 'true'
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: catalog-test-results
+          path: artifacts/tests.xml
+          retention-days: 14
+          if-no-files-found: error

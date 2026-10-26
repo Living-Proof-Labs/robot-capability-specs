@@ -1,0 +1,36 @@
+version: '3'
+
+tasks:
+  setup:
+    desc: Install locked development dependencies (requires Node.js 24, npm and Git)
+    preconditions:
+      - sh: node --version
+        msg: Install Node.js 24.10+ in the 24.x line before running Task.
+      - sh: npm --version
+        msg: Install npm before running Task.
+      - sh: git --version
+        msg: Install Git before running Task.
+    cmds:
+      - npm ci --ignore-scripts
+
+  check:
+    desc: Check JavaScript syntax and patch whitespace with native tools
+    cmds:
+      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs]
+        cmd: node --check "{{.ITEM}}"
+      - git diff --check
+
+  test:
+    desc: Run consumer validation and release-caller contract tests
+    cmds:
+      - mkdir -p artifacts
+      - node --test --test-reporter=spec --test-reporter=junit --test-reporter-destination=stdout --test-reporter-destination=artifacts/tests.xml tooling/test-suite.mjs
+
+  verify:
+    desc: Install dependencies, check syntax/whitespace, then run tests
+    cmds:
+      - task: check
+      - task: test
+  preview:
+    cmds:
+      - npm run preview

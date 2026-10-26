@@ -34,3 +34,17 @@ test('strict pause revision has four distinct boundary examples', async () => {
   assert.match(contract, /250 milliseconds/);
   assert.match(contract, /revision `2.0.0`/);
 });
+
+test('released execution matrix parses four distinct coordinates', async () => {
+  const source = await readFile('specs/matrix/reference.feature', 'utf8');
+  const messages = generateMessages(source, 'specs/matrix/reference.feature', SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN, {
+    newId: IdGenerator.incrementing(), includeGherkinDocument: true, includePickles: true,
+  });
+  assert.deepEqual(messages.filter(m => m.parseError), []);
+  const examples = messages.filter(m => m.pickle).map(m => m.pickle.steps.map(s => s.text));
+  assert.equal(examples.length, 4);
+  assert.equal(new Set(examples.map(e => e.slice(0, 2).join('\n'))).size, 4);
+  assert.equal(examples.filter(e => e.includes('the retained outcome is PASS')).length, 2);
+  assert.equal(examples.filter(e => e.includes('the retained outcome is FAIL')).length, 1);
+  assert.equal(examples.filter(e => e.includes('execution compatibility is INCOMPATIBLE')).length, 1);
+});

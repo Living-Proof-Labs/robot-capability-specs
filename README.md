@@ -45,18 +45,18 @@ ongoing synchronization or end-to-end GitLab support; see the
 
 ## Development
 
-Install [Task](https://taskfile.dev/docs/installation), Git, and Node.js 24.10+
-in the 24.x line (including npm) in your environment. CI installs Task 3.54.0.
-Task installs this project's locked development tools; it does not install a new
-system runtime or credentials. Then run:
+Install [Task](https://taskfile.dev/docs/installation), Git, and Docker with
+Compose. The tooling image supplies Node.js 24 and locked dependencies; host
+project runtimes are not required. CI installs Task 3.54.0. Then run:
 
 ```sh
 task verify
-npm run preview
+task preview
 ```
 
-Individual commands are `task setup` (locked dependencies), `task check` (syntax
-and whitespace), and `task test` (tests). `task verify` runs them sequentially.
+Individual commands are `task setup` (build tooling), `task check` (syntax
+and whitespace), and `task test` (tests). `task verify` builds and runs checks
+and tests. Inside the prepared image use `task -t Taskfile.runtime.yml verify`.
 Use native `git`, `gh`, or the appropriate provider CLI for repository operations;
 Task standardizes project commands rather than wrapping provider authentication.
 Release orchestration remains in the versioned shared Actions workflow, not a
@@ -92,3 +92,17 @@ versions/downstream outputs remain a separate follow-up.
 Original specification content under `specs/` is CC BY 4.0. Original tooling and
 project documentation elsewhere are Apache-2.0. See [LICENSE.md](LICENSE.md) for
 precise scope and attribution. Dependency and license texts retain their own terms.
+
+## Execution compatibility matrix
+
+See the [four released execution examples](specs/matrix/README.md) for the
+500 ms and 250 ms contracts crossed with two released fixture executors. Execution
+incompatibility is distinct from a capability failure or insufficient evidence.
+The Gherkin here is parser-tested; runtime tests belong in capability-verifier.
+
+The tooling now runs in Docker: use `task verify` and `task preview` on the host,
+or `task -t Taskfile.runtime.yml verify` inside the prepared image. Host Node/npm
+are no longer required. The image installs locked dependencies and Task 3.54.0.
+`artifacts/tests.xml` retains individual expectation checks. When an existing
+provider requires its CA bundle, `HOST_BUILD_CA_FILE` passes that existing file
+as a temporary build secret without changing host trust or disabling TLS.
