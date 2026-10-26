@@ -5,8 +5,8 @@
 ## Shared working guidelines
 
 Read and apply the Living Proof Labs baseline at the published version
-`v2.0.3`:
-https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/AGENTS.md
+`v4.1.0`:
+https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v4.1.0/AGENTS.md
 
 Fetch and read that file through authorized tools before relying on it. Read
 relevant linked procedures at the same version. A link does not load instructions.
@@ -29,3 +29,6 @@ independent work covered by available instructions. Do not substitute `main` or
 - The shared rule permits routine authorized merges without a human review gate.
   This repository's contribution procedure requires maintainer approval to merge
   or activate release automation; honor that approval requirement.
+
+Container override: host Task now delegates to the tooling Docker image. Inside
+that image use `task -t Taskfile.runtime.yml`; no host Node runtime is required.

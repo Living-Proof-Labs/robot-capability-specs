@@ -1,33 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Container wrapper follows collaboration-guidelines v4.1.0.
 version: '3'
-
 tasks:
   setup:
-    desc: Install locked development dependencies (requires Node.js 24, npm and Git)
-    preconditions:
-      - sh: node --version
-        msg: Install Node.js 24.10+ in the 24.x line before running Task.
-      - sh: npm --version
-        msg: Install npm before running Task.
-      - sh: git --version
-        msg: Install Git before running Task.
     cmds:
-      - npm ci --ignore-scripts
-
+      - docker compose build tooling
   check:
-    desc: Check JavaScript syntax and patch whitespace with native tools
     cmds:
-      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs]
-        cmd: node --check "{{.ITEM}}"
-      - git diff --check
-
+      - docker compose run --build --rm tooling check
   test:
-    desc: Run consumer validation and release-caller contract tests
     cmds:
-      - npm test
-
+      - docker compose run --build --rm tooling test
   verify:
-    desc: Install dependencies, check syntax/whitespace, then run tests
     cmds:
-      - task: setup
-      - task: check
-      - task: test
+      - docker compose run --build --rm tooling verify
+  preview:
+    cmds:
+      - docker compose run --build --rm tooling preview

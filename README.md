@@ -92,3 +92,17 @@ versions/downstream outputs remain a separate follow-up.
 Original specification content under `specs/` is CC BY 4.0. Original tooling and
 project documentation elsewhere are Apache-2.0. See [LICENSE.md](LICENSE.md) for
 precise scope and attribution. Dependency and license texts retain their own terms.
+
+## Execution compatibility matrix
+
+See the [four released execution examples](specs/matrix/README.md) for the
+500 ms and 250 ms contracts crossed with two released fixture executors. Execution
+incompatibility is distinct from a capability failure or insufficient evidence.
+The Gherkin here is parser-tested; runtime tests belong in capability-verifier.
+
+The tooling now runs in Docker: use `task verify` and `task preview` on the host,
+or `task -t Taskfile.runtime.yml verify` inside the prepared image. Host Node/npm
+are no longer required. The image installs locked dependencies and Task 3.54.0.
+`artifacts/tests.xml` retains individual expectation checks. When an existing
+provider requires its CA bundle, `HOST_BUILD_CA_FILE` passes that existing file
+as a temporary build secret without changing host trust or disabling TLS.
