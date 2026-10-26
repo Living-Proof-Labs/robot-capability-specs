@@ -4,16 +4,21 @@ version: '3'
 tasks:
   setup:
     cmds:
+      - mkdir -p artifacts
       - docker compose build tooling
   check:
     cmds:
+      - mkdir -p artifacts
       - docker compose run --build --rm tooling check
   test:
     cmds:
+      - mkdir -p artifacts
       - docker compose run --build --rm tooling test
   verify:
     cmds:
+      - mkdir -p artifacts
       - docker compose run --build --rm tooling verify
   preview:
     cmds:
+      - mkdir -p artifacts
       - docker compose run --build --rm tooling preview

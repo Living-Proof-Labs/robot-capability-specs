@@ -18,8 +18,8 @@ independent work covered by available instructions. Do not substitute `main` or
 
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) for draft PRs, release conventions,
   maintainer approval, and validation evidence.
-- Use Node.js 24.10+ in the 24.x line, npm, Git, and Task. Run `task verify`
-  (setup, checks, and tests); individual commands are `task setup`, `task check`,
+- Use Docker, Git, and Task; the tooling image supplies Node.js 24 and npm.
+  Run `task verify` (container build, checks, and tests); individual commands are `task setup`, `task check`,
   and `task test`. Use native provider CLIs when authenticated appropriately.
 - Keep robot adapters and proprietary SDK code outside this catalog. Preserve
   the path-specific licenses in [LICENSE.md](LICENSE.md).
