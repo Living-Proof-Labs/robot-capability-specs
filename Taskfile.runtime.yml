@@ -12,6 +12,7 @@ tasks:
         msg: Install Git before running Task.
     cmds:
       - npm ci --ignore-scripts
+      - pip install --require-hashes -r requirements-docs.txt
 
   check:
     desc: Check JavaScript syntax and patch whitespace with native tools
@@ -31,6 +32,17 @@ tasks:
     cmds:
       - task: check
       - task: test
+      - task: test:docs
   preview:
     cmds:
       - npm run preview
+
+  docs:
+    desc: Render repository Markdown and Gherkin as a browsable manual
+    cmds:
+      - python tooling/manual.py
+  test:docs:
+    desc: Build and exercise the manual in Chromium, retaining JUnit and screenshots
+    cmds:
+      - task: docs
+      - python -m pytest test/docs -q --junitxml=artifacts/manual/tests.xml

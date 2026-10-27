@@ -1,2 +1,6 @@
 node_modules/
 artifacts/
+.venv/
+.cache/
+__pycache__/
+.pytest_cache/

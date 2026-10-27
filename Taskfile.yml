@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Container wrapper follows collaboration-guidelines v4.1.0.
+# Container wrapper follows collaboration-guidelines v5.0.0.
 version: '3'
 tasks:
   setup:
@@ -22,3 +22,12 @@ tasks:
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling preview
+
+  docs:
+    cmds:
+      - mkdir -p artifacts
+      - docker compose run --build --rm tooling docs
+  test:docs:
+    cmds:
+      - mkdir -p artifacts
+      - docker compose run --build --rm tooling test:docs

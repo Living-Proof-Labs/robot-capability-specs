@@ -10,7 +10,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
@@ -21,25 +21,38 @@ jobs:
       - run: task preview
         env:
           PR_TITLE: "${{ github.event.pull_request.title || 'chore: branch preview' }}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: preview-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/preview.json
-      - name: Individual catalog test results
+          retention-days: 14
+          if-no-files-found: error
+      - name: Individual catalog and manual test results
+        id: results
         if: ${{ !cancelled() }}
         uses: dorny/test-reporter@8861569aa5348397e7a26b6dda744c17c9265478 # v2.1.1
         with:
-          name: Catalog expectation tests
-          path: artifacts/tests.xml
+          name: Catalog and manual expectations
+          path: artifacts/**/tests.xml
           reporter: java-junit
           use-actions-summary: 'true'
           list-tests: all
           fail-on-error: 'true'
           fail-on-empty: 'true'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        id: artifact
         if: ${{ !cancelled() }}
         with:
-          name: catalog-test-results
-          path: artifacts/tests.xml
+          name: catalog-and-manual
+          path: artifacts/
           retention-days: 14
           if-no-files-found: error
+
+      - name: Confirm complete result publication
+        if: ${{ !cancelled() }}
+        env:
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          PASSED: ${{ steps.results.outputs.passed }}
+          FAILED: ${{ steps.results.outputs.failed }}
+          SKIPPED: ${{ steps.results.outputs.skipped }}
+        run: python3 tooling/check-publication.py

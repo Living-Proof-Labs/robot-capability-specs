@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+site_name: Robot capability specifications
+site_url: https://docs.livingprooflabs.com/robot-capability-specs/
+use_directory_urls: false
+strict: true
+theme:
+  name: zensical
+  font: false
+  palette:
+    - media: '(prefers-color-scheme)'
+      toggle: {icon: lucide/sun-moon, name: Switch to light mode}
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle: {icon: lucide/sun, name: Switch to dark mode}
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle: {icon: lucide/moon, name: Switch to system preference}
+markdown_extensions:
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.superfences
+nav:
+  - Start here: index.md
+  - Catalog:
+      - Scope: specs/index.md
+      - Revision 1: specs/v1/index.md
+      - Revision 1 examples: specs/v1/reference.feature.md
+      - Revision 2: specs/v2/index.md
+      - Revision 2 examples: specs/v2/reference.feature.md
+      - Compatibility matrix: specs/matrix/index.md
+      - Matrix examples: specs/matrix/reference.feature.md
+  - Authoring: docs/authoring.md
+  - Verification: docs/verification.md
+  - Contributing: CONTRIBUTING.md
+  - Documentation version: version.md
+  - Licensing: LICENSE.md
