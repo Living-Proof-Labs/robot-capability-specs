@@ -1,25 +1,29 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Contributing
 
-Start with a GitHub issue describing the requirement and observable acceptance
-criteria. Keep high-level decisions separate from implementation tasks. Open a
-**draft PR**, link the issue, and include test evidence before requesting review.
-Do not merge or activate release automation without maintainer approval.
+Use the released [shared contribution and release rules](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/CONTRIBUTING.md),
+[developer interface](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/developer-interface.md),
+and [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/independent-review.md).
+[AGENTS.md](AGENTS.md) records this repository's explicit adoption and overrides.
 
-Use a Conventional Commit PR title: `type(scope): description`, with optional
-scope. Types: `feat`, `fix`, `perf`, `docs`, `chore`, `build`, `ci`, `test`,
-`refactor`, `style`, `revert`. Use `!` for breaking changes and describe the
-migration in the PR body; preserve any `BREAKING CHANGE:` footer in the final
-squash commit. Prefer squash merging so the reviewed title becomes the mainline
-commit. Maintainers must check the final merge message, not just the branch title.
+## Catalog additions and override
 
-Install Task, Docker with Compose and Git, then run `task verify`.
-Use `task setup`, `task check`, or `task test` for individual steps. Native `git`
-and the appropriate provider CLI remain the interface for repository operations. CI publishes only a preview artifact
-for feature branches and PRs. PR code has no release token. Changes to criteria
-that invalidate previously valid consumers or evidence are breaking; clarifications
-that preserve meaning are patches. Additive abilities are features. Per-contract
-revision semantics are deferred until the contract design is agreed.
+Start with a [catalog issue](https://github.com/Living-Proof-Labs/robot-capability-specs/issues)
+describing the requirement and observable acceptance criteria. Open a draft PR,
+link the issue, and include test evidence. **Do not merge or activate release
+automation without maintainer approval.** This is an explicit local override.
 
-Contribute only work you have the right to publish. Follow the path-specific
-license in LICENSE.md. Do not include credentials, private datasets, or proprietary
-robot SDK/adapter code.
+Follow the [authoring guide](docs/authoring.md). Criteria changes that invalidate
+previously valid consumers or evidence are breaking; meaning-preserving
+clarifications are patches, and additive abilities are features. Preserve the
+separate contract revisions and catalog bundle identity.
+
+Run `task verify` on the Docker/Task host, or
+`task -t Taskfile.runtime.yml verify` inside the prepared image. The manual's
+Tasks reference is generated from those actual definitions. PRs have no release
+token; catalog publication remains in the separately pinned v2.0.3 workflow.
+
+Contribute only work you have the right to publish. Preserve
+[path-specific licenses and attribution](LICENSE.md): specifications are CC BY 4.0,
+while original tooling and project documentation are Apache-2.0. Keep credentials,
+private datasets, proprietary SDKs and robot adapters outside this catalog.

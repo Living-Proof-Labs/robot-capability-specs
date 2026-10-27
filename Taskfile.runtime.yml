@@ -28,12 +28,13 @@ tasks:
       - node --test --test-reporter=spec --test-reporter=junit --test-reporter-destination=stdout --test-reporter-destination=artifacts/tests.xml tooling/test-suite.mjs
 
   verify:
-    desc: Install dependencies, check syntax/whitespace, then run tests
+    desc: Check syntax/whitespace, then run catalog and manual tests
     cmds:
       - task: check
       - task: test
       - task: test:docs
   preview:
+    desc: Record exact source preview identity
     cmds:
       - npm run preview
 

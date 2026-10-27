@@ -1,0 +1,95 @@
+{
+  "version.html": [
+    "__skip",
+    "documentation-version"
+  ],
+  "index.html": [
+    "__skip",
+    "robot-capability-specifications",
+    "collaboration-and-mirrors",
+    "development",
+    "releases",
+    "licensing",
+    "execution-compatibility-matrix"
+  ],
+  "LICENSE.html": [
+    "__skip",
+    "license-scope"
+  ],
+  "CONTRIBUTING.html": [
+    "__skip",
+    "contributing"
+  ],
+  "AGENTS.html": [
+    "__skip",
+    "working-in-this-repository",
+    "shared-working-guidelines",
+    "local-additions",
+    "local-overrides"
+  ],
+  "specs/index.html": [
+    "__skip",
+    "scope-of-the-capability-catalog"
+  ],
+  "github/PAGES.html": [
+    "__skip",
+    "pages-deployment-and-live-verification"
+  ],
+  "docs/verification.html": [
+    "__skip",
+    "verify-the-catalog-manual",
+    "initial-inventory-and-gaps",
+    "bounded-feature-inventory",
+    "reproduce-and-inspect"
+  ],
+  "docs/authoring.html": [
+    "__skip",
+    "author-a-capability-contract"
+  ],
+  "specs/v2/reference.feature.html": [
+    "__skip",
+    "specsv2referencefeature"
+  ],
+  "specs/v2/index.html": [
+    "__skip",
+    "strict-pause-demonstration-revision-200"
+  ],
+  "specs/v1/reference.feature.html": [
+    "__skip",
+    "specsv1referencefeature"
+  ],
+  "specs/v1/index.html": [
+    "__skip",
+    "reference-contracts-revision-100",
+    "pause-100",
+    "execute-spec-100",
+    "assess-evidence-100",
+    "report-results-100"
+  ],
+  "specs/matrix/reference.feature.html": [
+    "__skip",
+    "specsmatrixreferencefeature"
+  ],
+  "specs/matrix/index.html": [
+    "__skip",
+    "released-pause-execution-compatibility-examples"
+  ],
+  "docs/issues/roadmap.html": [
+    "__skip",
+    "roadmap-issue-drafts",
+    "1-establish-catalog-versions-and-generated-github-release-notes",
+    "2-define-one-minimal-capability-contract-and-its-evaluation-policies",
+    "3-identify-external-adapter-and-execution-boundaries"
+  ],
+  "docs/adr/0002-shared-release-workflow.html": [
+    "__skip",
+    "adr-0002-adopt-the-released-shared-workflow"
+  ],
+  "docs/adr/0001-catalog-releases.html": [
+    "__skip",
+    "adr-0001-upstream-semantic-release-for-catalog-releases",
+    "decision",
+    "merge-lifecycle-initial-version-and-ci",
+    "sources"
+  ]
+}

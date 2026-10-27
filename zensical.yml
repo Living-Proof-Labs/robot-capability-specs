@@ -20,17 +20,23 @@ markdown_extensions:
   - toc: {permalink: true}
   - pymdownx.superfences
 nav:
+  - Documentation home: https://docs.livingprooflabs.com/
   - Start here: index.md
-  - Catalog:
-      - Scope: specs/index.md
-      - Revision 1: specs/v1/index.md
-      - Revision 1 examples: specs/v1/reference.feature.md
-      - Revision 2: specs/v2/index.md
-      - Revision 2 examples: specs/v2/reference.feature.md
-      - Compatibility matrix: specs/matrix/index.md
-      - Matrix examples: specs/matrix/reference.feature.md
-  - Authoring: docs/authoring.md
+  - Guides:
+      - Authoring: docs/authoring.md
+  - Reference:
+      - Contracts:
+          - Scope: specs/index.md
+          - Revision 1: specs/v1/index.md
+          - Revision 1 examples: specs/v1/reference.feature.md
+          - Revision 2: specs/v2/index.md
+          - Revision 2 examples: specs/v2/reference.feature.md
+          - Compatibility matrix: specs/matrix/index.md
+          - Matrix examples: specs/matrix/reference.feature.md
+      - Tasks: tasks.md
   - Verification: docs/verification.md
-  - Contributing: CONTRIBUTING.md
-  - Documentation version: version.md
-  - Licensing: LICENSE.md
+  - Contribute: CONTRIBUTING.md
+  - Version and source: version.md
+  - Source: https://github.com/Living-Proof-Labs/robot-capability-specs
+  - Help / report an issue: https://github.com/Living-Proof-Labs/robot-capability-specs/issues
+  - License: LICENSE.md

@@ -1,5 +1,7 @@
 # Robot capability specifications
 
+**[Start here: documentation](https://docs.livingprooflabs.com/robot-capability-specs/)**
+
 An open Living Proof Labs catalog of granular robot abilities, operating conditions,
 and acceptance criteria, independent of any robot implementation.
 
@@ -27,15 +29,15 @@ fixture verdicts; they are not robot safety certification. The catalog's capabil
 document formatting and Gherkin parsing, not runtime robot behavior.
 
 Read the [authoring guide](docs/authoring.md) and [manual preview instructions](docs/verification.md).
-The public manual is pending Pages activation and live verification.
+The published manual follows the current main branch; its Documentation version
+page identifies the exact source revision.
 
 ## Collaboration and mirrors
 
-GitHub is the canonical product origin. Follow the shared
-["Fork em all!" collaboration guide](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/docs/collaboration.md)
-at `v2.0.3` for clones, faithful mirrors, intentional forks, upstream contributions,
-and release identity. [AGENTS.md](AGENTS.md) adopts the v5.0.0 working baseline;
-[CONTRIBUTING.md](CONTRIBUTING.md) adds this catalog's process.
+Shared collaboration and engineering procedures belong to
+[collaboration-guidelines v6.0.0](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/collaboration.md).
+[AGENTS.md](AGENTS.md) adopts that baseline; [CONTRIBUTING.md](CONTRIBUTING.md)
+retains this catalog's additions and maintainer-approval override.
 
 The public anonymous [GitLab pull mirror](https://gitlab.com/living-proof-labs/robot-capability-specs)
 had full canonical ref parity verified on **2026-10-24**. Its downstream-only
@@ -60,11 +62,9 @@ task preview
 Individual commands are `task setup` (build tooling), `task check` (syntax
 and whitespace), and `task test` (tests). `task verify` builds and runs checks
 and tests. Inside the prepared image use `task -t Taskfile.runtime.yml verify`.
-Use native `git`, `gh`, or the appropriate provider CLI for repository operations;
-Task standardizes project commands rather than wrapping provider authentication.
-Release orchestration remains in the versioned shared Actions workflow, not a
-local Task publish command. Consumer checks retain title and preview validation;
-release-engine tests and dependencies are owned by the shared source.
+See the released [developer interface](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/developer-interface.md)
+for shared tooling conventions. The manual generates its Tasks reference from
+this repository's actual host and prepared-environment Taskfiles.
 
 `artifacts/preview.json` identifies the exact checked-out commit. It is not a stable
 release or a prediction of the next release version. Tooling is private to this
@@ -72,19 +72,16 @@ repository; no npm package is published.
 
 ## Releases
 
-Use the [shared semantic-release workflow](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/docs/releases.md)
-at `v2.0.3`, with upstream official plugins; see
-[ADR 0002](docs/adr/0002-shared-release-workflow.md). Conventional Commits determine versions: fixes,
-documentation and maintenance changes increment patch; features increment minor;
-`!` or a `BREAKING CHANGE:` footer increments major. The first stable catalog release uses upstream
-`1.0.0`.
+Shared [release policy](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/CONTRIBUTING.md#release-from-main)
+and the separately pinned [v2.0.3 release implementation](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/docs/releases.md)
+remain canonical; see [ADR 0002](docs/adr/0002-shared-release-workflow.md).
+The working-guidelines update does not upgrade the release workflow.
 
-Merged mainline changes trigger the standard release process. Accumulated merges
-may share a release; upstream filtering can omit reverted pairs and unclassified
-messages. Complete documentation in the PR before merging. Generated notes belong
-in the GitHub release body, not a committed changelog or version-bump commit.
-The release tag identifies the exact source commit. No custom ledger or release
-manifest is generated.
+Catalog tags version the complete bundle; capability revisions identify individual
+contracts. Criteria changes that invalidate previously valid evidence or consumers
+are breaking; additive abilities are features and meaning-preserving clarifications
+are patches. Parsed Gherkin is not runtime execution evidence. Documentation
+commit identity is separate from both catalog tags and contract revisions.
 
 See [ADR 0001](docs/adr/0001-catalog-releases.md). Publishing is enabled on `main` after passing tests. Set repository variable
 `RELEASES_ENABLED=false` to pause it; unset or `true` enables publishing. CI-only run

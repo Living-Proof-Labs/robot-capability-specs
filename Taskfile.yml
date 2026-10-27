@@ -3,31 +3,38 @@
 version: '3'
 tasks:
   setup:
+    desc: Build the locked tooling image
     cmds:
       - mkdir -p artifacts
       - docker compose build tooling
   check:
+    desc: Check source syntax and whitespace in Docker
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling check
   test:
+    desc: Run catalog tests in Docker
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling test
   verify:
+    desc: Check catalog and rendered manual in Docker
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling verify
   preview:
+    desc: Record source preview identity in Docker
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling preview
 
   docs:
+    desc: Build the manual in Docker
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling docs
   test:docs:
+    desc: Build and test the manual in Docker
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling test:docs
