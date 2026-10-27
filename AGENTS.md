@@ -5,8 +5,8 @@
 ## Shared working guidelines
 
 Read and apply the Living Proof Labs baseline at the published version
-`v4.1.0`:
-https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v4.1.0/AGENTS.md
+`v5.0.0`:
+https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v5.0.0/AGENTS.md
 
 Fetch and read that file through authorized tools before relying on it. Read
 relevant linked procedures at the same version. A link does not load instructions.

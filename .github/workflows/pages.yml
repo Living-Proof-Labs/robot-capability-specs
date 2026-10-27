@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Publish manual
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2
+        with:
+          version: '3.54.0'
+      - run: task verify
+      - name: Individual catalog and manual test results
+        id: results
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@8861569aa5348397e7a26b6dda744c17c9265478 # v2.1.1
+        with:
+          name: Catalog and manual expectations
+          path: artifacts/**/tests.xml
+          reporter: java-junit
+          use-actions-summary: 'true'
+          list-tests: all
+          fail-on-error: 'true'
+          fail-on-empty: 'true'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        id: artifact
+        if: ${{ !cancelled() }}
+        with:
+          name: manual-verification
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Confirm complete result publication
+        if: ${{ !cancelled() }}
+        env:
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          PASSED: ${{ steps.results.outputs.passed }}
+          FAILED: ${{ steps.results.outputs.failed }}
+          SKIPPED: ${{ steps.results.outputs.skipped }}
+        run: python3 tooling/check-publication.py
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        with:
+          path: artifacts/manual/html
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Confirm this run still describes current main
+        id: freshness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha)
+          if [ "$current" = "$GITHUB_SHA" ]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Superseded source; deployment skipped.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        id: deployment
+        if: steps.freshness.outputs.current == 'true'

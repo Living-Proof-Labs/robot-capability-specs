@@ -26,12 +26,15 @@ Passing expectation tests include correctly detected FAIL and INSUFFICIENT_EVIDE
 fixture verdicts; they are not robot safety certification. The catalog's capability checks cover
 document formatting and Gherkin parsing, not runtime robot behavior.
 
+Read the [authoring guide](docs/authoring.md) and [manual preview instructions](docs/verification.md).
+The public manual is pending Pages activation and live verification.
+
 ## Collaboration and mirrors
 
 GitHub is the canonical product origin. Follow the shared
 ["Fork em all!" collaboration guide](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/docs/collaboration.md)
 at `v2.0.3` for clones, faithful mirrors, intentional forks, upstream contributions,
-and release identity. [AGENTS.md](AGENTS.md) adopts that version's working baseline;
+and release identity. [AGENTS.md](AGENTS.md) adopts the v5.0.0 working baseline;
 [CONTRIBUTING.md](CONTRIBUTING.md) adds this catalog's process.
 
 The public anonymous [GitLab pull mirror](https://gitlab.com/living-proof-labs/robot-capability-specs)

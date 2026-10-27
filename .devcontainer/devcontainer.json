@@ -1,0 +1,6 @@
+{
+  "name": "Capability catalog tooling",
+  "build": {"dockerfile": "../Dockerfile", "context": ".."},
+  "overrideCommand": true,
+  "postCreateCommand": "task -t Taskfile.runtime.yml setup"
+}
