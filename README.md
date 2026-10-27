@@ -1,5 +1,7 @@
 # Robot capability specifications
 
+**[Start here: documentation](https://docs.livingprooflabs.com/robot-capability-specs/)**
+
 An open Living Proof Labs catalog of granular robot abilities, operating conditions,
 and acceptance criteria, independent of any robot implementation.
 
@@ -27,7 +29,8 @@ fixture verdicts; they are not robot safety certification. The catalog's capabil
 document formatting and Gherkin parsing, not runtime robot behavior.
 
 Read the [authoring guide](docs/authoring.md) and [manual preview instructions](docs/verification.md).
-The public manual is pending Pages activation and live verification.
+The published manual follows the current main branch; its Documentation version
+page identifies the exact source revision.
 
 ## Collaboration and mirrors
 

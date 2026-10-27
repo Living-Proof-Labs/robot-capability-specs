@@ -69,6 +69,7 @@ A failed test must retain its nonzero exit status. Independent review must repea
 these checks on the downloaded artifact and post evidence using the pinned
 [review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v5.0.0/docs/independent-review.md).
 
-Pages settings are enabled; deployment, live navigation and the README's
-verified live-manual link remain pending; see [the activation plan](../.github/PAGES.md).
-Do not treat the configured canonical URL as a deployed-site claim.
+The [public manual](https://docs.livingprooflabs.com/robot-capability-specs/) is
+published from main. See [deployment and live verification](../.github/PAGES.md)
+for the deployed revision and evidence. The manual identifies its source revision;
+it does not imply that every installed consumer uses that catalog version.
