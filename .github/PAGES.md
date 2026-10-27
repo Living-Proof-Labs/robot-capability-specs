@@ -28,6 +28,14 @@ also released as catalog v1.2.2. The live `build.json` records that exact revisi
 `dirty: false`, and Zensical 0.0.73. The manual follows main; subsequent deployments
 show their own exact source identity rather than retaining a historical manual.
 
+Live reader checks on 2026-10-27 passed: authoring links to revision 1 and
+rendered Gherkin, the compatibility matrix, search for `pause` (10 results) and
+navigation to a revision 2 fragment followed by reload, dark-theme persistence,
+system light mode, and exact clean build identity. The parent performed these
+checks in a normal cloud browser. The raw Gherkin download link was visible, but
+browser policy blocked the download itself; independent HTTP source/content
+checks passed. This is not a claim of a successful browser download.
+
 For each deployment, check the live landing page, revision links and anchors,
 search and result navigation, asset loading, desktop/mobile navigation, themes
 and version identity. A successful build or artifact upload alone is not live
