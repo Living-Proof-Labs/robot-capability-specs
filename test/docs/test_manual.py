@@ -95,7 +95,8 @@ def test_navigation(browser, server, output, width):
     page.goto(server + '/')
     if width == 390:
         page.locator('label.md-header__button[for="__drawer"]:visible').first.click()
-    page.locator('label.md-nav__link').filter(has_text='Catalog').first.click()
+    page.locator('label.md-nav__link').filter(has_text='Reference').first.click()
+    page.locator('label.md-nav__link').filter(has_text='Contracts').first.click()
     page.get_by_role('link', name='Revision 1', exact=True).first.click()
     article = page.locator('article')
     expect(article).to_contain_text('Reference contracts, revision 1.0.0')
@@ -157,4 +158,66 @@ def test_themes(browser, server, output, mode):
     assert len(seen) >= 2
     (output / 'screenshots').mkdir(exist_ok=True)
     page.screenshot(path=str(output / f'screenshots/theme-{mode}.png'))
+    context.close()
+
+
+def test_historical_content_anchors(output):
+    baseline = json.loads((ROOT / 'test/docs/legacy-headings.json').read_text())
+    for path, anchors in baseline.items():
+        document = Document((output / 'html' / path).read_text())
+        assert set(anchors) <= document.ids, (path, set(anchors) - document.ids)
+
+
+def test_native_task_reference_is_fresh(output):
+    records = json.loads((output / 'html/task-reference.json').read_text())
+    build = json.loads((output / 'html/build.json').read_text())
+    assert {record['path'] for record in records} == {'Taskfile.yml', 'Taskfile.runtime.yml'}
+    assert build['task_sources'] == [{'path': r['path'], 'sha256': r['sha256']} for r in records]
+    rendered = ' '.join(Document((output / 'html/tasks.html').read_text()).text)
+    for record in records:
+        assert hashlib.sha256((ROOT / record['path']).read_bytes()).hexdigest() == record['sha256']
+        listing = json.loads(subprocess.check_output(
+            ['task', '-t', record['path'], '--list', '--json'], cwd=ROOT, text=True))
+        assert {t['name'] for t in record['tasks']} == {t['name'] for t in listing['tasks']}
+        for task in record['tasks']:
+            actual = subprocess.check_output(['task', '-t', record['path'], task['name'], '--summary'],
+                                             cwd=ROOT, text=True).replace(str(ROOT), '<repository>')
+            assert task['summary'] == actual
+            assert task['description'] in rendered
+            assert ' '.join(actual.split()) in ' '.join(rendered.split())
+
+
+def test_all_pages_expose_exact_identity_and_root(output):
+    build = json.loads((output / 'html/build.json').read_text())
+    for path in (output / 'html').rglob('*.html'):
+        if path.name == '404.html':
+            continue
+        doc = Document(path.read_text())
+        text = ' '.join(doc.text)
+        assert 'https://docs.livingprooflabs.com/' in doc.links, path
+        assert f'https://github.com/Living-Proof-Labs/robot-capability-specs/commit/{build["revision"]}' in doc.links
+        assert f'Docs: development · {build["revision"][:12]}' in text
+        assert 'Catalog releases' in text
+        assert 'https://github.com/Living-Proof-Labs/robot-capability-specs/issues' in doc.links
+
+
+@pytest.mark.parametrize('javascript', [True, False], ids=['scripts', 'no-scripts'])
+def test_keyboard_task_navigation_and_deep_reload(browser, server, javascript):
+    context = browser.new_context(java_script_enabled=javascript)
+    page = context.new_page()
+    page.goto(server + '/specs/v2/index.html')
+    root_link = page.get_by_role('link', name='Documentation home', exact=True).first
+    root_link.focus()
+    expect(root_link).to_be_focused()
+    assert root_link.get_attribute('href') == 'https://docs.livingprooflabs.com/'
+    task_link = page.get_by_role('link', name='Tasks', exact=True).first
+    task_link.focus()
+    page.keyboard.press('Enter')
+    expect(page).to_have_url(re.compile('/tasks.html$'))
+    expect(page.locator('article')).to_contain_text('Prepared environment')
+    page.goto(server + '/tasks.html#prepared-environment')
+    page.reload()
+    expect(page.locator('#prepared-environment')).to_be_visible()
+    # Navigation and identity are ordinary anchors, not dependent on badge scripts.
+    assert page.locator('footer a').count() >= 5
     context.close()

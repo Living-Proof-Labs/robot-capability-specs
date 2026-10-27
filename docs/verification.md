@@ -12,7 +12,7 @@ CLI or runtime in this repository; no command or API reference is invented.
 
 The initial gaps were no browsable manual, no authoring entry point, no manual
 artifact or browser checks, and no development-container configuration. This
-change adopts the shared working baseline from v4.1.0 to
+initial #14 change adopted the shared working baseline from v4.1.0 to
 [v5.0.0](https://github.com/Living-Proof-Labs/collaboration-guidelines/tree/v5.0.0),
 resolved to `dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. The separately pinned
 v2.0.3 release workflow remains unchanged. No local `.agents/skills` exist.
@@ -67,8 +67,32 @@ failures when available. The Actions summary must show individual cases and
 matching emitted/ingested counts; a report upload alone is not completion.
 A failed test must retain its nonzero exit status. Independent review must repeat
 these checks on the downloaded artifact and post evidence using the pinned
-[review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v5.0.0/docs/independent-review.md).
+[review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/independent-review.md).
 
-Pages settings are enabled; deployment, live navigation and the README's
-verified live-manual link remain pending; see [the activation plan](../.github/PAGES.md).
-Do not treat the configured canonical URL as a deployed-site claim.
+The [public manual](https://docs.livingprooflabs.com/robot-capability-specs/) is
+published from main. See [deployment and live verification](../.github/PAGES.md)
+for the deployed revision and evidence. The manual identifies its source revision;
+it does not imply that every installed consumer uses that catalog version.
+
+## Documentation ownership adoption
+
+Issue [#16](https://github.com/Living-Proof-Labs/robot-capability-specs/issues/16)
+adopts guidelines v6.0.0, resolved to
+`52a2f274576dab20e96ee1152b6c8d187cfbf377`. Shared mechanics now link to their
+released owner; catalog semantics, source paths, historical headings and the
+maintainer-approval override stay here. The prepared #14 publication cleanup is
+included rather than published as a second PR. Release workflow v2.0.3 and
+executable example pins remain unchanged.
+
+The manual adds common root/source/help/license navigation and exact documentation
+identity on every page. Catalog releases remain a separate link, not a badge
+implying the documentation matches the latest release. Task descriptions and
+summaries are generated using Task 3.54.0 from reviewed host/prepared Taskfiles;
+source hashes and a freshness check guard that reference. No CLI, API, measured
+coverage, private security route or runtime scenarios are invented. Existing
+Gherkin pages remain explanatory and parser-tested.
+
+Additional checks preserve historical headings, compare generated Task summaries
+with native output, and exercise nested navigation with keyboard input and deep
+link reload. Root/manual links are current reading destinations; shared guidance
+and executable dependencies remain pinned to explicit releases.
