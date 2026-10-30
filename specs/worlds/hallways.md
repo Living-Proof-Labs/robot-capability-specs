@@ -3,6 +3,10 @@
 
 Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
 
+Document revision 0.2.0 versions this specification text. It is separate from
+the fixture content version (`hallway-open` / `0.1.0`), which versions the world
+data.
+
 This document applies the [world contract](README.md) to one fixture:
 `hallway-open`. It is a straight hallway with a floor and two side walls, open at
 both ends, with no doors, rooms, end walls, or ceiling. It is engine-neutral:
@@ -32,7 +36,8 @@ All values are metres.
 
 Clear width is the distance between the inner side-wall faces. Length is the
 extent of the floor and both side walls along `+x`. Wall height is measured from
-the floor top surface. The floor covers `x = [-3.00, 3.00]`, `y = [-0.90, 0.90]`.
+the floor top surface. The floor covers `x = [-3.00, 3.00]`, `y = [-0.90, 0.90]` and is 0.10 m
+thick, with its top surface at `z = 0` and its underside at `z = -0.10`.
 
 ## Frame
 
@@ -62,7 +67,7 @@ the geometry, frame, and initial world state and removes transient entities.
 
 ## Conformance expectations
 
-Measured clear width, length, wall height, wall thickness, origin, and every
+Measured clear width, length, wall height, wall thickness, floor thickness, origin, and every
 named place must agree with the canonical values within 0.01 m. Frame axes and
 spawn yaws must agree within 0.5 degrees.
 
@@ -73,8 +78,8 @@ contacts enabled:
    `z = 0.75 m`. It settles on the floor; penetration below the floor top
    surface may not exceed 0.01 m.
 2. **Side walls:** from `spawn-centre`, drive it normally (no teleporting, at
-   most 0.25 m/s) toward `+y` and then `-y`. It must not pass an inner wall face
-   by more than 0.01 m.
+   most 0.25 m/s) toward `+y` and then `-y`. The sphere's surface must not pass
+   an inner wall face by more than 0.01 m.
 3. **Open ends:** from `spawn-centre`, drive it along `passage-centreline` to
    `x = ±2.80`. It contacts nothing but the floor, showing that no end wall or
    door exists.
