@@ -25,7 +25,8 @@ The [revision 1 reference contracts](v1/README.md) and
 [Gherkin examples](v1/reference.feature) define a bounded fixture demonstration.
 They do not establish a general robot certification schema.
 
-The [world contract](worlds/README.md) defines two closed hallway fixtures and
-independent MuJoCo/Gazebo evidence expectations. It is
-authored and parser-validated only: it neither creates a world library nor
-reports an engine or robot result.
+The [world contract](worlds/README.md) defines versioned world selection and
+conformance evidence without constraining fixture geometry or consumers. The
+[hallway fixture examples](worlds/hallways.md) define two closed hallway fixtures
+and their MuJoCo/Gazebo matrix. They are authored and parser-validated only;
+this catalog contains neither world assets nor engine results.

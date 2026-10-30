@@ -11,10 +11,11 @@ and their [five fixture scenarios](specs/v1/reference.feature). There is no univ
 schema or robot adapter here; runtime implementations belong in separate repositories.
 See the [scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.md).
 
-The [world contract](specs/worlds/README.md) separates reusable world
-content from simulator consumers and later robot adapters. Its two hallway
-fixtures and MuJoCo/Gazebo BDD matrix are acceptance criteria, not
-implemented simulator worlds or locomotion results.
+The [world contract](specs/worlds/README.md) defines versioned world selection
+and conformance evidence independently of geometry and consumers. The
+[hallway fixture examples](specs/worlds/hallways.md) provide two closed hallway
+fixtures and a MuJoCo/Gazebo matrix. This catalog contains their specifications
+and parser checks, not world assets or engine execution.
 
 To execute the thin reference demo, follow
 [capability-verifier v1.0.1](https://github.com/Living-Proof-Labs/capability-verifier/tree/v1.0.1).

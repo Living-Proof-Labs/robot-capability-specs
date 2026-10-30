@@ -49,26 +49,28 @@ test('released execution matrix parses four distinct coordinates', async () => {
   assert.equal(examples.filter(e => e.includes('execution compatibility is INCOMPATIBLE')).length, 1);
 });
 
-test('world contract crosses two hallway fixtures with two simulators', async () => {
+test('world contract has generic selection and evidence scenarios', async () => {
   const source = await readFile('specs/worlds/reference.feature', 'utf8');
   const messages = generateMessages(source, 'specs/worlds/reference.feature', SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN, {
     newId: IdGenerator.incrementing(), includeGherkinDocument: true, includePickles: true,
   });
   assert.deepEqual(messages.filter(m => m.parseError), []);
   const examples = messages.filter(m => m.pickle).map(m => m.pickle.steps.map(s => s.text).join('\n'));
-  assert.equal(examples.length, 16);
+  assert.equal(examples.length, 4);
+  assert.ok(examples.every(e => !/hallway|MuJoCo|Gazebo|0\.1\.0/.test(e)));
+});
+
+test('hallway examples cover two fixtures in two simulator consumers', async () => {
+  const source = await readFile('specs/worlds/hallways.feature', 'utf8');
+  const messages = generateMessages(source, 'specs/worlds/hallways.feature', SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN, {
+    newId: IdGenerator.incrementing(), includeGherkinDocument: true, includePickles: true,
+  });
+  assert.deepEqual(messages.filter(m => m.parseError), []);
+  const examples = messages.filter(m => m.pickle).map(m => m.pickle.steps.map(s => s.text).join('\n'));
+  assert.equal(examples.length, 8);
   for (const world of ['hallway-short', 'hallway-long']) {
     for (const simulator of ['MuJoCo', 'Gazebo']) {
-      assert.equal(examples.filter(e => e.includes(world) && e.includes(simulator)).length, 3);
+      assert.equal(examples.filter(e => e.includes(world) && e.includes(simulator)).length, 2);
     }
   }
-  const contract = await readFile('specs/worlds/README.md', 'utf8');
-  assert.match(contract, /authored and parser-validated/);
-  assert.match(contract, /not implemented/);
-  assert.match(contract, /0.01 m/);
-  assert.match(contract, /As an integrator/);
-  assert.match(contract, /As a scenario author/);
-  assert.match(contract, /As a verifier/);
-  assert.match(contract, /As a reviewer/);
-  assert.doesNotMatch(source, /1\.50|5\.00|2\.00|10\.00/);
 });

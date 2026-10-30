@@ -1,71 +1,28 @@
 # SPDX-License-Identifier: CC-BY-4.0
 @world_contract
-Feature: Closed hallway world contract
-  World conformance is separate from robot locomotion and simulator-specific implementation.
+Feature: Versioned world contract
+  A world contract defines selection and evidence independently of geometry or consumer implementation.
 
-  Scenario Outline: An integrator selects a versioned world fixture
-    Given world fixture <world> at content version "0.1.0"
-    And simulator <simulator> with an independently versioned adapter
-    When an integrator selects the declared fixture content
-    Then the adapter resolves the canonical fixture definition without an engine-specific world code change
-    And the floor and four enclosing walls have no door, entrance, exit, or navigation-goal semantics
+  Scenario: A consumer selects a versioned world
+    Given a world fixture identifier and immutable content version
+    When a consumer resolves the selected fixture through its world-content interface
+    Then it uses the selected fixture declaration or reports it as unsupported
+    And it does not silently substitute world content
 
-    Examples:
-      | world         | simulator |
-      | hallway-short | MuJoCo    |
-      | hallway-short | Gazebo    |
-      | hallway-long  | MuJoCo    |
-      | hallway-long  | Gazebo    |
+  Scenario: A scenario author uses selected-fixture conventions
+    Given a selected fixture with declared metric frame and placement conventions
+    When a scenario author records a pose or probe request
+    Then the request uses the selected fixture's declared frame and permitted region
+    And an unsupported placement is reported clearly
 
-  Scenario Outline: A scenario author uses canonical coordinates
-    Given world fixture <world> at content version "0.1.0"
-    When a scenario author reads the canonical fixture definition
-    Then the author uses the declared origin, right-handed axes, and pose convention
-    And the author uses the declared horizontal allowed region for an entity reference point
-    And a floor spawn and a collision-probe centre pose are recorded separately
+  Scenario: A verifier evaluates selected-fixture evidence
+    Given a selected fixture with declared geometry, surfaces, reset, and collision expectations
+    When a verifier evaluates a consumer record
+    Then it assesses the declared expectations and retained evidence
+    And it keeps world conformance separate from system behavior
 
-    Examples:
-      | world         |
-      | hallway-short |
-      | hallway-long  |
-
-  Scenario Outline: A verifier evaluates bounded world-conformance evidence
-    Given world fixture <world> at content version "0.1.0"
-    And simulator <simulator> with an independently versioned adapter
-    When a verifier reviews geometry, frame, reset, and bounded floor and wall collision evidence
-    Then it applies the contract tolerances to the canonical fixture definition
-    And it records gravity, contacts, and non-teleport probe drive conditions
-    And it does not assess robot locomotion or require exact physics or pixel equality
-
-    Examples:
-      | world         | simulator |
-      | hallway-short | MuJoCo    |
-      | hallway-short | Gazebo    |
-      | hallway-long  | MuJoCo    |
-      | hallway-long  | Gazebo    |
-
-  Scenario Outline: A reviewer inspects retained conformance results
-    Given world fixture <world> at content version "0.1.0"
-    And simulator <simulator> with an independently versioned adapter
-    When a reviewer opens a rendered conformance result
-    Then it includes interior and overhead visuals and machine-readable evidence
-    And it identifies the world, specification, and adapter versions and commits
-    And it reports unsupported or invalid evidence clearly rather than PASS
-
-    Examples:
-      | world         | simulator |
-      | hallway-short | MuJoCo    |
-      | hallway-short | Gazebo    |
-      | hallway-long  | MuJoCo    |
-      | hallway-long  | Gazebo    |
-
-  Scenario Outline: Unsupported world-contract features fail clearly
-    Given simulator <simulator> with an independently versioned adapter
-    When the adapter is asked for unsupported feature <feature>
-    Then it returns a clear unsupported or invalid-evidence result naming <feature>
-    And it does not report world conformance as PASS
-
-    Examples:
-      | simulator | feature                  |
-      | MuJoCo    | required evidence format |
-      | Gazebo    | requested world fixture  |
+  Scenario: A reviewer inspects retained conformance results
+    Given a completed world-conformance evaluation
+    When a reviewer opens its result
+    Then the result identifies the fixture, contract, consumer, and evidence digests
+    And missing or unsupported evidence is reported clearly
