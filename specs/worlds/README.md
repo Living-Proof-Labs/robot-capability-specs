@@ -28,10 +28,23 @@ result. It must not silently substitute a different fixture or placement.
 | As a scenario author, I want declared coordinate and placement conventions, so that a scenario has an unambiguous frame and pose. | The scenario uses the selected fixture's declared frame and permitted placement region. | `A scenario author uses selected-fixture conventions` |
 | As a verifier, I want measurable fixture expectations, so that I can assess world conformance separately from system behavior. | The verifier checks the selected fixture's declared geometry, surfaces, reset, and collision expectations. | `A verifier evaluates selected-fixture evidence` |
 | As a reviewer, I want retained results with provenance, so that I can inspect what was evaluated. | The result identifies the selected fixture, contract, consumer, and retained evidence. | `A reviewer inspects retained conformance results` |
+| As a verifier, I want an unsupported world feature to fail clearly, so that no consumer silently ignores part of a fixture. | The consumer reports the unsupported feature by name and the record is not a pass. | `A consumer meets an unsupported world feature` |
 
-The [hallway fixture definitions](hallways.md) and [hallway examples](hallways.feature)
-are one selected-fixture family and consumer matrix; they do not constrain other
-worlds.
+The [open hallway fixture](hallways.md) and [hallway examples](hallways.feature)
+are one selected fixture and consumer matrix; they do not constrain other worlds.
+
+## Named places
+
+A fixture may declare named places in its own frame: points, line segments,
+regions, polylines, and poses. Consumers and scenarios refer to a place by name
+and fixture version, never by re-deriving its coordinates in consumer code.
+
+## Unsupported features
+
+When a consumer cannot represent a declared feature (for example a geometric
+primitive, surface property, or named-place type its engine cannot load), it
+must stop with an `UNSUPPORTED` result naming the fixture, version, and feature.
+It must not drop, approximate, or substitute the feature and then report a pass.
 
 ## Conformance evidence
 
@@ -46,10 +59,12 @@ initial pose, gravity/contact settings where applicable, permitted drive method,
 sampling, measurement method, and tolerance. A consumer returns an unsupported
 or invalid-evidence result when it cannot meet a declared expectation. Results
 from distinct consumers need not have identical physics trajectories, contact
-forces, timestamps, or rendered pixels.
+forces, timestamps, or rendered pixels. Equivalent geometry does not imply
+identical physics.
 
 ## Status
 
 This contract and its Gherkin examples are authored and parser-validated in this
 catalog. World assets, consumer adapters, engine execution, and measured
-conformance records are not implemented here.
+conformance records are not implemented here. World data will live in a separate
+`livingproof-worlds` repository; simulator adapters live in their own consumers.

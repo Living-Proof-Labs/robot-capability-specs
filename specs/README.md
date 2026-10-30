@@ -27,6 +27,6 @@ They do not establish a general robot certification schema.
 
 The [world contract](worlds/README.md) defines versioned world selection and
 conformance evidence without constraining fixture geometry or consumers. The
-[hallway fixture examples](worlds/hallways.md) define two closed hallway fixtures
-and their MuJoCo/Gazebo matrix. They are authored and parser-validated only;
+[open hallway fixture](worlds/hallways.md) defines one door-free hallway with
+named places and its MuJoCo/Gazebo matrix. They are authored and parser-validated only;
 this catalog contains neither world assets nor engine results.

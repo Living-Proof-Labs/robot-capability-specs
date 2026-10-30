@@ -26,3 +26,9 @@ Feature: Versioned world contract
     When a reviewer opens its result
     Then the result identifies the fixture, contract, consumer, and evidence digests
     And missing or unsupported evidence is reported clearly
+
+  Scenario: A consumer meets an unsupported world feature
+    Given a selected fixture that declares a feature the consumer cannot represent
+    When the consumer loads the selected fixture
+    Then it returns an unsupported result naming the feature
+    And it does not drop or approximate the feature and report a pass
