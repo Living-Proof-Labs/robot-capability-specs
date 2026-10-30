@@ -49,7 +49,7 @@ test('released execution matrix parses four distinct coordinates', async () => {
   assert.equal(examples.filter(e => e.includes('execution compatibility is INCOMPATIBLE')).length, 1);
 });
 
-test('proposed world contract crosses two hallway fixtures with two simulators', async () => {
+test('world contract crosses two hallway fixtures with two simulators', async () => {
   const source = await readFile('specs/worlds/reference.feature', 'utf8');
   const messages = generateMessages(source, 'specs/worlds/reference.feature', SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN, {
     newId: IdGenerator.incrementing(), includeGherkinDocument: true, includePickles: true,

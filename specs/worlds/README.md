@@ -1,13 +1,13 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# Proposed world contract, revision 0.1.0
+# World contract, revision 0.1.0
 
 Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
 
-This is a proposed, document-only contract for small reusable worlds. It defines
+This document-only contract defines small reusable worlds. It defines
 world content and cross-engine evidence separately from robot locomotion,
 controllers, and adapters. It is not an implemented world, simulator test, or
-building-code standard. `livingproof-worlds` is the proposed future library; it
-is not created by this contract. `livingproof-sim-mujoco` and
+building-code standard. `livingproof-worlds` is the future library; it is not
+created by this contract. `livingproof-sim-mujoco` and
 `livingproof-sim-gazebo` are the intended independent consumers. Robot adapters
 come later. The older Cursor-built `unitree-foxglove-sdk` may inform discussion
 but is disposable proof/reference material and must never become a runtime
@@ -20,11 +20,11 @@ rectangle rather than a navigable corridor. It has a floor and four enclosing
 walls. It has no entrances, exits, doors, doorway semantics, or navigation exit
 goal. The top is open for visualization and inspection.
 
-All values are metres. The following proposed values are canonical for this
+All values are metres. The following values are canonical for this
 contract. BDD examples and consumer evidence refer to fixture identifiers and
 this table rather than duplicating dimensions.
 
-| Fixture and proposed content version | Clear interior width | Clear interior length | Wall height | Wall thickness | Exterior width × length |
+| Fixture and content version | Clear interior width | Clear interior length | Wall height | Wall thickness | Exterior width × length |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `hallway-short` / `0.1.0` | 1.50 m | 5.00 m | 2.50 m | 0.15 m | 1.80 m × 5.30 m |
 | `hallway-long` / `0.1.0` | 2.00 m | 10.00 m | 2.50 m | 0.15 m | 2.30 m × 10.30 m |
@@ -68,11 +68,11 @@ than silently relocating it. Reset must remove transient entities and restore th
 declared fixture geometry, frame, and initial world state; it does not require
 bitwise-identical physics trajectories across engines.
 
-## Proposed conformance criteria and evidence
+## Conformance criteria and evidence
 
-A simulator adapter can claim this proposed contract only when it supplies
+A simulator adapter conforms to this contract only when it supplies
 evidence for geometry, frame, collision, reset, and rendering. These are
-illustrative acceptance criteria, not reported passes:
+acceptance criteria, not reported passes:
 
 - Measured clear width, clear length, wall height, wall thickness, and declared
   origin must each agree with this contract within 0.01 m. Measured frame axes
