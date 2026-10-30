@@ -11,6 +11,12 @@ and their [five fixture scenarios](specs/v1/reference.feature). There is no univ
 schema or robot adapter here; runtime implementations belong in separate repositories.
 See the [scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.md).
 
+The [world contract](specs/worlds/README.md) defines versioned world selection
+and conformance evidence independently of geometry and consumers. The
+[open hallway fixture](specs/worlds/hallways.md) defines one door-free hallway
+with named places and a MuJoCo/Gazebo matrix. This catalog contains their specifications
+and parser checks, not world assets or engine execution.
+
 To execute the thin reference demo, follow
 [capability-verifier v1.0.1](https://github.com/Living-Proof-Labs/capability-verifier/tree/v1.0.1).
 With Git, Docker Compose v2 and Task 3.54.0 installed, and Docker running:
