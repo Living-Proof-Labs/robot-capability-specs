@@ -11,6 +11,11 @@ and their [five fixture scenarios](specs/v1/reference.feature). There is no univ
 schema or robot adapter here; runtime implementations belong in separate repositories.
 See the [scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.md).
 
+The [proposed world contract](specs/worlds/README.md) separates reusable world
+content from simulator consumers and later robot adapters. Its two hallway
+fixtures and MuJoCo/Gazebo BDD matrix are proposed acceptance criteria, not
+implemented simulator worlds or locomotion results.
+
 To execute the thin reference demo, follow
 [capability-verifier v1.0.1](https://github.com/Living-Proof-Labs/capability-verifier/tree/v1.0.1).
 With Git, Docker Compose v2 and Task 3.54.0 installed, and Docker running:

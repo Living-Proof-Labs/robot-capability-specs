@@ -48,3 +48,21 @@ test('released execution matrix parses four distinct coordinates', async () => {
   assert.equal(examples.filter(e => e.includes('the retained outcome is FAIL')).length, 1);
   assert.equal(examples.filter(e => e.includes('execution compatibility is INCOMPATIBLE')).length, 1);
 });
+
+test('proposed world contract crosses two hallway fixtures with two simulators', async () => {
+  const source = await readFile('specs/worlds/reference.feature', 'utf8');
+  const messages = generateMessages(source, 'specs/worlds/reference.feature', SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN, {
+    newId: IdGenerator.incrementing(), includeGherkinDocument: true, includePickles: true,
+  });
+  assert.deepEqual(messages.filter(m => m.parseError), []);
+  const examples = messages.filter(m => m.pickle).map(m => m.pickle.steps.map(s => s.text).join('\n'));
+  assert.equal(examples.length, 6);
+  assert.equal(examples.filter(e => e.includes('hallway-short') && e.includes('MuJoCo')).length, 1);
+  assert.equal(examples.filter(e => e.includes('hallway-short') && e.includes('Gazebo')).length, 1);
+  assert.equal(examples.filter(e => e.includes('hallway-long') && e.includes('MuJoCo')).length, 1);
+  assert.equal(examples.filter(e => e.includes('hallway-long') && e.includes('Gazebo')).length, 1);
+  const contract = await readFile('specs/worlds/README.md', 'utf8');
+  assert.match(contract, /authored and parser-validated/);
+  assert.match(contract, /not implemented/);
+  assert.match(contract, /0.01 m/);
+});
