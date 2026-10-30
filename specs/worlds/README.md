@@ -67,4 +67,4 @@ identical physics.
 This contract and its Gherkin examples are authored and parser-validated in this
 catalog. World assets, consumer adapters, engine execution, and measured
 conformance records are not implemented here. World data will live in a separate
-`livingproof-worlds` repository; simulator adapters live in their own consumers.
+[Living-Proof-Labs/livingproof-worlds](https://github.com/Living-Proof-Labs/livingproof-worlds) repository; simulator adapters live in their own consumers.

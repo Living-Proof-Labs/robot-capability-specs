@@ -92,6 +92,12 @@ test('open hallway contract declares named places, tolerances and scope limits',
   assert.match(doc, /Equivalent geometry does not imply identical physics/);
   assert.match(doc, /no robot, controller/);
   assert.match(doc, /later story/);
-  assert.match(doc, /livingproof-worlds/);
+  assert.match(doc, /Living-Proof-Labs\/livingproof-worlds/);
+  const feature = await readFile('specs/worlds/hallways.feature', 'utf8');
+  const scenarios = [...feature.matchAll(/^  Scenario(?: Outline)?: (.+)$/gm)].map(m => m[1]);
+  const rows = [...doc.matchAll(/^\| As an? (.+?), I want .+?, so that .+? \| .+? \| `(.+?)` \|$/gm)];
+  assert.equal(rows.length, 5);
+  assert.deepEqual(rows.map(r => r[2]), scenarios);
+  for (const r of rows) assert.ok(['integrator', 'scenario author', 'verifier', 'reviewer'].includes(r[1]));
   assert.doesNotMatch(doc, /hallway-short|hallway-long/);
 });

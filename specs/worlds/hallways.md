@@ -8,7 +8,8 @@ This document applies the [world contract](README.md) to one fixture:
 both ends, with no doors, rooms, end walls, or ceiling. It is engine-neutral:
 the same declaration is meant to be loaded by MuJoCo and Gazebo consumers.
 
-The world data for this fixture will live in a future `livingproof-worlds`
+The world data for this fixture will live in a future
+[Living-Proof-Labs/livingproof-worlds](https://github.com/Living-Proof-Labs/livingproof-worlds)
 repository. This catalog holds only the specification and its examples.
 
 ## Scope
@@ -98,12 +99,16 @@ results, and the test results. Every record names the exact fixture identifier
 and content version, the world-contract revision, the catalog version and
 commit, and the consumer (engine and adapter) version and commit.
 
-## User stories and acceptance criteria
+## User stories and BDD traceability
 
-| # | Story | Acceptance criteria | BDD scenario |
-| --- | --- | --- | --- |
-| 1 | As an integrator, I want to select a named, versioned hallway without simulator code changes. | Selecting `hallway-open` at `0.1.0` is configuration only; both consumers load it with no code change; an unknown id or version is reported, not substituted. | `An integrator selects the open hallway by name and version` |
-| 2 | As a scenario author, I want entrance, exit, and passage in consistent coordinates. | Each consumer reports every named place in the world frame within 0.01 m / 0.5° of the canonical table. | `A consumer reports the named places in the world frame` |
-| 3 | As a verifier, I want to show that MuJoCo and Gazebo loaded equivalent dimensions, placements, and collision boundaries. | Both engines pass the dimension, place, and three collision checks, and a cross-engine comparison record lists per-quantity values and differences. | `A verifier compares MuJoCo and Gazebo` |
-| 4 | As a reviewer, I want screenshots from both engines, test results, and the exact world and spec versions. | The review record has the required screenshots and test results for each engine and the fixture, contract, catalog, and adapter versions. | `A reviewer inspects both engines' evidence` |
-| 5 | As a verifier, I want an unsupported world feature to fail clearly. | A consumer that cannot load a declared feature returns `UNSUPPORTED` naming it; the run is never reported as a pass with the feature ignored. | `A consumer cannot load a declared feature` |
+Stories follow the [world contract](README.md#user-stories-and-bdd-traceability)
+format and personas. Each expected outcome is the acceptance criterion; each BDD
+scenario names its scenario in [hallway examples](hallways.feature).
+
+| Story | Expected outcome | BDD scenario |
+| --- | --- | --- |
+| As an integrator, I want to select a named, versioned hallway without changing simulator code, so that MuJoCo and Gazebo consumers load the same declared fixture. | Selecting `hallway-open` at `0.1.0` is configuration only; each consumer loads it without code changes; an unknown identifier or version is reported, not substituted. | `An integrator selects the open hallway by name and version` |
+| As a scenario author, I want the entrance, exit, and passage declared in one world frame, so that a scenario has unambiguous places and poses. | Each consumer reports every named place in the world frame within 0.01 m and 0.5 degrees of the canonical table. | `A scenario author uses the declared hallway places` |
+| As a verifier, I want to compare MuJoCo and Gazebo against the same declaration, so that I can show they loaded equivalent dimensions, placements, and collision boundaries. | Both engines pass the dimension, named-place, floor, side-wall, and open-end checks, and a cross-engine comparison lists each quantity's canonical value, measured values, and difference. | `A verifier compares MuJoCo and Gazebo hallway evidence` |
+| As a reviewer, I want screenshots, test results, and exact versions from both engines, so that I can inspect what was evaluated. | The record shows the required screenshots and test results for each engine and identifies the fixture, world contract, catalog, and adapter versions. | `A reviewer inspects retained hallway results from both engines` |
+| As a verifier, I want an unsupported hallway feature to fail clearly, so that no consumer silently ignores part of the fixture. | A consumer that cannot load a declared feature returns `UNSUPPORTED` naming the fixture, version, and feature, and never reports a pass with it ignored. | `A consumer meets an unsupported hallway feature` |
