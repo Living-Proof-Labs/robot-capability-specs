@@ -20,9 +20,9 @@ rectangle rather than a navigable corridor. It has a floor and four enclosing
 walls. It has no entrances, exits, doors, doorway semantics, or navigation exit
 goal. The top is open for visualization and inspection.
 
-All values are metres. The following proposed values are centralized here;
-examples and consumer evidence must refer to these fixture identifiers rather
-than restating different dimensions.
+All values are metres. The following proposed values are canonical for this
+contract. BDD examples and consumer evidence refer to fixture identifiers and
+this table rather than duplicating dimensions.
 
 | Fixture and proposed content version | Clear interior width | Clear interior length | Wall height | Wall thickness | Exterior width × length |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -35,7 +35,20 @@ from the floor top surface at `z = 0` to the wall top. The floor must cover the
 entire interior footprint; its construction thickness and material properties are
 engine choices that must be declared if they affect evidence.
 
-## Coordinates, poses, and reset
+## User stories and BDD traceability
+
+These stories keep world content, simulator integration, and verification
+separate. Hallways are the first examples, not the only world shape this contract
+can later describe.
+
+| Story | Expected outcome | BDD scenario |
+| --- | --- | --- |
+| As an integrator, I want to select a versioned world fixture without changing engine-specific world code, so that the same declared content can be consumed by more than one simulator. | The adapter resolves the selected fixture content/version through its declared world-content interface. | `An integrator selects a versioned world fixture` |
+| As a scenario author, I want consistent coordinates and valid placement rules, so that scenarios mean the same thing for every consumer. | The author receives the canonical axes, origin, and horizontal allowed region. | `A scenario author uses canonical coordinates` |
+| As a verifier, I want bounded conformance evidence, so that I can distinguish geometry/frame/collision/reset evidence from robot ability. | The verifier evaluates declared world evidence, including floor and wall collision, without grading locomotion. | `A verifier evaluates bounded world-conformance evidence` |
+| As a reviewer, I want rendered and machine-readable retained results with provenance, so that I can inspect an engine result and reproduce its identity. | The result includes required visuals, evidence records, and world/specification/adapter provenance. | `A reviewer inspects retained conformance results` |
+
+## Coordinates, poses, placement, and reset
 
 Use a right-handed, metre-based world frame: the origin is at the centre of the
 floor top surface, `+x` follows clear interior length, `+y` follows clear interior
@@ -44,11 +57,13 @@ side-wall faces are at `y = ±width/2`. A pose is position `(x, y, z)` in that
 frame plus a right-handed orientation; yaw is positive about `+z`. State the
 orientation representation in retained evidence, but do not change these axes.
 
-The valid spawn/probe region is on the floor with a ground-contact point at
-`z = 0`, any yaw, and at least 0.25 m horizontal clearance from every inner wall
-face. Thus it is `x = [-2.25, 2.25]`, `y = [-0.50, 0.50]` for `hallway-short`,
-and `x = [-4.75, 4.75]`, `y = [-0.75, 0.75]` for `hallway-long`. Consumers must
-reject or clearly report a requested spawn or probe outside that region rather
+The allowed horizontal region for an entity reference point is at least 0.25 m
+from every inner wall face: `x = [-2.25, 2.25]`, `y = [-0.50, 0.50]` for
+`hallway-short`, and `x = [-4.75, 4.75]`, `y = [-0.75, 0.75]` for
+`hallway-long`. A floor-spawned entity records its ground-contact point at
+`z = 0` and any yaw. A collision probe records its own centre pose, collision
+shape, and clearance; it is not a ground-contact spawn. Consumers must reject or
+clearly report a requested reference point outside the horizontal region rather
 than silently relocating it. Reset must remove transient entities and restore the
 declared fixture geometry, frame, and initial world state; it does not require
 bitwise-identical physics trajectories across engines.
@@ -62,11 +77,15 @@ illustrative acceptance criteria, not reported passes:
 - Measured clear width, clear length, wall height, wall thickness, and declared
   origin must each agree with this contract within 0.01 m. Measured frame axes
   must agree within 0.5 degrees.
-- A declared non-robot collision probe with a 0.10 m spherical radius and centre
-  height of 0.50 m must be driven normally toward each wall from the valid probe
-  region. It must not emerge outside the closed interior; no more than 0.01 m
-  penetration beyond an inner wall face is permitted. The probe, drive method,
-  sampling rate, and measurement method belong in the adapter evidence.
+- Collision evidence uses a declared non-robot sphere with a 0.10 m radius.
+  With gravity and contacts enabled, release it from rest with its centre at
+  `z = 0.75 m` to demonstrate floor containment. Then drive it normally toward
+  each wall from a declared centre pose in the allowed horizontal region, without
+  teleporting it and at no more than 0.25 m/s. It must not emerge below the floor
+  or outside the closed interior; no more than 0.01 m penetration beyond a floor
+  top surface or inner wall face is permitted. The gravity setting, contact
+  setting, drive method, sampling rate, and measurement method belong in the
+  adapter evidence.
 - Reset evidence must show that the fixture identifier, dimensions, frame, and
   empty transient-entity set are restored. It must not infer robot locomotion
   capability from a world reset or collision observation.
@@ -88,8 +107,10 @@ catalog. Engine-specific tests, world-library assets, simulator adapters, robot
 locomotion tests, and measured conformance results are **not implemented** here.
 The traceability path is: this contract revision → a future versioned
 `livingproof-worlds` fixture → an independent versioned simulator adapter →
-retained evidence. Verification remains separate from world content: MuJoCo and
-Gazebo consumers must not rely on a shared simulator test framework.
+retained evidence. World content remains independent from a verifier. No common
+runtime implementation is required across MuJoCo and Gazebo, although a later
+shared verification utility is permitted if it preserves independent adapters and
+engine-specific evidence.
 
 The BDD matrix in [the accompanying examples](reference.feature) crosses the two
 fixtures with the two intended simulators. It defines expected evidence coverage,

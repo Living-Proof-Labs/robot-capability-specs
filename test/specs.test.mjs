@@ -56,13 +56,19 @@ test('proposed world contract crosses two hallway fixtures with two simulators',
   });
   assert.deepEqual(messages.filter(m => m.parseError), []);
   const examples = messages.filter(m => m.pickle).map(m => m.pickle.steps.map(s => s.text).join('\n'));
-  assert.equal(examples.length, 6);
-  assert.equal(examples.filter(e => e.includes('hallway-short') && e.includes('MuJoCo')).length, 1);
-  assert.equal(examples.filter(e => e.includes('hallway-short') && e.includes('Gazebo')).length, 1);
-  assert.equal(examples.filter(e => e.includes('hallway-long') && e.includes('MuJoCo')).length, 1);
-  assert.equal(examples.filter(e => e.includes('hallway-long') && e.includes('Gazebo')).length, 1);
+  assert.equal(examples.length, 16);
+  for (const world of ['hallway-short', 'hallway-long']) {
+    for (const simulator of ['MuJoCo', 'Gazebo']) {
+      assert.equal(examples.filter(e => e.includes(world) && e.includes(simulator)).length, 3);
+    }
+  }
   const contract = await readFile('specs/worlds/README.md', 'utf8');
   assert.match(contract, /authored and parser-validated/);
   assert.match(contract, /not implemented/);
   assert.match(contract, /0.01 m/);
+  assert.match(contract, /As an integrator/);
+  assert.match(contract, /As a scenario author/);
+  assert.match(contract, /As a verifier/);
+  assert.match(contract, /As a reviewer/);
+  assert.doesNotMatch(source, /1\.50|5\.00|2\.00|10\.00/);
 });
