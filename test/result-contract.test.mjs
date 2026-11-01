@@ -199,3 +199,18 @@ test('probe parameters are machine-readable and match hallways.md prose', async 
     assert.ok(doc.includes(text), text);
   }
 });
+
+test('two records with the same engine.name are INVALID, not merged', async () => {
+  const a = await load();
+  const b = await load();
+  b.quantities.find(q => q.name === 'clear_width').measured += 0.5;
+  assert.equal(compare(a, b).grade, 'INVALID');
+  assert.match(compare(a, b).errors.join('\n'), /both records have engine.name mujoco/);
+  const run = cli(await tmpFile(a), await tmpFile(b));
+  assert.equal(run.status, EXIT.INVALID);
+  assert.match(run.stdout, /^grade: INVALID$/m);
+  assert.match(run.stderr, /both records have engine.name mujoco/);
+  const upper = await load();
+  upper.engine.name = 'MuJoCo';
+  assert.equal(compare(a, upper).grade, 'INVALID');
+});
