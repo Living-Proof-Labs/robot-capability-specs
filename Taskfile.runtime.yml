@@ -17,7 +17,7 @@ tasks:
   check:
     desc: Check JavaScript syntax and patch whitespace with native tools
     cmds:
-      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs, test/result-contract.test.mjs, tooling/compare-results.mjs, test/robot-profiles.test.mjs, test/robot-manifest.test.mjs, tooling/validate-manifests.mjs]
+      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs, test/result-contract.test.mjs, tooling/compare-results.mjs, test/robot-profiles.test.mjs, test/run-assessment.test.mjs, test/robot-manifest.test.mjs, tooling/validate-manifests.mjs]
         cmd: node --check "{{.ITEM}}"
       - git diff --check
 
