@@ -31,6 +31,10 @@ nav:
           - Revision 1 examples: specs/v1/reference.feature.md
           - Revision 2: specs/v2/index.md
           - Revision 2 examples: specs/v2/reference.feature.md
+          - World contract: specs/worlds/index.md
+          - World examples: specs/worlds/reference.feature.md
+          - Open hallway fixture: specs/worlds/hallways.md
+          - Hallway examples: specs/worlds/hallways.feature.md
           - Compatibility matrix: specs/matrix/index.md
           - Matrix examples: specs/matrix/reference.feature.md
       - Tasks: tasks.md

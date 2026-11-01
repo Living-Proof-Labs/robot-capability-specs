@@ -24,3 +24,9 @@ evidence formats, grader execution, and separate robot adapters are later work.
 The [revision 1 reference contracts](v1/README.md) and
 [Gherkin examples](v1/reference.feature) define a bounded fixture demonstration.
 They do not establish a general robot certification schema.
+
+The [world contract](worlds/README.md) defines versioned world selection and
+conformance evidence without constraining fixture geometry or consumers. The
+[open hallway fixture](worlds/hallways.md) defines one door-free hallway with
+named places and its MuJoCo/Gazebo matrix. They are authored and parser-validated only;
+this catalog contains neither world assets nor engine results.
