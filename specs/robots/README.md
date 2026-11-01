@@ -108,7 +108,9 @@ profile and each configuration profile by path and sha256 instead of copying the
 - `simulators` is optional: per simulator, the engine version, the runner release
   and a status of `verified`, `experimental` or `unsupported`.
 
-[Example manifests](examples/manifests/) for the Unitree G1, Unitree Go1 and
-Booster T1 are built from those repositories' `robot.json`,
+Example manifests for the
+[Unitree G1](examples/manifests/unitree-g1.json),
+[Unitree Go1](examples/manifests/unitree-go1.json) and
+[Booster T1](examples/manifests/booster-t1.json) are built from those repositories' `robot.json`,
 `verification.lock.json`, `pins.json` and `pyproject.toml`. Check any manifest
 with `task validate:manifests -- path/to/manifest.json`.
