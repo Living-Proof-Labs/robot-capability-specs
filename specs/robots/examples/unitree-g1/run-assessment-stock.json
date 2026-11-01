@@ -1,0 +1,531 @@
+{
+  "$comment": "Example: the Unitree G1 stock walk-hallway run (12/20 PASS), values as the capability report v1.10.0 computes them today.",
+  "format": "livingproof-run-assessment/0.1",
+  "policy": {
+    "id": "all-required-v1",
+    "version": "1.0.0"
+  },
+  "aggregation": {
+    "id": "k-of-n-wilson95",
+    "version": "1.0.0"
+  },
+  "decisions": [
+    {
+      "result_id": "stock-seed-01",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-02",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-03",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-04",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.58 m > 0.49 m at 10.56 s (seed 4); wall contact depth 0.005 m at 10.62 s (seed 4); 2 contacts",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.5814,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.56,
+          "seed": 4
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.0047,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.62,
+          "seed": 4,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.034,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 11.1,
+          "seed": 4,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-05",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.66 m > 0.49 m at 10.08 s (seed 5); wall contact depth 0.10 m at 10.28 s (seed 5)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.66,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.08,
+          "seed": 5
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.105,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.28,
+          "seed": 5,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-06",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-07",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.61 m > 0.49 m at 10.26 s (seed 7); wall contact depth 0.05 m at 10.38 s (seed 7)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.6112,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.26,
+          "seed": 7
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.0524,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.38,
+          "seed": 7,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-08",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-09",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.65 m > 0.49 m at 9.84 s (seed 9); wall contact depth 0.10 m at 10.30 s (seed 9)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.648,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 9.84,
+          "seed": 9
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.1,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.3,
+          "seed": 9,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-10",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-11",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-12",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.69 m > 0.49 m at 9.66 s (seed 12); wall contact depth 0.11 m at 9.74 s (seed 12)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.6887,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 9.66,
+          "seed": 12
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.1129,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 9.74,
+          "seed": 12,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-13",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-14",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.53 m > 0.49 m at 11.12 s (seed 14)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.5324,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 11.12,
+          "seed": 14
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-15",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.77 m > 0.49 m at 9.00 s (seed 15); wall contact depth 0.15 m at 9.34 s (seed 15)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.773,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 9.0,
+          "seed": 15
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.1549,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 9.34,
+          "seed": 15,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-16",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-17",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-18",
+      "status": "FAIL",
+      "reason": "Failed: lateral 0.55 m > 0.49 m at 10.86 s (seed 18); wall contact depth 0.004 m at 11.32 s (seed 18)",
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.5536,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.86,
+          "seed": 18
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.0035,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 11.32,
+          "seed": 18,
+          "wall": "wall-left"
+        }
+      ],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-19",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    },
+    {
+      "result_id": "stock-seed-20",
+      "status": "PASS",
+      "reason": "All four hallway evaluators and every retained assessment pass",
+      "failures": [],
+      "assessor_types": [
+        "deterministic"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "capability": "walk-hallway",
+      "spec": {
+        "repository": "https://github.com/Living-Proof-Labs/robot-capability-specs",
+        "tag": "v1.6.1",
+        "commit": "0bdf1db3f975b044692c0b8f1ec37737ad8b889f",
+        "capability": "walk-hallway",
+        "revision": "0.1.0"
+      },
+      "system": {
+        "id": "unitree-g1/stock",
+        "version": "1.1.0"
+      },
+      "environment": {
+        "id": "hallway-open",
+        "version": "0.1.0"
+      },
+      "run_id": "walk-hallway-unitree-g1-stock-20261101T171146Z",
+      "k": 12,
+      "n": 20,
+      "required_passes": 18,
+      "interval": {
+        "method": "wilson",
+        "level": 0.95,
+        "lower": 0.3866,
+        "upper": 0.7812
+      },
+      "grade": "FAIL",
+      "rationale": "12/20 PASS, needs 18",
+      "result_ids": [
+        "stock-seed-01",
+        "stock-seed-02",
+        "stock-seed-03",
+        "stock-seed-04",
+        "stock-seed-05",
+        "stock-seed-06",
+        "stock-seed-07",
+        "stock-seed-08",
+        "stock-seed-09",
+        "stock-seed-10",
+        "stock-seed-11",
+        "stock-seed-12",
+        "stock-seed-13",
+        "stock-seed-14",
+        "stock-seed-15",
+        "stock-seed-16",
+        "stock-seed-17",
+        "stock-seed-18",
+        "stock-seed-19",
+        "stock-seed-20"
+      ],
+      "failures": [
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.5814,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.56,
+          "seed": 4
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.0047,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.62,
+          "seed": 4,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.034,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 11.1,
+          "seed": 4,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.66,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.08,
+          "seed": 5
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.105,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.28,
+          "seed": 5,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.6112,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.26,
+          "seed": 7
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.0524,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.38,
+          "seed": 7,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.648,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 9.84,
+          "seed": 9
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.1,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 10.3,
+          "seed": 9,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.6887,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 9.66,
+          "seed": 12
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.1129,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 9.74,
+          "seed": 12,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.5324,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 11.12,
+          "seed": 14
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.773,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 9.0,
+          "seed": 15
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.1549,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 9.34,
+          "seed": 15,
+          "wall": "wall-left"
+        },
+        {
+          "check": "hallway-lateral-limit",
+          "observed": 0.5536,
+          "limit": 0.49,
+          "unit": "m",
+          "t": 10.86,
+          "seed": 18
+        },
+        {
+          "check": "hallway-wall-contact",
+          "observed": 0.0035,
+          "limit": 0.0,
+          "unit": "m",
+          "t": 11.32,
+          "seed": 18,
+          "wall": "wall-left"
+        }
+      ],
+      "prototype": null
+    }
+  ]
+}
