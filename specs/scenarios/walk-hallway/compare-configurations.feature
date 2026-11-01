@@ -7,9 +7,9 @@ Feature: Compare configuration profiles on one robot
     Given world "hallway-open" at its pinned version in simulator "MuJoCo"
     And robot "unitree-g1" at its pinned model
     And the run manifest selects configuration profile <configuration> with its sha256
-    And the trial seeds are 1 to 20
+    And the trial seeds are those of the README parameter trials
     When the controller is commanded to walk forward at the README parameter command_speed
-    Then the run's grade is PASS only if at least 18 of 20 trials pass
+    Then the run's grade is PASS only if at least the README parameter required_passes of the README parameter trials pass
 
     Examples:
       | configuration |
