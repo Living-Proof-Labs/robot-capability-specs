@@ -68,6 +68,13 @@ def build():
             f'[Download original Gherkin]({path.name})\n\n```gherkin\n{path.read_text()}```\n')
         manifest.append({'path': str(relative), 'page': str(relative) + '.md',
                          'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+    # Machine-readable contract files (schemas, quantity and probe lists) ship verbatim.
+    for path in sorted((ROOT / 'specs').rglob('*.json')):
+        relative = path.relative_to(ROOT)
+        (SOURCE / relative).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, SOURCE / relative)
+        manifest.append({'path': str(relative), 'page': str(relative),
+                         'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
     shutil.copytree(ROOT / 'LICENSES', SOURCE / 'LICENSES')
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
