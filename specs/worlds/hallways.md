@@ -135,8 +135,8 @@ follow each record's `engine.name` (MuJoCo first, then Gazebo), not the argument
 order. The grade is `PASS` only when every required quantity passes in both
 records; the difference is reported, never used to hide a deviation. It exits 0
 for `PASS`, 1 for `FAIL`, 3 when either record is `UNSUPPORTED`, 4 for a schema
-error, a missing required quantity or an inconsistent record, and 2 for a usage
-or read error.
+error, a missing required quantity, an inconsistent record or two records with
+the same `engine.name`, and 2 for a usage or read error.
 
 ## Reviewer evidence
 

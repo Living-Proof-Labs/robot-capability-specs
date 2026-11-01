@@ -73,6 +73,10 @@ export function compare(x, y) {
   const [first, second] = orderByEngine(x, y);
   const engines = [first, second].map(r => r?.engine?.name ?? 'unknown');
   const errors = [...check(first, engines[0]), ...check(second, engines[1])];
+  if (String(engines[0]).toLowerCase() === String(engines[1]).toLowerCase()) {
+    // Columns are keyed by engine name, so two records from one engine would overwrite each other.
+    errors.push(`both records have engine.name ${engines[0]}; compare two different engines`);
+  }
   if (errors.length) return { grade: 'INVALID', engines, errors, rows: [] };
   const unsupported = [first, second].filter(r => r.status === 'UNSUPPORTED').map(r => `${r.engine.name}: ${r.feature}`);
   if (unsupported.length) return { grade: 'UNSUPPORTED', engines, errors, unsupported, rows: [] };
