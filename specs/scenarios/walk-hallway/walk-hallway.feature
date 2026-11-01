@@ -66,8 +66,26 @@ Feature: Walk the open hallway
       | 20     | 17     | 18              | FAIL  |
       | 20     | 0      | 18              | FAIL  |
 
-  Scenario: A robot that cannot meet the preconditions
-    Given a robot whose width plus twice <wall_clearance> exceeds the hallway clear width
+  Scenario Outline: A robot that cannot meet the preconditions
+    Given a <robot_class> robot of width <width_m> metres, so wall_clearance is <wall_clearance_m> metres
+    And the hallway clear width is <clear_width_m> metres
     When a run is requested
     Then the grade is UNSUPPORTED naming precondition "fits_width"
     And no trial is run
+
+    Examples:
+      | robot_class | width_m | wall_clearance_m | clear_width_m |
+      | humanoid    | 1.41  | 0.05             | 1.5         |
+      | quadruped   | 1.31  | 0.10             | 1.5         |
+
+  Scenario Outline: A robot that meets fits_width is run
+    Given a <robot_class> robot of width <width_m> metres, so wall_clearance is <wall_clearance_m> metres
+    And the hallway clear width is <clear_width_m> metres
+    When a run is requested
+    Then precondition "fits_width" is met and the planned trials run
+
+    Examples:
+      | robot_class | width_m | wall_clearance_m | clear_width_m |
+      | humanoid    | 0.52  | 0.05             | 1.5         |
+      | humanoid    | 1.40  | 0.05             | 1.5         |
+      | quadruped   | 0.282 | 0.10             | 1.5         |

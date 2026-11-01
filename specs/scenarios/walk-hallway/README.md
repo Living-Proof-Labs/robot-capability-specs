@@ -94,9 +94,13 @@ Example comparison, **illustrative numbers only, not measured**:
 | `stock` | 9 (illustrative) | `FAIL` | 11 seeds, mostly falls (illustrative) |
 | `playground` | 19 (illustrative) | `PASS` | 1 seed, time limit (illustrative) |
 
-The comparison names a better configuration only by a declared rule: a higher
-grade first, then pass-rate intervals that do not overlap, otherwise "no clear
-winner". A configuration that falls is a valid `FAIL`, reported and not retried.
+The comparison ranks configurations by a declared rule: grade (`PASS` above
+`INSUFFICIENT_EVIDENCE` above `FAIL`), then passed trials, then the Wilson 95% lower
+bound; ties share a rank. It names a sole winner only for a `PASS` that is the only one or
+whose interval does not overlap the next. Several overlapping `PASS` runs read "no
+statistically clear winner"; when none passes it names the closest run, never a winner
+(see `compare-configurations.feature`). A configuration that falls is a valid `FAIL`,
+reported and not retried.
 
 ## Status
 
