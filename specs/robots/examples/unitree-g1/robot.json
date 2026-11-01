@@ -1,0 +1,20 @@
+{
+  "$comment": "Illustrative example. Hashes, commits and numbers are placeholders, not measured; the real file lives in livingproof-unitree-g1.",
+  "format": "livingproof-robot-profile/0.1",
+  "id": "unitree-g1",
+  "manufacturer": "Unitree Robotics",
+  "model": "G1 (29 degrees of freedom)",
+  "class": "humanoid",
+  "model_source": {"repo": "https://github.com/google-deepmind/mujoco_menagerie", "path": "unitree_g1", "commit": "0000000000000000000000000000000000000000", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "license": "BSD-3-Clause"},
+  "dimensions": {
+    "width": {"value": 0.45, "unit": "m", "source": "measured", "ref": "task profile:measure"},
+    "length": {"value": 0.3, "unit": "m", "source": "measured", "ref": "task profile:measure"},
+    "height": {"value": 1.32, "unit": "m", "source": "published", "ref": "Unitree G1 specification sheet"}
+  },
+  "configurations": [
+    {"name": "stock", "path": "configurations/stock.json"},
+    {"name": "playground", "path": "configurations/playground.json"}
+  ],
+  "default_configuration": "playground",
+  "simulators": ["mujoco"]
+}

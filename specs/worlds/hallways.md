@@ -1,19 +1,19 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# Open hallway fixture, revision 0.3.0
+# Open hallway world, revision 0.3.0
 
 Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
 
 Document revision 0.3.0 versions this specification text (0.3.0 adds the shared
 result contract and probe parameters). It is separate from
-the fixture content version (`hallway-open` / `0.1.0`), which versions the world
+the world content version (`hallway-open` / `0.1.0`), which versions the world
 data.
 
-This document applies the [world contract](README.md) to one fixture:
+This document applies the [world contract](README.md) to one world:
 `hallway-open`. It is a straight hallway with a floor and two side walls, open at
 both ends, with no doors, rooms, end walls, or ceiling. It is engine-neutral:
 the same declaration is meant to be loaded by MuJoCo and Gazebo consumers.
 
-The world data for this fixture will live in a future
+The world data for this world will live in a future
 [Living-Proof-Labs/livingproof-worlds](https://github.com/Living-Proof-Labs/livingproof-worlds)
 repository. This catalog holds only the specification and its examples.
 
@@ -31,7 +31,7 @@ repository. This catalog holds only the specification and its examples.
 
 All values are metres.
 
-| Fixture / content version | Clear width | Length | Wall height | Wall thickness | Exterior width |
+| World / content version | Clear width | Length | Wall height | Wall thickness | Exterior width |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `hallway-open` / `0.1.0` | 1.50 m | 6.00 m | 2.50 m | 0.15 m | 1.80 m |
 
@@ -100,7 +100,7 @@ rate, and measurement method.
 
 ## Cross-engine comparison
 
-A verifier produces one comparison record per fixture version listing, for
+A verifier produces one comparison record per world version listing, for
 each measured quantity (dimensions, named places, collision boundaries), the
 canonical value, each engine's measured value, each engine's deviation, and the
 MuJoCo-minus-Gazebo difference. The comparison passes only when every engine is
@@ -111,7 +111,7 @@ not used to hide a deviation.
 
 Every engine writes one `livingproof-world-result/0.2` record per run, defined
 by [hallway-result.schema.json](hallway-result.schema.json). It names the
-fixture, the world-contract revision, the catalog tag and commit, the engine,
+world, the world-contract revision, the catalog tag and commit, the engine,
 and the adapter (`adapter.version` is a semantic version, `adapter.commit` the
 full 40-character commit or `null`, and the optional `adapter.provenance` is
 `git` or `package`).
@@ -132,7 +132,7 @@ validates both records against the schema and the required names, then lists
 each quantity's canonical value, each engine's measured value and deviation from
 canonical, the MuJoCo-minus-Gazebo difference, and each engine's pass. Columns
 follow each record's `engine.name` (MuJoCo first, then Gazebo), not the argument
-order. The verdict is `PASS` only when every required quantity passes in both
+order. The grade is `PASS` only when every required quantity passes in both
 records; the difference is reported, never used to hide a deviation. It exits 0
 for `PASS`, 1 for `FAIL`, 3 when either record is `UNSUPPORTED`, 4 for a schema
 error, a missing required quantity or an inconsistent record, and 2 for a usage
@@ -142,7 +142,7 @@ or read error.
 
 Each engine run retains at least an overhead screenshot and a view from
 `spawn-entrance` toward `exit`, machine-readable geometry/place/collision/reset
-results, and the test results. Every record names the exact fixture identifier
+results, and the test results. Every record names the exact world identifier
 and content version, the world-contract revision, the catalog version and
 commit, and the consumer (engine and adapter) version and commit.
 
@@ -154,8 +154,8 @@ scenario names its scenario in [hallway examples](hallways.feature).
 
 | Story | Expected outcome | BDD scenario |
 | --- | --- | --- |
-| As an integrator, I want to select a named, versioned hallway without changing simulator code, so that MuJoCo and Gazebo consumers load the same declared fixture. | Selecting `hallway-open` at `0.1.0` is configuration only; each consumer loads it without code changes; an unknown identifier or version is reported, not substituted. | `An integrator selects the open hallway by name and version` |
+| As an integrator, I want to select a named, versioned hallway without changing simulator code, so that MuJoCo and Gazebo consumers load the same declared world. | Selecting `hallway-open` at `0.1.0` is configuration only; each consumer loads it without code changes; an unknown identifier or version is reported, not substituted. | `An integrator selects the open hallway by name and version` |
 | As a scenario author, I want the entrance, exit, and passage declared in one world frame, so that a scenario has unambiguous places and poses. | Each consumer reports every named place in the world frame within 0.01 m and 0.5 degrees of the canonical table. | `A scenario author uses the declared hallway places` |
 | As a verifier, I want to compare MuJoCo and Gazebo against the same declaration, so that I can show they loaded equivalent dimensions, placements, and collision boundaries. | Both engines pass the dimension, named-place, floor, side-wall, and open-end checks, and a cross-engine comparison lists each quantity's canonical value, measured values, and difference. | `A verifier compares MuJoCo and Gazebo hallway evidence` |
-| As a reviewer, I want screenshots, test results, and exact versions from both engines, so that I can inspect what was evaluated. | The record shows the required screenshots and test results for each engine and identifies the fixture, world contract, catalog, and adapter versions. | `A reviewer inspects retained hallway results from both engines` |
-| As a verifier, I want an unsupported hallway feature to fail clearly, so that no consumer silently ignores part of the fixture. | A consumer that cannot load a declared feature returns `UNSUPPORTED` naming the fixture, version, and feature, and never reports a pass with it ignored. | `A consumer meets an unsupported hallway feature` |
+| As a reviewer, I want screenshots, test results, and exact versions from both engines, so that I can inspect what was evaluated. | The record shows the required screenshots and test results for each engine and identifies the world, world contract, catalog, and adapter versions. | `A reviewer inspects retained hallway results from both engines` |
+| As a verifier, I want an unsupported hallway feature to fail clearly, so that no consumer silently ignores part of the world. | A consumer that cannot load a declared feature returns `UNSUPPORTED` naming the world, version, and feature, and never reports a pass with it ignored. | `A consumer meets an unsupported hallway feature` |

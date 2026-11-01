@@ -3,7 +3,7 @@
 // Compare two livingproof-world-result/0.2 records (for example MuJoCo and Gazebo).
 // Usage: node tooling/compare-results.mjs one/result.json other/result.json [--json]
 // Columns follow each record's engine field (MuJoCo first, then Gazebo), never argument order.
-// Verdict PASS only if both records are valid and every required quantity passes in both.
+// Grade PASS only if both records are valid and every required quantity passes in both.
 // Exit 0: PASS; 1: FAIL; 3: UNSUPPORTED (either record); 4: INVALID (schema error, missing
 // required quantity or inconsistent record); 2: usage or unreadable file.
 import { readFileSync } from 'node:fs';
@@ -73,9 +73,9 @@ export function compare(x, y) {
   const [first, second] = orderByEngine(x, y);
   const engines = [first, second].map(r => r?.engine?.name ?? 'unknown');
   const errors = [...check(first, engines[0]), ...check(second, engines[1])];
-  if (errors.length) return { verdict: 'INVALID', engines, errors, rows: [] };
+  if (errors.length) return { grade: 'INVALID', engines, errors, rows: [] };
   const unsupported = [first, second].filter(r => r.status === 'UNSUPPORTED').map(r => `${r.engine.name}: ${r.feature}`);
-  if (unsupported.length) return { verdict: 'UNSUPPORTED', engines, errors, unsupported, rows: [] };
+  if (unsupported.length) return { grade: 'UNSUPPORTED', engines, errors, unsupported, rows: [] };
   const maps = [first, second].map(r => new Map(r.quantities.map(q => [q.name, q])));
   const required = new Set(QUANTITIES.required.map(q => q.name));
   const names = [...new Set([...maps[0].keys(), ...maps[1].keys()])];
@@ -92,7 +92,7 @@ export function compare(x, y) {
     };
   });
   const failed = rows.filter(r => r.required && !(r[engines[0]].pass && r[engines[1]].pass)).map(r => r.name);
-  return { verdict: failed.length ? 'FAIL' : 'PASS', engines, errors, failed, rows };
+  return { grade: failed.length ? 'FAIL' : 'PASS', engines, errors, failed, rows };
 }
 
 function fmt(v) { return v === null || v === undefined ? '-' : typeof v === 'number' ? Number(v.toPrecision(6)).toString() : String(v); }
@@ -118,9 +118,9 @@ function main(argv) {
     }
     for (const u of result.unsupported ?? []) console.log(`UNSUPPORTED ${u}`);
     for (const f of result.failed ?? []) console.log(`FAILED ${f}`);
-    console.log(`verdict: ${result.verdict}`);
+    console.log(`grade: ${result.grade}`);
   }
-  return EXIT[result.verdict];
+  return EXIT[result.grade];
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) process.exitCode = main(process.argv.slice(2));

@@ -47,9 +47,9 @@ test('hand-written fixtures are small, valid and complete once filled', async ()
   assert.deepEqual([...kinds].sort(), ['collision', 'dimension', 'drive', 'frame', 'place']);
 });
 
-test('PASS verdict lists each engine value, deviation and MuJoCo minus Gazebo', async () => {
+test('PASS grade lists each engine value, deviation and MuJoCo minus Gazebo', async () => {
   const result = compare(await load('mujoco'), await load('gazebo'));
-  assert.equal(result.verdict, 'PASS');
+  assert.equal(result.grade, 'PASS');
   assert.deepEqual(result.engines, ['mujoco', 'gazebo']);
   const row = result.rows.find(r => r.name === 'collision/floor/penetration');
   assert.deepEqual(row.mujoco, { measured: 0.0043, deviation: 0.0043, pass: true });
@@ -67,25 +67,25 @@ test('columns follow the engine field, not argument order', async () => {
   assert.equal(run.status, EXIT.PASS, run.stderr);
   assert.match(run.stdout, /^\| quantity \| canonical \| mujoco \| mujoco deviation \| gazebo \| gazebo deviation \| mujoco - gazebo \| mujoco pass \| gazebo pass \|$/m);
   assert.match(run.stdout, /^\| collision\/floor\/penetration \| 0 \| 0\.0043 \| 0\.0043 \| 0\.006 \| 0\.006 \| -0\.0017 \| true \| true \|$/m);
-  assert.match(run.stdout, /^verdict: PASS$/m);
+  assert.match(run.stdout, /^grade: PASS$/m);
 });
 
-test('FAIL verdict when any required quantity fails in either record, exit 1', async () => {
+test('FAIL grade when any required quantity fails in either record, exit 1', async () => {
   const result = compare(await load('gazebo-fail'), await load('mujoco'));
-  assert.equal(result.verdict, 'FAIL');
+  assert.equal(result.grade, 'FAIL');
   assert.deepEqual(result.failed, ['collision/wall+y/max_speed']);
   for (const order of [['mujoco', 'gazebo-fail'], ['gazebo-fail', 'mujoco']]) {
     const run = cli(...await Promise.all(order.map(async n => tmpFile(await load(n)))));
     assert.equal(run.status, EXIT.FAIL);
     assert.match(run.stdout, /^FAILED collision\/wall\+y\/max_speed$/m);
-    assert.match(run.stdout, /^verdict: FAIL$/m);
+    assert.match(run.stdout, /^grade: FAIL$/m);
   }
 });
 
-test('UNSUPPORTED on either side gives an UNSUPPORTED verdict and a non-zero exit', async () => {
+test('UNSUPPORTED on either side gives an UNSUPPORTED grade and a non-zero exit', async () => {
   for (const [x, y] of [['mujoco-unsupported', 'gazebo'], ['mujoco', 'gazebo-unsupported'], ['gazebo-unsupported', 'mujoco']]) {
     const result = compare(await load(x), await load(y));
-    assert.equal(result.verdict, 'UNSUPPORTED', `${x} ${y}`);
+    assert.equal(result.grade, 'UNSUPPORTED', `${x} ${y}`);
     const run = cli(await tmpFile(await load(x)), await tmpFile(await load(y)));
     assert.equal(run.status, EXIT.UNSUPPORTED);
     assert.match(run.stdout, /^UNSUPPORTED (mujoco|gazebo): geometry 'wall-left' type 'cylinder'$/m);
@@ -105,7 +105,7 @@ test('CLI exits non-zero on a schema error or a missing required quantity', asyn
   run = cli(good, await tmpFile(missing));
   assert.equal(run.status, EXIT.INVALID);
   assert.match(run.stderr, /mujoco: missing required quantity clear_width/);
-  assert.match(run.stdout, /^verdict: INVALID$/m);
+  assert.match(run.stdout, /^grade: INVALID$/m);
   assert.equal(cli(good).status, EXIT.USAGE);
 });
 
@@ -167,7 +167,7 @@ test('UNSUPPORTED records validate with fixture as an object and compare without
   Object.assign(r, { status: 'UNSUPPORTED', feature: "geometry 'wall-left' type 'cylinder'", quantities: [] });
   assert.deepEqual(check(r), []);
   const result = compare(r, await load('gazebo'));
-  assert.equal(result.verdict, 'UNSUPPORTED');
+  assert.equal(result.grade, 'UNSUPPORTED');
   assert.deepEqual(result.unsupported, ["mujoco: geometry 'wall-left' type 'cylinder'"]);
 });
 

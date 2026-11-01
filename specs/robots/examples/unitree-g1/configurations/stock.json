@@ -1,0 +1,22 @@
+{
+  "$comment": "Illustrative example. Hashes, commits and numbers are placeholders, not measured.",
+  "format": "livingproof-configuration-profile/0.1",
+  "robot": "unitree-g1",
+  "name": "stock",
+  "version": "1.0.0",
+  "summary": "Unitree's published rl_gym locomotion controller (motion.pt) with its published gains.",
+  "controller": {
+    "publisher": "Unitree Robotics",
+    "artifact": {"repo": "https://github.com/unitreerobotics/unitree_rl_gym", "path": "deploy/pre_train/g1/motion.pt", "commit": "0000000000000000000000000000000000000000", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "license": "BSD-3-Clause"},
+    "format": "torchscript",
+    "interface": ["velocity_command"],
+    "rate_hz": 50
+  },
+  "locomotion": {
+    "max_speed": {"value": 1.0, "unit": "m/s", "source": "published", "ref": "deploy_mujoco/configs/g1.yaml command range"},
+    "nominal_base_height": {"value": 0.78, "unit": "m", "source": "measured", "ref": "task profile:stand"},
+    "fall_base_height": {"value": 0.5, "unit": "m", "source": "chosen", "reason": "About two-thirds of standing pelvis height."}
+  },
+  "settings": {"pd_gains_source": "deploy_mujoco/configs/g1.yaml", "action_scale": 0.25},
+  "known_issues": "Known to drift and fall on some seeds; expected to fail the hallway."
+}

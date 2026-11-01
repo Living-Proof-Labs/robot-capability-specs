@@ -6,7 +6,7 @@ Start with [catalog scope](../specs/README.md), then read the
 [Gherkin examples](../specs/v1/reference.feature). Select an explicit catalog
 release and capability revision when citing a contract. The
 [compatibility matrix](../specs/matrix/README.md) explains why executor support
-is separate from a capability verdict.
+is separate from a capability grade.
 
 Propose changed criteria in an issue before adding a revision. State observable
 preconditions, measurements and units, inclusive boundaries, mandatory assessments,
