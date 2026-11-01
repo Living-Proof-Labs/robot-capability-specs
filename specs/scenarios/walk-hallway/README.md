@@ -50,7 +50,7 @@ interval.
 | --- | --- | --- | --- |
 | `hallway-exit-reached` | `exit_time` (s, absent if never crossed) | absent or later than `time_limit` | Acceptance |
 | `hallway-lateral-limit` | `max_abs_lateral` (m, with its time) | greater than `lateral_limit` | World clear width and robot profile `width` |
-| `hallway-wall-contact` | `wall_contacts` (list; each with wall, time and depth) | the list is not empty | None; contact is real-geometry signed distance at or below zero |
+| `hallway-wall-contact` | `wall_contacts` (list; each with wall, start and end time, and depth) | the list is not empty | None; contact is real-geometry signed distance at or below zero |
 | `hallway-fall` | `min_base_height` (m, with its time) | less than `fall_height` | Configuration profile `locomotion.fall_base_height` |
 
 A missing or malformed observation gives `INSUFFICIENT_EVIDENCE`. Each

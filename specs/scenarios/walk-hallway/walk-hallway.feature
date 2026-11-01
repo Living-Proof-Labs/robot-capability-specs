@@ -53,11 +53,18 @@ Feature: Walk the open hallway
       | 20     | 17     | 18              | 0.6396 to 0.9476 | FAIL  |
       | 20     | 12     | 18              | 0.3866 to 0.7812 | FAIL  |
 
-  Scenario: Repeated trials are reported in full
-    Given a walk-hallway run of <trials> seeded trials
+  Scenario Outline: Repeated trials are reported in full
+    Given a walk-hallway run of <trials> seeded trials, of which <passed> pass
     When the grading policy is applied
-    Then the grade is PASS only if at least <required_passes> trials pass
-    And every trial is listed with its seed, trial outcome and first failing metric
+    Then the grade is <grade> because at least <required_passes> trials must pass
+    And all <trials> trials are listed with their seed, trial outcome and first failing metric
+
+    Examples:
+      | trials | passed | required_passes | grade |
+      | 20     | 20     | 18              | PASS  |
+      | 20     | 18     | 18              | PASS  |
+      | 20     | 17     | 18              | FAIL  |
+      | 20     | 0      | 18              | FAIL  |
 
   Scenario: A robot that cannot meet the preconditions
     Given a robot whose width plus twice <wall_clearance> exceeds the hallway clear width
