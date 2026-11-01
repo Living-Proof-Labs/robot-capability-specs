@@ -1,0 +1,131 @@
+{
+  "_note": "Hand-written test fixture: a few quantities per kind. Tests add the remaining required names as synthetic passes.",
+  "format": "livingproof-world-result/0.2",
+  "status": "PASS",
+  "fixture": {
+    "id": "hallway-open",
+    "content_version": "0.1.0"
+  },
+  "contract": {
+    "world_contract_revision": "0.2.0",
+    "document": "specs/worlds/hallways.md",
+    "document_revision": "0.3.0",
+    "result_format": "livingproof-world-result/0.2"
+  },
+  "catalog": {
+    "repository": "Living-Proof-Labs/robot-capability-specs",
+    "tag": "v1.3.0",
+    "commit": "ad53368c11b322b787f6b71023bbe87dec839c0b"
+  },
+  "engine": {
+    "name": "gazebo",
+    "version": "8.9.0"
+  },
+  "adapter": {
+    "name": "livingproof-sim-gazebo",
+    "version": "1.2.0",
+    "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "provenance": "git"
+  },
+  "quantities": [
+    {
+      "name": "clear_width",
+      "kind": "dimension",
+      "unit": "m",
+      "comparison": "within",
+      "canonical": 1.5,
+      "measured": 1.5,
+      "deviation": 0.0,
+      "tolerance": 0.01,
+      "pass": true,
+      "method": "geom read-back"
+    },
+    {
+      "name": "origin/x",
+      "kind": "frame",
+      "unit": "m",
+      "comparison": "within",
+      "canonical": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0,
+      "tolerance": 0.01,
+      "pass": true,
+      "method": "frame read-back"
+    },
+    {
+      "name": "axes/floor",
+      "kind": "frame",
+      "unit": "deg",
+      "comparison": "within",
+      "canonical": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0,
+      "tolerance": 0.5,
+      "pass": true,
+      "method": "frame read-back"
+    },
+    {
+      "name": "place/spawn-exit/yaw",
+      "kind": "place",
+      "unit": "deg",
+      "comparison": "within",
+      "canonical": 180.0,
+      "measured": 180.1,
+      "deviation": 0.1,
+      "tolerance": 0.5,
+      "pass": true,
+      "method": "site read-back"
+    },
+    {
+      "name": "collision/floor/penetration",
+      "kind": "collision",
+      "unit": "m",
+      "comparison": "at_most",
+      "canonical": 0.0,
+      "measured": 0.006,
+      "deviation": 0.006,
+      "tolerance": 0.01,
+      "pass": true,
+      "method": "probe drop"
+    },
+    {
+      "name": "collision/wall+y/max_speed",
+      "kind": "drive",
+      "unit": "m/s",
+      "comparison": "at_most",
+      "canonical": 0.25,
+      "measured": 0.2401,
+      "deviation": -0.0099,
+      "tolerance": 0.0,
+      "pass": true,
+      "method": "probe drive"
+    },
+    {
+      "name": "collision/open_end/+x/final_x",
+      "kind": "collision",
+      "unit": "m",
+      "comparison": "within",
+      "canonical": 2.8,
+      "measured": 2.7979,
+      "deviation": -0.0021,
+      "tolerance": 0.01,
+      "pass": true,
+      "method": "probe drive"
+    },
+    {
+      "name": "collision/open_end/+x/non_floor_contacts",
+      "kind": "collision",
+      "unit": "count",
+      "comparison": "within",
+      "canonical": 0.0,
+      "measured": 0.0,
+      "deviation": 0.0,
+      "tolerance": 0.0,
+      "pass": true,
+      "method": "contact list",
+      "contacts": [
+        "floor"
+      ]
+    }
+  ]
+}

@@ -5,10 +5,25 @@ import { readFile, writeFile, mkdtemp } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, compare, expectedPass, QUANTITIES, SCHEMA } from '../tooling/compare-results.mjs';
+import { check, compare, expectedPass, EXIT, QUANTITIES, SCHEMA } from '../tooling/compare-results.mjs';
 
-const FIXTURE = 'test/fixtures/mujoco-hallway-open-0.1.0.result.json';
-const load = async () => JSON.parse(await readFile(FIXTURE, 'utf8'));
+// Hand-written fixtures hold a few quantities per kind; complete() adds every other
+// required name as a synthetic pass so records are complete without a 1000-line file.
+const DIR = 'test/fixtures/hallway-results/';
+function complete(record) {
+  const have = new Set(record.quantities.map(q => q.name));
+  if (record.status !== 'UNSUPPORTED') {
+    for (const { name, kind, unit, comparison } of QUANTITIES.required) {
+      if (!have.has(name)) {
+        record.quantities.push({ name, kind, unit, comparison, canonical: 0, measured: 0, deviation: 0,
+          tolerance: 0, pass: true, method: 'synthetic test filler' });
+      }
+    }
+  }
+  return record;
+}
+const raw = async (name = 'mujoco') => JSON.parse(await readFile(DIR + name + '.json', 'utf8'));
+const load = async (name = 'mujoco') => complete(await raw(name));
 const cli = (...args) => spawnSync(process.execPath, ['tooling/compare-results.mjs', ...args], { encoding: 'utf8' });
 async function tmpFile(record) {
   const path = join(await mkdtemp(join(tmpdir(), 'result-')), 'result.json');
@@ -22,45 +37,76 @@ test('result schema is livingproof-world-result/0.2 published next to hallways.m
   assert.match(SCHEMA.$id, /robot-capability-specs\/specs\/worlds\/hallway-result\.schema\.json$/);
 });
 
-test('converted MuJoCo hallway result is valid and complete', async () => {
-  assert.deepEqual(check(await load()), []);
+test('hand-written fixtures are small, valid and complete once filled', async () => {
+  for (const name of ['mujoco', 'gazebo', 'gazebo-fail', 'gazebo-unsupported', 'mujoco-unsupported']) {
+    const r = await raw(name);
+    assert.ok(r.quantities.length <= 10, name);
+    assert.deepEqual(check(complete(r)), [], name);
+  }
+  const kinds = new Set((await raw()).quantities.map(q => q.kind));
+  assert.deepEqual([...kinds].sort(), ['collision', 'dimension', 'drive', 'frame', 'place']);
 });
 
-test('compare reports A, B, difference and each pass per quantity', async () => {
-  const a = await load();
-  const b = structuredClone(a);
-  b.engine = { name: 'gazebo', version: '8.9.0' };
-  const q = b.quantities.find(x => x.name === 'collision/floor/penetration');
-  q.measured = 0.006; q.deviation = 0.006;
-  const result = compare(a, b);
-  assert.equal(result.ok, true);
+test('PASS verdict lists each engine value, deviation and MuJoCo minus Gazebo', async () => {
+  const result = compare(await load('mujoco'), await load('gazebo'));
+  assert.equal(result.verdict, 'PASS');
+  assert.deepEqual(result.engines, ['mujoco', 'gazebo']);
   const row = result.rows.find(r => r.name === 'collision/floor/penetration');
-  assert.equal(row.a, a.quantities.find(x => x.name === row.name).measured);
-  assert.equal(row.b, 0.006);
-  assert.ok(Math.abs(row.difference - (0.006 - row.a)) < 1e-12);
-  assert.equal(row.pass_a, true);
-  assert.equal(row.pass_b, true);
-  assert.equal(result.rows.length, a.quantities.length);
+  assert.deepEqual(row.mujoco, { measured: 0.0043, deviation: 0.0043, pass: true });
+  assert.deepEqual(row.gazebo, { measured: 0.006, deviation: 0.006, pass: true });
+  assert.ok(Math.abs(row.difference - (0.0043 - 0.006)) < 1e-12);
+  assert.equal(result.rows.find(r => r.name === 'place/spawn-exit/yaw').gazebo.deviation, 0.1);
 });
 
-test('CLI prints a table and exits 0 for two valid results', () => {
-  const run = cli(FIXTURE, FIXTURE);
-  assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /\| collision\/open_end\/\+x\/final_x \| 2\.8 \|/);
+test('columns follow the engine field, not argument order', async () => {
+  const a = compare(await load('mujoco'), await load('gazebo'));
+  const b = compare(await load('gazebo'), await load('mujoco'));
+  assert.deepEqual(b.engines, ['mujoco', 'gazebo']);
+  assert.deepEqual(b.rows, a.rows);
+  const run = cli(await tmpFile(await load('gazebo')), await tmpFile(await load('mujoco')));
+  assert.equal(run.status, EXIT.PASS, run.stderr);
+  assert.match(run.stdout, /^\| quantity \| canonical \| mujoco \| mujoco deviation \| gazebo \| gazebo deviation \| mujoco - gazebo \| mujoco pass \| gazebo pass \|$/m);
+  assert.match(run.stdout, /^\| collision\/floor\/penetration \| 0 \| 0\.0043 \| 0\.0043 \| 0\.006 \| 0\.006 \| -0\.0017 \| true \| true \|$/m);
+  assert.match(run.stdout, /^verdict: PASS$/m);
+});
+
+test('FAIL verdict when any required quantity fails in either record, exit 1', async () => {
+  const result = compare(await load('gazebo-fail'), await load('mujoco'));
+  assert.equal(result.verdict, 'FAIL');
+  assert.deepEqual(result.failed, ['collision/wall+y/max_speed']);
+  for (const order of [['mujoco', 'gazebo-fail'], ['gazebo-fail', 'mujoco']]) {
+    const run = cli(...await Promise.all(order.map(async n => tmpFile(await load(n)))));
+    assert.equal(run.status, EXIT.FAIL);
+    assert.match(run.stdout, /^FAILED collision\/wall\+y\/max_speed$/m);
+    assert.match(run.stdout, /^verdict: FAIL$/m);
+  }
+});
+
+test('UNSUPPORTED on either side gives an UNSUPPORTED verdict and a non-zero exit', async () => {
+  for (const [x, y] of [['mujoco-unsupported', 'gazebo'], ['mujoco', 'gazebo-unsupported'], ['gazebo-unsupported', 'mujoco']]) {
+    const result = compare(await load(x), await load(y));
+    assert.equal(result.verdict, 'UNSUPPORTED', `${x} ${y}`);
+    const run = cli(await tmpFile(await load(x)), await tmpFile(await load(y)));
+    assert.equal(run.status, EXIT.UNSUPPORTED);
+    assert.match(run.stdout, /^UNSUPPORTED (mujoco|gazebo): geometry 'wall-left' type 'cylinder'$/m);
+  }
+  assert.notEqual(EXIT.UNSUPPORTED, 0);
 });
 
 test('CLI exits non-zero on a schema error or a missing required quantity', async () => {
+  const good = await tmpFile(await load('gazebo'));
   const bad = await load();
   bad.adapter.version = bad.adapter.commit;
-  let run = cli(FIXTURE, await tmpFile(bad));
-  assert.equal(run.status, 1);
-  assert.match(run.stderr, /B: schema: \/adapter\/version must match pattern/);
+  let run = cli(await tmpFile(bad), good);
+  assert.equal(run.status, EXIT.INVALID);
+  assert.match(run.stderr, /mujoco: schema: \/adapter\/version must match pattern/);
   const missing = await load();
   missing.quantities = missing.quantities.filter(q => q.name !== 'clear_width');
-  run = cli(await tmpFile(missing), FIXTURE);
-  assert.equal(run.status, 1);
-  assert.match(run.stderr, /A: missing required quantity clear_width/);
-  assert.equal(cli(FIXTURE).status, 2);
+  run = cli(good, await tmpFile(missing));
+  assert.equal(run.status, EXIT.INVALID);
+  assert.match(run.stderr, /mujoco: missing required quantity clear_width/);
+  assert.match(run.stdout, /^verdict: INVALID$/m);
+  assert.equal(cli(good).status, EXIT.USAGE);
 });
 
 const negative = [
@@ -120,8 +166,8 @@ test('UNSUPPORTED records validate with fixture as an object and compare without
   const r = await load();
   Object.assign(r, { status: 'UNSUPPORTED', feature: "geometry 'wall-left' type 'cylinder'", quantities: [] });
   assert.deepEqual(check(r), []);
-  const result = compare(await load(), r);
-  assert.equal(result.ok, true);
+  const result = compare(r, await load('gazebo'));
+  assert.equal(result.verdict, 'UNSUPPORTED');
   assert.deepEqual(result.unsupported, ["mujoco: geometry 'wall-left' type 'cylinder'"]);
 });
 
@@ -136,11 +182,20 @@ test('probe parameters are machine-readable and match hallways.md prose', async 
   assert.equal(probe.checks.floor.start_z_m, 0.75);
   assert.equal(probe.checks.wall.drive_s, 5);
   assert.equal(probe.checks.open_end.drive_s, 16);
+  assert.equal(probe.probe.density_kg_per_m3, 1000);
+  assert.ok(Math.abs(probe.probe.mass_kg - 1000 * 4 / 3 * Math.PI * 0.1 ** 3) < 1e-4);
+  assert.deepEqual(probe.gravity_m_per_s2, [0, 0, -9.81]);
+  assert.equal(probe.checks.floor.settle_s, 2);
+  assert.equal(probe.checks.wall.settle_s, 1.5);
+  assert.equal(probe.checks.open_end.settle_s, 1.5);
+  assert.match(probe.probe.controller, /engine-specific/);
   assert.deepEqual(probe.checks.open_end.targets_x_m, [2.8, -2.8]);
   const doc = (await readFile('specs/worlds/hallways.md', 'utf8')).replace(/\s+/g, ' ');
   for (const text of ['three slide joints', 'no rotation', 'friction is 0.1', '500 Hz', '5 s', '16 s',
     '[hallway-result.schema.json](hallway-result.schema.json)', '[hallway-quantities.json](hallway-quantities.json)',
-    '[hallway-probe.json](hallway-probe.json)', 'tooling/compare-results.mjs']) {
+    '[hallway-probe.json](hallway-probe.json)', 'tooling/compare-results.mjs',
+    '1000 kg/m³', '9.81 m/s²', '2.0 s settle', 'settles for 1.5 s', 'left to each engine',
+    'MuJoCo-minus-Gazebo difference', 'not the argument order', 'exits 0 for `PASS`, 1 for `FAIL`, 3 when either record is `UNSUPPORTED`']) {
     assert.ok(doc.includes(text), text);
   }
 });

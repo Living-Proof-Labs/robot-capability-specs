@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: Apache-2.0
 // Compare two livingproof-world-result/0.2 records (for example MuJoCo and Gazebo).
-// Usage: node tooling/compare-results.mjs A/result.json B/result.json [--json]
-// Exit 0: both valid and complete (per-quantity passes are reported, not enforced);
-// 1: a schema error, a missing required quantity or an inconsistent record; 2: usage.
+// Usage: node tooling/compare-results.mjs one/result.json other/result.json [--json]
+// Columns follow each record's engine field (MuJoCo first, then Gazebo), never argument order.
+// Verdict PASS only if both records are valid and every required quantity passes in both.
+// Exit 0: PASS; 1: FAIL; 3: UNSUPPORTED (either record); 4: INVALID (schema error, missing
+// required quantity or inconsistent record); 2: usage or unreadable file.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -48,50 +50,77 @@ export function check(record, label = 'record') {
   return errors;
 }
 
-/** Join two valid records on quantity name. */
-export function compare(a, b) {
-  const errors = [...check(a, 'A'), ...check(b, 'B')];
-  if (errors.length) return { ok: false, errors, rows: [] };
-  if (a.status === 'UNSUPPORTED' || b.status === 'UNSUPPORTED') {
-    return { ok: true, errors, rows: [], unsupported: [a, b].filter(r => r.status === 'UNSUPPORTED').map(r => `${r.engine.name}: ${r.feature}`) };
-  }
-  const mapA = new Map(a.quantities.map(q => [q.name, q]));
-  const mapB = new Map(b.quantities.map(q => [q.name, q]));
-  const names = [...new Set([...mapA.keys(), ...mapB.keys()])];
-  const rows = names.map(name => {
-    const qa = mapA.get(name), qb = mapB.get(name);
-    const va = qa ? qa.measured : null, vb = qb ? qb.measured : null;
-    return {
-      name,
-      canonical: (qa ?? qb).canonical,
-      a: va, b: vb,
-      difference: va === null || vb === null ? null : vb - va,
-      pass_a: qa ? qa.pass : null,
-      pass_b: qb ? qb.pass : null,
-    };
-  });
-  return { ok: true, errors, rows, a: a.engine.name, b: b.engine.name };
+export const ENGINE_ORDER = ['mujoco', 'gazebo'];
+export const EXIT = { PASS: 0, FAIL: 1, USAGE: 2, UNSUPPORTED: 3, INVALID: 4 };
+
+function rank(record) {
+  const i = ENGINE_ORDER.indexOf(String(record?.engine?.name).toLowerCase());
+  return i === -1 ? ENGINE_ORDER.length : i;
 }
 
-function fmt(v) { return v === null ? '-' : typeof v === 'number' ? Number(v.toPrecision(6)).toString() : String(v); }
+/** Order two records by engine (MuJoCo, then Gazebo, then others by name); stable otherwise. */
+export function orderByEngine(x, y) {
+  const swap = rank(y) < rank(x) || (rank(x) === rank(y) && rank(x) === ENGINE_ORDER.length &&
+    String(y.engine.name) < String(x.engine.name));
+  return swap ? [y, x] : [x, y];
+}
+
+/**
+ * Join two records on quantity name with columns ordered by engine.
+ * difference = first engine's measured - second engine's (MuJoCo - Gazebo).
+ */
+export function compare(x, y) {
+  const [first, second] = orderByEngine(x, y);
+  const engines = [first, second].map(r => r?.engine?.name ?? 'unknown');
+  const errors = [...check(first, engines[0]), ...check(second, engines[1])];
+  if (errors.length) return { verdict: 'INVALID', engines, errors, rows: [] };
+  const unsupported = [first, second].filter(r => r.status === 'UNSUPPORTED').map(r => `${r.engine.name}: ${r.feature}`);
+  if (unsupported.length) return { verdict: 'UNSUPPORTED', engines, errors, unsupported, rows: [] };
+  const maps = [first, second].map(r => new Map(r.quantities.map(q => [q.name, q])));
+  const required = new Set(QUANTITIES.required.map(q => q.name));
+  const names = [...new Set([...maps[0].keys(), ...maps[1].keys()])];
+  const rows = names.map(name => {
+    const [q1, q2] = maps.map(m => m.get(name));
+    const v1 = q1 ? q1.measured : null, v2 = q2 ? q2.measured : null;
+    return {
+      name,
+      required: required.has(name),
+      canonical: (q1 ?? q2).canonical,
+      [engines[0]]: { measured: v1, deviation: q1 ? q1.deviation : null, pass: q1 ? q1.pass : null },
+      [engines[1]]: { measured: v2, deviation: q2 ? q2.deviation : null, pass: q2 ? q2.pass : null },
+      difference: v1 === null || v2 === null ? null : v1 - v2,
+    };
+  });
+  const failed = rows.filter(r => r.required && !(r[engines[0]].pass && r[engines[1]].pass)).map(r => r.name);
+  return { verdict: failed.length ? 'FAIL' : 'PASS', engines, errors, failed, rows };
+}
+
+function fmt(v) { return v === null || v === undefined ? '-' : typeof v === 'number' ? Number(v.toPrecision(6)).toString() : String(v); }
 
 function main(argv) {
   const json = argv.includes('--json');
   const files = argv.filter(x => x !== '--json');
-  if (files.length !== 2) { console.error('usage: compare-results.mjs A.json B.json [--json]'); return 2; }
+  if (files.length !== 2) { console.error('usage: compare-results.mjs one.json other.json [--json]'); return EXIT.USAGE; }
   let records;
   try { records = files.map(f => JSON.parse(readFileSync(f, 'utf8'))); }
-  catch (e) { console.error(`cannot read result: ${e.message}`); return 1; }
+  catch (e) { console.error(`cannot read result: ${e.message}`); return EXIT.USAGE; }
   const result = compare(...records);
+  const [e1, e2] = result.engines;
   if (json) console.log(JSON.stringify(result, null, 2));
-  else if (!result.ok) result.errors.forEach(e => console.error(e));
   else {
-    console.log(`| quantity | canonical | A (${result.a}) | B (${result.b}) | B - A | pass A | pass B |`);
-    console.log('| --- | ---: | ---: | ---: | ---: | --- | --- |');
-    for (const r of result.rows) console.log(`| ${r.name} | ${fmt(r.canonical)} | ${fmt(r.a)} | ${fmt(r.b)} | ${fmt(r.difference)} | ${fmt(r.pass_a)} | ${fmt(r.pass_b)} |`);
+    result.errors.forEach(e => console.error(e));
+    if (result.rows.length) {
+      console.log(`| quantity | canonical | ${e1} | ${e1} deviation | ${e2} | ${e2} deviation | ${e1} - ${e2} | ${e1} pass | ${e2} pass |`);
+      console.log('| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |');
+      for (const r of result.rows) {
+        console.log(`| ${r.name} | ${fmt(r.canonical)} | ${fmt(r[e1].measured)} | ${fmt(r[e1].deviation)} | ${fmt(r[e2].measured)} | ${fmt(r[e2].deviation)} | ${fmt(r.difference)} | ${fmt(r[e1].pass)} | ${fmt(r[e2].pass)} |`);
+      }
+    }
     for (const u of result.unsupported ?? []) console.log(`UNSUPPORTED ${u}`);
+    for (const f of result.failed ?? []) console.log(`FAILED ${f}`);
+    console.log(`verdict: ${result.verdict}`);
   }
-  return result.ok ? 0 : 1;
+  return EXIT[result.verdict];
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) process.exitCode = main(process.argv.slice(2));

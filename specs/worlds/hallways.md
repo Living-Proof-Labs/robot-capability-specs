@@ -77,7 +77,12 @@ contacts enabled. The probe is the same in every engine
 ([hallway-probe.json](hallway-probe.json)): it is mounted on three slide joints
 (x, y, z) with no rotation, so it slides rather than rolls; its friction is 0.1;
 it is moved by speed control capped at 0.25 m/s, never teleported; and every
-physics step is sampled at 500 Hz. These are demonstration choices for probing
+physics step is sampled at 500 Hz. Its density is 1000 kg/m³ (mass about
+4.19 kg) and gravity is 9.81 m/s² along `-z`. Before the floor drop it is held
+for a 2.0 s settle; before each wall and open-end drive it is reset to
+`spawn-centre` and settles for 1.5 s. The speed controller's gain and force
+(effort) limit are left to each engine and recorded in its result settings;
+they are not part of this contract. These are demonstration choices for probing
 collision boundaries, not a robot model.
 
 1. **Floor:** release it from rest at `spawn-centre` with its centre at
@@ -122,10 +127,16 @@ face and the 0.25 m/s speed cap). Open-end quantities are named
 `collision/floor/settled_bottom_z` is optional, and names under `reset/` are
 reserved for the reset checks.
 
-`node tooling/compare-results.mjs A/result.json B/result.json` validates both
-records against the schema and the required names, then lists each quantity's
-canonical value, value A, value B, the difference (B - A) and each pass. It
-exits non-zero on a schema error or a missing required quantity.
+`node tooling/compare-results.mjs mujoco/result.json gazebo/result.json`
+validates both records against the schema and the required names, then lists
+each quantity's canonical value, each engine's measured value and deviation from
+canonical, the MuJoCo-minus-Gazebo difference, and each engine's pass. Columns
+follow each record's `engine.name` (MuJoCo first, then Gazebo), not the argument
+order. The verdict is `PASS` only when every required quantity passes in both
+records; the difference is reported, never used to hide a deviation. It exits 0
+for `PASS`, 1 for `FAIL`, 3 when either record is `UNSUPPORTED`, 4 for a schema
+error, a missing required quantity or an inconsistent record, and 2 for a usage
+or read error.
 
 ## Reviewer evidence
 
