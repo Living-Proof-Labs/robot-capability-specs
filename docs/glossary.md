@@ -5,6 +5,9 @@ Terms used across the catalog for robots, configurations and scenario runs.
 They align with the concepts on the Living Proof Labs website; where a word had
 two meanings, the choice made here is noted.
 
+Trial counts and seeds in the examples (such as 18 of 20) are illustrative.
+They are not pass bars; each specification's acceptance rule sets its own.
+
 | Term | Meaning | Example |
 | --- | --- | --- |
 | **Robot** | One make and model as its maker publishes it: kinematics, geometry, mass, actuators and sensors. Living Proof Labs never changes it; it is pinned by source and sha256. | Unitree G1, model from `mujoco_menagerie` `unitree_g1` at a pinned commit |
@@ -16,15 +19,15 @@ two meanings, the choice made here is noted.
 | **World** | A versioned simulated environment with declared geometry and named places. Used for the hallway instead of *fixture*. | `hallway-open` 0.1.0 |
 | **Fixture** | Recorded or hand-written input data used in place of a live system, for example a test record. Not used for worlds. | `test/fixtures/hallway-results/mujoco.json` |
 | **Scenario** | One concrete situation that exercises a specification: starting state, what happens and what is observed. Robot-neutral; every number is a named parameter. | Walk `hallway-open` from `spawn-entrance` to `exit` |
-| **Acceptance** | The part of a specification that says what is good enough: one rule per metric, written over robot and configuration profile fields, plus the trial policy. | Pass when at least 18 of 20 trials pass |
+| **Acceptance** | The part of a specification that says what is good enough: one rule per metric, written over robot and configuration profile fields, plus the trial policy. | Pass when at least 18 of 20 trials pass (illustrative) |
 | **Grading policy** | The named rule that turns results into a grade. Used instead of *policy* for this meaning, so that *policy* in robotics keeps meaning a learned controller. | `all-required-v1` |
 | **Run manifest** | The generated, never committed record of exactly what one run uses, written before the first trial: specification tag, scenario, world, simulator and adapter, robot repository commit, selected configuration profile name, version and sha256, resolved parameters and seeds. | `run-manifest.json` |
 | **Trial** | One execution of the scenario with one seed. | Seed 7 |
 | **Trial outcome** | The result of one trial: `PASS`, `FAIL` or `ERROR` (the simulator or controller crashed; counts as not passed). | Seed 7: `FAIL`, first failing metric `wall_contacts` |
-| **Seed** | The integer that fixes a trial's random choices. The same seeds are used for every configuration being compared. | Seeds 1 to 20 |
+| **Seed** | The integer that fixes a trial's random choices. The same seeds are used for every configuration being compared. | Seeds 1 to 20 (illustrative) |
 | **Grade** | The result of applying a grading policy to a run, replacing the earlier word *verdict*. One of the five values below. | `PASS` |
-| **`PASS`** | The acceptance rule is met. | At least 18 of 20 trials passed |
-| **`FAIL`** | Trials ran and the acceptance rule is not met. A controller that falls is a valid `FAIL`. | 9 of 20 |
+| **`PASS`** | The acceptance rule is met. | At least 18 of 20 trials passed (illustrative) |
+| **`FAIL`** | Trials ran and the acceptance rule is not met. A controller that falls is a valid `FAIL`. | 9 of 20 trials passed (illustrative) |
 | **`INSUFFICIENT_EVIDENCE`** | Trials ran but required metrics or files are missing, or too many trials ended in `ERROR`. | No contact log |
 | **`UNSUPPORTED`** | A declared precondition cannot be met, decided before any trial. Names the precondition. Never a pass. | `configuration_offered` |
 | **`ERROR`** | The run could not be completed, for example the simulator failed to start. | Runner crash |
