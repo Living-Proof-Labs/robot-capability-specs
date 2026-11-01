@@ -7,11 +7,11 @@ Feature: Walk the open hallway
     Given world "hallway-open" at its pinned version in simulator <simulator>
     And robot <robot> with configuration profile <configuration>
     And the robot stands at "spawn-entrance" facing the exit
-    When the controller is commanded to walk forward at <command_speed>
-    Then the robot's base crosses "exit" within <time_limit>
+    When the controller is commanded to walk forward at the README parameter command_speed
+    Then the robot's base crosses "exit" within the README parameter time_limit
     And no robot body touches either side wall
-    And the base height never drops below <fall_height>
-    And the base stays within <lateral_limit> of the centreline
+    And the base height never drops below the README parameter fall_height, the selected configuration profile's locomotion.fall_base_height
+    And the base stays within the README parameter lateral_limit, clear width ÷ 2 − robot width ÷ 2, of the centreline
 
     Examples:
       | simulator | robot       | configuration |

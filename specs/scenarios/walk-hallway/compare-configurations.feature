@@ -7,9 +7,9 @@ Feature: Compare configuration profiles on one robot
     Given world "hallway-open" at its pinned version in simulator "MuJoCo"
     And robot "unitree-g1" at its pinned model
     And the run manifest selects configuration profile <configuration> with its sha256
-    And the trial seeds are <seeds>
-    When the controller is commanded to walk forward at <command_speed>
-    Then the run's grade is PASS only if at least <required_passes> of <trials> trials pass
+    And the trial seeds are 1 to 20
+    When the controller is commanded to walk forward at the README parameter command_speed
+    Then the run's grade is PASS only if at least 18 of 20 trials pass
 
     Examples:
       | configuration |
@@ -22,15 +22,15 @@ Feature: Compare configuration profiles on one robot
     When the comparison is reported
     Then it shows each configuration's passed trials, pass rate and grade
     And it shows both configurations even if one has grade FAIL or ERROR
-    And it ranks them by grade (PASS above INSUFFICIENT_EVIDENCE above FAIL), then passed trials, then the Wilson 95% lower bound, with ties sharing a rank
+    And it ranks them by grade (PASS above INSUFFICIENT_EVIDENCE above FAIL above ERROR), then passed trials, then the Wilson 95% lower bound; configurations equal on all three share a rank and are listed alphabetically
 
-  Scenario Outline: Configurations are ranked and the summary line is worded by the comparison rule
+  Scenario Outline: Configurations are ranked and the comparison summary line is worded by the comparison rule
     Given 20 planned trials per configuration and 18 required passes
     And configuration "stock" has grade <stock_grade> with <stock_passed> passed, Wilson 95% <stock_wilson>
     And configuration "playground" has grade <playground_grade> with <playground_passed> passed, Wilson 95% <playground_wilson>
     When the comparison is reported
     Then "stock" is ranked <stock_rank> and "playground" is ranked <playground_rank>
-    And the summary line reads <summary>
+    And the comparison summary line reads <summary>
 
     Examples:
       | stock_grade           | stock_passed | stock_wilson     | playground_grade | playground_passed | playground_wilson | stock_rank | playground_rank | summary |
