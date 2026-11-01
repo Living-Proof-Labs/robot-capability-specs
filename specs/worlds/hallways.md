@@ -1,9 +1,10 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# Open hallway fixture, revision 0.2.0
+# Open hallway fixture, revision 0.3.0
 
 Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
 
-Document revision 0.2.0 versions this specification text. It is separate from
+Document revision 0.3.0 versions this specification text (0.3.0 adds the shared
+result contract and probe parameters). It is separate from
 the fixture content version (`hallway-open` / `0.1.0`), which versions the world
 data.
 
@@ -72,16 +73,21 @@ named place must agree with the canonical values within 0.01 m. Frame axes and
 spawn yaws must agree within 0.5 degrees.
 
 Collision evidence uses a 0.10 m-radius non-robot sphere with gravity and
-contacts enabled:
+contacts enabled. The probe is the same in every engine
+([hallway-probe.json](hallway-probe.json)): it is mounted on three slide joints
+(x, y, z) with no rotation, so it slides rather than rolls; its friction is 0.1;
+it is moved by speed control capped at 0.25 m/s, never teleported; and every
+physics step is sampled at 500 Hz. These are demonstration choices for probing
+collision boundaries, not a robot model.
 
 1. **Floor:** release it from rest at `spawn-centre` with its centre at
    `z = 0.75 m`. It settles on the floor; penetration below the floor top
    surface may not exceed 0.01 m.
 2. **Side walls:** from `spawn-centre`, drive it normally (no teleporting, at
-   most 0.25 m/s) toward `+y` and then `-y`. The sphere's surface must not pass
+   most 0.25 m/s) toward `+y` and then `-y`, for 5 s each. The sphere's surface must not pass
    an inner wall face by more than 0.01 m.
 3. **Open ends:** from `spawn-centre`, drive it along `passage-centreline` to
-   `x = ±2.80`. It contacts nothing but the floor, showing that no end wall or
+   `x = ±2.80`, for up to 16 s each way. It contacts nothing but the floor, showing that no end wall or
    door exists.
 
 Retained evidence records gravity/contact settings, drive method, sampling
@@ -95,6 +101,31 @@ canonical value, each engine's measured value, each engine's deviation, and the
 MuJoCo-minus-Gazebo difference. The comparison passes only when every engine is
 within tolerance of the canonical value; the pairwise difference is reported,
 not used to hide a deviation.
+
+## Result contract
+
+Every engine writes one `livingproof-world-result/0.2` record per run, defined
+by [hallway-result.schema.json](hallway-result.schema.json). It names the
+fixture, the world-contract revision, the catalog tag and commit, the engine,
+and the adapter (`adapter.version` is a semantic version, `adapter.commit` the
+full 40-character commit or `null`, and the optional `adapter.provenance` is
+`git` or `package`).
+
+Each quantity carries its canonical value or target, the measured value, the
+deviation, a tolerance and one comparison: `within` passes when
+`|measured - canonical| <= tolerance`; `at_most` passes when
+`measured <= canonical + tolerance` (used for penetration, distance past a wall
+face and the 0.25 m/s speed cap). Open-end quantities are named
+`collision/open_end/+x/…` and `collision/open_end/-x/…`, with the ±2.80 target in
+`canonical`. The names every record must contain are listed in
+[hallway-quantities.json](hallway-quantities.json);
+`collision/floor/settled_bottom_z` is optional, and names under `reset/` are
+reserved for the reset checks.
+
+`node tooling/compare-results.mjs A/result.json B/result.json` validates both
+records against the schema and the required names, then lists each quantity's
+canonical value, value A, value B, the difference (B - A) and each pass. It
+exits non-zero on a schema error or a missing required quantity.
 
 ## Reviewer evidence
 
