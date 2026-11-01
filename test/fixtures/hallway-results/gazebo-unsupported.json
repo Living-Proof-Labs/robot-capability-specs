@@ -1,0 +1,32 @@
+{
+  "_note": "Hand-written variant: UNSUPPORTED record.",
+  "format": "livingproof-world-result/0.2",
+  "status": "UNSUPPORTED",
+  "fixture": {
+    "id": "hallway-open",
+    "content_version": "0.1.0"
+  },
+  "contract": {
+    "world_contract_revision": "0.2.0",
+    "document": "specs/worlds/hallways.md",
+    "document_revision": "0.3.0",
+    "result_format": "livingproof-world-result/0.2"
+  },
+  "catalog": {
+    "repository": "Living-Proof-Labs/robot-capability-specs",
+    "tag": "v1.3.0",
+    "commit": "ad53368c11b322b787f6b71023bbe87dec839c0b"
+  },
+  "engine": {
+    "name": "gazebo",
+    "version": "8.9.0"
+  },
+  "adapter": {
+    "name": "livingproof-sim-gazebo",
+    "version": "1.2.0",
+    "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "provenance": "git"
+  },
+  "quantities": [],
+  "feature": "geometry 'wall-left' type 'cylinder'"
+}
