@@ -31,7 +31,7 @@ Feature: Walk the open hallway
       | evaluator             | observation     | rule                     | threshold     |
       | hallway-exit-reached  | exit_time       | is absent or later than  | time_limit    |
       | hallway-lateral-limit | max_abs_lateral | is greater than          | lateral_limit |
-      | hallway-wall-contact  | wall_contacts   | lists any contact        | no contact    |
+      | hallway-wall-contact  | wall_contacts   | lists any contact        | an empty list |
       | hallway-fall          | min_base_height | is less than             | fall_height   |
 
   Scenario: A trial passes only when every hallway evaluator passes
@@ -40,11 +40,18 @@ Feature: Walk the open hallway
     Then any FAIL makes the trial FAIL
     And any INSUFFICIENT_EVIDENCE without a FAIL makes the trial INSUFFICIENT_EVIDENCE
 
-  Scenario: Trials are aggregated as k of N with a Wilson interval
-    Given <trials> trial results of one configuration
+  Scenario Outline: Trials are aggregated as k of N with a Wilson interval
+    Given <trials> trial results of one configuration, of which <passed> pass
     When the trial results are aggregated
-    Then the result reports passed trials k of N with its Wilson 95% interval
-    And the grade is PASS only if at least <required_passes> trials pass
+    Then the result reports <passed> of <trials> with Wilson 95% interval <wilson_95>
+    And the grade is <grade> because at least <required_passes> trials must pass
+
+    Examples:
+      | trials | passed | required_passes | wilson_95        | grade |
+      | 20     | 20     | 18              | 0.8389 to 1.0000 | PASS  |
+      | 20     | 18     | 18              | 0.6990 to 0.9721 | PASS  |
+      | 20     | 17     | 18              | 0.6396 to 0.9476 | FAIL  |
+      | 20     | 12     | 18              | 0.3866 to 0.7812 | FAIL  |
 
   Scenario: Repeated trials are reported in full
     Given a walk-hallway run of <trials> seeded trials

@@ -32,7 +32,7 @@ Examples: [walk-hallway.feature](walk-hallway.feature) and
 | --- | --- | --- | --- |
 | `reached_exit` | true or false | The base origin crosses `exit` | Must be true |
 | `time_to_exit` | s | First time the base crosses `exit` | At most `time_limit` |
-| `wall_contacts` | count | Contacts between any robot body and either side wall | Must be 0 |
+| `wall_contacts` | list | Each contact between any robot body and either side wall, with its wall, start and end time (s) and depth (m) | Must be empty |
 | `min_base_height` | m | Lowest base height above the floor | At least `fall_height` |
 | `max_abs_lateral` | m | Largest sideways distance of the base from the centreline | At most `lateral_limit` |
 
@@ -50,7 +50,7 @@ interval.
 | --- | --- | --- | --- |
 | `hallway-exit-reached` | `exit_time` (s, absent if never crossed) | absent or later than `time_limit` | Acceptance |
 | `hallway-lateral-limit` | `max_abs_lateral` (m, with its time) | greater than `lateral_limit` | World clear width and robot profile `width` |
-| `hallway-wall-contact` | `wall_contacts` (each with time and depth) | any contact | None; contact is real-geometry signed distance at or below zero |
+| `hallway-wall-contact` | `wall_contacts` (list; each with wall, time and depth) | the list is not empty | None; contact is real-geometry signed distance at or below zero |
 | `hallway-fall` | `min_base_height` (m, with its time) | less than `fall_height` | Configuration profile `locomotion.fall_base_height` |
 
 A missing or malformed observation gives `INSUFFICIENT_EVIDENCE`. Each
