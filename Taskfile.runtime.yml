@@ -17,7 +17,7 @@ tasks:
   check:
     desc: Check JavaScript syntax and patch whitespace with native tools
     cmds:
-      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs, test/result-contract.test.mjs, tooling/compare-results.mjs, test/robot-profiles.test.mjs]
+      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs, test/result-contract.test.mjs, tooling/compare-results.mjs, test/robot-profiles.test.mjs, test/robot-manifest.test.mjs, tooling/validate-manifests.mjs]
         cmd: node --check "{{.ITEM}}"
       - git diff --check
 
@@ -27,10 +27,16 @@ tasks:
       - mkdir -p artifacts
       - node --test --test-reporter=spec --test-reporter=junit --test-reporter-destination=stdout --test-reporter-destination=artifacts/tests.xml tooling/test-suite.mjs
 
+  validate:manifests:
+    desc: Validate robot manifests (default the G1, Go1 and T1 examples) against the schema
+    cmds:
+      - node tooling/validate-manifests.mjs {{.CLI_ARGS}}
+
   verify:
     desc: Check syntax/whitespace, then run catalog and manual tests
     cmds:
       - task: check
+      - task: validate:manifests
       - task: test
       - task: test:docs
   preview:

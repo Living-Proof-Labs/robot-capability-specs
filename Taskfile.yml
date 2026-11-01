@@ -17,6 +17,11 @@ tasks:
     cmds:
       - mkdir -p artifacts
       - docker compose run --build --rm tooling test
+  validate:manifests:
+    desc: Validate robot manifests against the schema in Docker
+    cmds:
+      - mkdir -p artifacts
+      - docker compose run --build --rm tooling validate:manifests -- {{.CLI_ARGS}}
   verify:
     desc: Check catalog and rendered manual in Docker
     cmds:
