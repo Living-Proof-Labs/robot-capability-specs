@@ -13,7 +13,7 @@ See the [scope](specs/README.md) and [roadmap issue drafts](docs/issues/roadmap.
 
 The [world contract](specs/worlds/README.md) defines versioned world selection
 and conformance evidence independently of geometry and consumers. The
-[open hallway fixture](specs/worlds/hallways.md) defines one door-free hallway
+[open hallway world](specs/worlds/hallways.md) defines one door-free hallway
 with named places and a MuJoCo/Gazebo matrix. This catalog contains their specifications
 and parser checks, not world assets or engine execution.
 
@@ -31,7 +31,7 @@ That released verifier consumes catalog **v1.1.0** with commit and content-hash
 verification. It does not automatically consume newer catalog releases.
 [View its 26-test report](https://github.com/Living-Proof-Labs/capability-verifier/runs/120847135184).
 Passing expectation tests include correctly detected FAIL and INSUFFICIENT_EVIDENCE
-fixture verdicts; they are not robot safety certification. The catalog's capability checks cover
+fixture grades; they are not robot safety certification. The catalog's capability checks cover
 document formatting and Gherkin parsing, not runtime robot behavior.
 
 Read the [authoring guide](docs/authoring.md) and [manual preview instructions](docs/verification.md).

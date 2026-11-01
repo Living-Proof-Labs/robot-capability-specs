@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Living-Proof-Labs/robot-capability-specs/specs/robots/run-manifest.schema.json",
+  "title": "livingproof-run-manifest/0.1",
+  "description": "What one run uses, written by the simulator runner before the first trial and kept with the evidence. Generated, never committed. It names the configuration profile and its sha256 and never copies the profile's contents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "run_id", "specification", "scenario", "world", "simulator", "robot", "configuration", "trials"],
+  "properties": {
+    "$comment": {"type": "string"},
+    "format": {"const": "livingproof-run-manifest/0.1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "specification": {
+      "type": "object", "additionalProperties": false, "required": ["tag", "commit"],
+      "properties": {"tag": {"type": "string"}, "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}}
+    },
+    "scenario": {"type": "string", "pattern": "^[a-z0-9-]+@[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "world": {
+      "type": "object", "additionalProperties": false, "required": ["id", "version", "sha256"],
+      "properties": {"id": {"type": "string"}, "version": {"type": "string"}, "sha256": {"$ref": "robot-profile.schema.json#/$defs/sha256"}}
+    },
+    "simulator": {
+      "type": "object", "additionalProperties": false, "required": ["engine", "version", "adapter", "adapter_commit"],
+      "properties": {
+        "engine": {"enum": ["mujoco", "gazebo"]},
+        "version": {"type": "string"},
+        "adapter": {"type": "string"},
+        "adapter_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "robot": {
+      "type": "object", "additionalProperties": false, "required": ["id", "repo", "commit", "profile_sha256"],
+      "properties": {
+        "id": {"$ref": "robot-profile.schema.json#/$defs/name"},
+        "repo": {"type": "string"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "profile_sha256": {"$ref": "robot-profile.schema.json#/$defs/sha256"}
+      }
+    },
+    "configuration": {
+      "description": "The selected configuration profile. Selecting it is the feature toggle.",
+      "type": "object", "additionalProperties": false, "required": ["name", "version", "sha256"],
+      "properties": {
+        "name": {"$ref": "robot-profile.schema.json#/$defs/name"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "sha256": {"$ref": "robot-profile.schema.json#/$defs/sha256", "description": "sha256 of the configuration profile file bytes as committed in the robot repository."}
+      }
+    },
+    "parameters": {"type": "object", "additionalProperties": {"anyOf": [{"type": "number"}, {"type": "string"}, {"type": "boolean"}]}, "description": "Resolved scenario parameters."},
+    "trials": {
+      "type": "object", "additionalProperties": false, "required": ["count", "seeds", "required_passes"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "seeds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer"}},
+        "required_passes": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

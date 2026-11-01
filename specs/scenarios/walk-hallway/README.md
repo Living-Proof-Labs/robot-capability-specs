@@ -1,0 +1,86 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+# Walk the open hallway, scenario 0.1.0
+
+Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../../LICENSES/CC-BY-4.0.txt).
+
+A robot uses the controller in its selected configuration profile to walk the
+[open hallway world](../../worlds/hallways.md) from `spawn-entrance` to `exit`.
+The scenario is robot-neutral: robots, configurations and simulators are the
+only literals, and every number is a named parameter resolved from acceptance
+and the robot and configuration profiles. Formats are defined in
+[robot and configuration profiles](../../robots/README.md); terms in the
+[glossary](../../../docs/glossary.md).
+
+## Stories
+
+| Story | Scenario |
+| --- | --- |
+| As a robot maker, I want my robot walked through a standard hallway with its own published controller, so that I can show it walks a narrow passage without touching the walls or falling. | `A robot walks the open hallway` |
+| As a verifier, I want the scenario judged against each robot's own size and configuration, so that a humanoid and a quadruped are held to fair, declared thresholds. | `A robot walks the open hallway` |
+| As a reviewer, I want every trial reported, including failures, with seeds and versions, so that a pass rate is honest and reproducible. | `Repeated trials are reported in full` |
+| As a verifier, I want a robot that cannot fit reported as `UNSUPPORTED` before it runs, so that a non-result is never shown as a pass or a failure. | `A robot that cannot meet the preconditions` |
+| As a robotics team, I want the same G1 walked with each configuration profile, so that evidence shows which pluggable controller is better. | `Each configuration profile walks the same robot` |
+| As a reviewer, I want both configurations shown even when one fails, so that a weak controller is visible rather than dropped. | `The comparison shows both configurations` |
+| As a verifier, I want a configuration the robot does not offer reported as `UNSUPPORTED`, so that a missing profile is never shown as a failed walk. | `A configuration that is not offered` |
+
+Examples: [walk-hallway.feature](walk-hallway.feature) and
+[compare-configurations.feature](compare-configurations.feature).
+
+## Metrics
+
+| Metric | Unit | Definition | Judged |
+| --- | --- | --- | --- |
+| `reached_exit` | true or false | The base origin crosses `exit` | Must be true |
+| `time_to_exit` | s | First time the base crosses `exit` | At most `time_limit` |
+| `wall_contacts` | count | Contacts between any robot body and either side wall | Must be 0 |
+| `min_base_height` | m | Lowest base height above the floor | At least `fall_height` |
+| `max_abs_lateral` | m | Largest sideways distance of the base from the centreline | At most `lateral_limit` |
+
+Metrics are evaluated from the recorded trajectory and contact log, not inside
+the controller loop.
+
+## Acceptance
+
+| Parameter | Value | Source |
+| --- | --- | --- |
+| `command_speed` | 0.5 m/s | Shared, so robots and configurations are comparable |
+| `time_limit` | 2 × route length ÷ `command_speed` + 5 s | Route length 5.5 m |
+| `fall_height` | `locomotion.fall_base_height` | Selected configuration profile |
+| `wall_clearance` | 0.05 m humanoid, 0.10 m quadruped | Robot class |
+| `lateral_limit` | clear width ÷ 2 − robot width ÷ 2 | World and robot profile |
+| `trials` | 20, seeds 1 to 20 | No retries |
+| `required_passes` | 18 | Grade `PASS` when at least 18 of 20 trials pass |
+
+Preconditions, checked before any trial and giving `UNSUPPORTED` when unmet:
+`fits_width` (robot width + 2 × `wall_clearance` ≤ clear width),
+`configuration_offered`, `velocity_interface` and `simulator_declared`.
+
+## The G1 and its pluggable controller
+
+The Unitree G1 robot profile offers two configuration profiles. The robot model
+is the same in both; selecting a profile is the feature toggle.
+
+| Configuration profile | Controller | Publisher |
+| --- | --- | --- |
+| `stock` | rl_gym `motion.pt` | Unitree Robotics |
+| `playground` | MuJoCo Playground `g1_policy.onnx` | Google DeepMind |
+
+Both runs use the same world, simulator, seeds and command speed; their run
+manifests differ only in `configuration` and `run_id`. The comparison reports
+each run's passed trials, pass rate and grade, always showing both.
+
+Example comparison, **illustrative numbers only, not measured**:
+
+| Configuration | Passed of 20 | Grade | Failing seeds |
+| --- | ---: | --- | --- |
+| `stock` | 9 (illustrative) | `FAIL` | 11 seeds, mostly falls (illustrative) |
+| `playground` | 19 (illustrative) | `PASS` | 1 seed, time limit (illustrative) |
+
+The comparison names a better configuration only by a declared rule: a higher
+grade first, then pass-rate intervals that do not overlap, otherwise "no clear
+winner". A configuration that falls is a valid `FAIL`, reported and not retried.
+
+## Status
+
+The stories and Gherkin examples are parser-validated in this catalog. Runners,
+recordings and the evaluator live in the simulator and robot repositories.

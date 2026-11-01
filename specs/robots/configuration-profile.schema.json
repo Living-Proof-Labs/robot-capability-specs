@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Living-Proof-Labs/robot-capability-specs/specs/robots/configuration-profile.schema.json",
+  "title": "livingproof-configuration-profile/0.1",
+  "description": "One named, versioned configuration of a robot, owned by the robot repository. It may differ from another profile by controller, gains, limits or any other setting. Specifications and run manifests refer only to its name, version and the sha256 of this file; the robot repository keeps the name matched to these details. Fields under settings are free-form so a profile can carry whatever the robot implementation needs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "robot", "name", "version", "summary", "controller"],
+  "properties": {
+    "$comment": {"type": "string"},
+    "format": {"const": "livingproof-configuration-profile/0.1"},
+    "robot": {"$ref": "robot-profile.schema.json#/$defs/name"},
+    "name": {"$ref": "robot-profile.schema.json#/$defs/name"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "summary": {"type": "string", "minLength": 1, "description": "One line telling a reader what makes this profile different."},
+    "controller": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publisher", "artifact", "format", "interface", "rate_hz"],
+      "properties": {
+        "publisher": {"type": "string", "minLength": 1},
+        "artifact": {"$ref": "robot-profile.schema.json#/$defs/pinned"},
+        "format": {"enum": ["onnx", "torchscript", "other"]},
+        "interface": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "rate_hz": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "locomotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_speed": {"$ref": "robot-profile.schema.json#/$defs/quantity"},
+        "nominal_base_height": {"$ref": "robot-profile.schema.json#/$defs/quantity"},
+        "fall_base_height": {"$ref": "robot-profile.schema.json#/$defs/quantity"}
+      }
+    },
+    "settings": {"type": "object", "description": "Gains, limits and any other implementation detail. Not interpreted by specifications."},
+    "known_issues": {"type": "string"}
+  }
+}

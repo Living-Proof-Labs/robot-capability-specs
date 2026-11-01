@@ -24,6 +24,7 @@ nav:
   - Start here: index.md
   - Guides:
       - Authoring: docs/authoring.md
+      - Glossary: docs/glossary.md
   - Reference:
       - Contracts:
           - Scope: specs/index.md
@@ -33,8 +34,12 @@ nav:
           - Revision 2 examples: specs/v2/reference.feature.md
           - World contract: specs/worlds/index.md
           - World examples: specs/worlds/reference.feature.md
-          - Open hallway fixture: specs/worlds/hallways.md
+          - Open hallway world: specs/worlds/hallways.md
           - Hallway examples: specs/worlds/hallways.feature.md
+          - Robot and configuration profiles: specs/robots/index.md
+          - Walk the hallway scenario: specs/scenarios/walk-hallway/index.md
+          - Walk the hallway examples: specs/scenarios/walk-hallway/walk-hallway.feature.md
+          - Configuration comparison examples: specs/scenarios/walk-hallway/compare-configurations.feature.md
           - Compatibility matrix: specs/matrix/index.md
           - Matrix examples: specs/matrix/reference.feature.md
       - Tasks: tasks.md

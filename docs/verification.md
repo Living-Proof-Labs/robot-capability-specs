@@ -29,7 +29,7 @@ v2.0.3 release workflow remains unchanged. No local `.agents/skills` exist.
 | `version` | Development identity and canonical project path are explicit | manual JUnit |
 
 The inventory covers the new manual, not all catalog behavior. Gherkin parsing
-is reported separately in catalog JUnit. Runtime verdicts, physical robots,
+is reported separately in catalog JUnit. Runtime grades, physical robots,
 external-link availability, non-Chromium browsers and live deployment remain
 outside the offline automated claim. No line-coverage percentage is claimed.
 

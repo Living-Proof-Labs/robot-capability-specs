@@ -1,0 +1,21 @@
+{
+  "$comment": "Illustrative example. Hashes, commits and numbers are placeholders, not measured.",
+  "format": "livingproof-configuration-profile/0.1",
+  "robot": "unitree-g1",
+  "name": "playground",
+  "version": "1.0.0",
+  "summary": "Google DeepMind MuJoCo Playground G1 joystick controller (g1_policy.onnx).",
+  "controller": {
+    "publisher": "Google DeepMind",
+    "artifact": {"repo": "https://github.com/google-deepmind/mujoco_playground", "path": "mujoco_playground/experimental/sim2sim/onnx/g1_policy.onnx", "commit": "0000000000000000000000000000000000000000", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "license": "Apache-2.0"},
+    "format": "onnx",
+    "interface": ["velocity_command"],
+    "rate_hz": 50
+  },
+  "locomotion": {
+    "max_speed": {"value": 1.0, "unit": "m/s", "source": "published", "ref": "Playground joystick command range"},
+    "nominal_base_height": {"value": 0.75, "unit": "m", "source": "measured", "ref": "task profile:stand"},
+    "fall_base_height": {"value": 0.5, "unit": "m", "source": "chosen", "reason": "Same rule as the stock profile."}
+  },
+  "settings": {"pd_gains_source": "Playground G1 environment defaults"}
+}

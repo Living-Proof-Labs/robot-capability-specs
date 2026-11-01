@@ -1,0 +1,13 @@
+{
+  "$comment": "Illustrative example of a generated manifest; real manifests are written by the runner and never committed. The configuration and robot hashes are the sha256 of the example files beside it.",
+  "format": "livingproof-run-manifest/0.1",
+  "run_id": "walk-hallway--unitree-g1--playground--mujoco--example",
+  "specification": {"tag": "v1.5.0", "commit": "0000000000000000000000000000000000000000"},
+  "scenario": "walk-hallway@0.1.0",
+  "world": {"id": "hallway-open", "version": "0.1.0", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+  "simulator": {"engine": "mujoco", "version": "3.3.0", "adapter": "livingproof-sim-mujoco", "adapter_commit": "0000000000000000000000000000000000000000"},
+  "robot": {"id": "unitree-g1", "repo": "https://github.com/Living-Proof-Labs/livingproof-unitree-g1", "commit": "0000000000000000000000000000000000000000", "profile_sha256": "49f4c5eea4827428f731b31a5ce70ecdf637fd25c7d0499a1408659d4bd503fe"},
+  "configuration": {"name": "playground", "version": "1.0.0", "sha256": "30da63911ad5836b62b97a8d38930f5c4fc77dd7ccc8e2ceec65f14925008414"},
+  "parameters": {"command_speed": 0.5, "time_limit": 27.0, "fall_height": 0.5, "wall_clearance": 0.05},
+  "trials": {"count": 20, "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "required_passes": 18}
+}
