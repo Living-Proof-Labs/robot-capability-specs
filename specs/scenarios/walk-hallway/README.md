@@ -39,6 +39,24 @@ Examples: [walk-hallway.feature](walk-hallway.feature) and
 Metrics are evaluated from the recorded trajectory and contact log, not inside
 the controller loop.
 
+## Evaluators
+
+The simulator emits observations only; it does not grade. The capability
+verifier assesses each trial with these evaluators, then applies
+`all-required-v1` per trial and aggregates trials as k of N with a Wilson 95%
+interval.
+
+| Evaluator | Observation | FAIL when | Threshold source |
+| --- | --- | --- | --- |
+| `hallway-exit-reached` | `exit_time` (s, absent if never crossed) | absent or later than `time_limit` | Acceptance |
+| `hallway-lateral-limit` | `max_abs_lateral` (m, with its time) | greater than `lateral_limit` | World clear width and robot profile `width` |
+| `hallway-wall-contact` | `wall_contacts` (each with time and depth) | any contact | None; contact is real-geometry signed distance at or below zero |
+| `hallway-fall` | `min_base_height` (m, with its time) | less than `fall_height` | Configuration profile `locomotion.fall_base_height` |
+
+A missing or malformed observation gives `INSUFFICIENT_EVIDENCE`. Each
+rationale names the check, the time and the margin, for example
+`lateral 0.62 m > 0.49 m at 10.1 s` (illustrative numbers only, not measured).
+
 ## Acceptance
 
 | Parameter | Value | Source |

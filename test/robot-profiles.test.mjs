@@ -99,6 +99,16 @@ test('walk-hallway examples parse with no numeric literals', async () => {
   assert.ok(compare.some(e => e.includes('even if one has grade FAIL')));
 });
 
+test('walk-hallway names one evaluator per acceptance check', async () => {
+  const source = await readFile('specs/scenarios/walk-hallway/walk-hallway.feature', 'utf8');
+  const ids = ['hallway-exit-reached', 'hallway-lateral-limit', 'hallway-wall-contact', 'hallway-fall'];
+  const steps = await pickles('specs/scenarios/walk-hallway/walk-hallway.feature');
+  for (const id of ids) assert.ok(steps.some(e => e.includes('"' + id + '"')), id);
+  assert.match(source, /policy "all-required-v1"/);
+  const doc = await readFile('specs/scenarios/walk-hallway/README.md', 'utf8');
+  for (const id of ids) assert.match(doc, new RegExp('`' + id + '`'));
+});
+
 test('scenario example numbers are labelled illustrative and grades are listed', async () => {
   const doc = await readFile('specs/scenarios/walk-hallway/README.md', 'utf8');
   assert.match(doc, /illustrative numbers only, not measured/);
