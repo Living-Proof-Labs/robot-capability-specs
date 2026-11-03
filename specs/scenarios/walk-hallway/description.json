@@ -1,0 +1,147 @@
+{
+  "$comment": "Human-readable text for walk-hallway 0.1.0 on hallway-open 0.1.0 (specs #30). Text only; README.md stays normative.",
+  "format": "livingproof-scenario-description/0.1",
+  "scenario": {
+    "id": "walk-hallway",
+    "revision": "0.1.0"
+  },
+  "mission": {
+    "title": "Walk the hallway",
+    "description": "The robot starts at the hallway entrance and is commanded to walk straight ahead at 0.5 m/s. It must reach the exit, 5.5 m along the route, within 27 s, staying upright, never touching either wall, and staying within its lateral limit of the centreline.",
+    "success_criteria": [
+      {
+        "evaluator": "hallway-exit-reached",
+        "text": "Reaches the exit, 5.5 m along the route, within 27 s, crossing it inside the exit segment."
+      },
+      {
+        "evaluator": "hallway-wall-contact",
+        "text": "Never touches a side wall."
+      },
+      {
+        "evaluator": "hallway-fall",
+        "text": "Stays upright: the base never drops below the fall height."
+      },
+      {
+        "evaluator": "hallway-lateral-limit",
+        "text": "Stays within its lateral limit of the hallway centreline."
+      }
+    ],
+    "grading": "20 runs (seeds 1 to 20), no retries. A configuration passes when at least 18 of 20 runs pass. Results show k/20 with a Wilson 95% interval.",
+    "time_limit_explained": "27 s is twice the time the route takes at the commanded speed, plus 5 s (2 × 5.5 m ÷ 0.5 m/s + 5 s)."
+  },
+  "world": {
+    "id": "hallway-open",
+    "content_version": "0.1.0",
+    "title": "Open hallway",
+    "description": "A straight, empty hallway 1.50 m wide between the walls and 6.00 m long, with 2.50 m-high walls. Nothing else is in it: the test is whether the robot can hold a straight line.",
+    "dimensions": {
+      "clear_width": {
+        "value": 1.5,
+        "unit": "m"
+      },
+      "length": {
+        "value": 6.0,
+        "unit": "m"
+      },
+      "wall_height": {
+        "value": 2.5,
+        "unit": "m"
+      },
+      "wall_thickness": {
+        "value": 0.15,
+        "unit": "m"
+      }
+    }
+  },
+  "parameters": {
+    "route_length": {
+      "value": 5.5,
+      "unit": "m"
+    },
+    "command_speed": {
+      "value": 0.5,
+      "unit": "m/s"
+    },
+    "time_limit": {
+      "value": 27,
+      "unit": "s",
+      "formula": "2 × route_length ÷ command_speed + 5 s"
+    },
+    "trials": {
+      "count": 20,
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "retries": false
+    },
+    "required_passes": 18,
+    "wall_clearance": {
+      "humanoid": {
+        "value": 0.05,
+        "unit": "m"
+      },
+      "quadruped": {
+        "value": 0.1,
+        "unit": "m"
+      }
+    }
+  },
+  "limits": {
+    "lateral_limit": {
+      "unit": "m",
+      "formula": "clear_width ÷ 2 − robot_width ÷ 2",
+      "inputs": {
+        "clear_width": "world clear width",
+        "robot_width": "robot profile dimensions.width"
+      },
+      "text": "How far the robot's centre may drift from the centreline before its side would reach a wall: half the clear width minus half the robot's width.",
+      "sentence": "{robot} may drift up to {value} m either side of the centreline: half the {clear_width} m hallway, minus half its {robot_width} m width."
+    },
+    "exit_segment": {
+      "unit": "m",
+      "formula": "|y| ≤ clear_width ÷ 2",
+      "inputs": {
+        "clear_width": "world clear width"
+      },
+      "text": "The exit counts only when the robot's base crosses it between the walls, within half the clear width of the centreline."
+    },
+    "fall_height": {
+      "unit": "m",
+      "formula": "locomotion.fall_base_height",
+      "inputs": {
+        "fall_base_height": "configuration profile locomotion.fall_base_height"
+      },
+      "text": "The lowest base height that still counts as upright, declared by the selected configuration."
+    },
+    "fits_width": {
+      "unit": "m",
+      "formula": "robot_width + 2 × wall_clearance ≤ clear_width",
+      "inputs": {
+        "robot_width": "robot profile dimensions.width",
+        "wall_clearance": "parameters.wall_clearance for the robot class",
+        "clear_width": "world clear width"
+      },
+      "text": "Checked before any trial: the robot fits when its width plus the wall clearance on each side (0.05 m for a humanoid, 0.10 m for a quadruped) is at most the clear width. A robot that does not fit is UNSUPPORTED, not run.",
+      "sentence": "{robot} fits: {robot_width} m + 2 × {wall_clearance} m ≤ {clear_width} m."
+    }
+  }
+}
