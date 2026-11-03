@@ -104,6 +104,17 @@ configuration is named 'closest', 'ahead of the rest' when its interval does not
 the second-ranked one's, otherwise 'not significantly ahead'. A configuration that falls
 is a valid `FAIL`, reported and not retried.
 
+## Description text
+
+[description.json](description.json) carries the human-readable mission and world
+text for this revision, the acceptance parameters above and the rule for each limit
+resolved per robot (`lateral_limit`, the exit segment, `fall_height` and `fits_width`),
+in the [`livingproof-scenario-description/0.1`](../scenario-description.schema.json)
+format. It is text only and changes no acceptance rule; this README stays normative.
+The verifier passes it through into the bundle with the inputs it used and each
+unrounded resolved value, so a report renders mission, world and limits without
+computing them.
+
 ## Status
 
 The stories and Gherkin examples are parser-validated in this catalog. Runners,
