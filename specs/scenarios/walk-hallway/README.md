@@ -57,6 +57,8 @@ test-system errors, the run is not evaluated and the grade is
 | `hallway-wall-contact` | `wall_contacts` (list; each with wall, start and end time, and depth) | the list is not empty | None; contact is real-geometry signed distance at or below zero |
 | `hallway-fall` | `min_base_height` (m, with its time) | less than `fall_height` | Configuration profile `locomotion.fall_base_height` |
 
+An absent `exit_time` because the robot never crossed is a `FAIL`; a missing or malformed observation record is a test-system `ERROR`.
+
 A missing or malformed observation is a test-system `ERROR` on the trial. Each
 rationale names the check, the time and the margin, for example
 `lateral 0.62 m > 0.49 m at 10.1 s` (illustrative numbers only, not measured).

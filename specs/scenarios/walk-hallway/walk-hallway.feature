@@ -38,8 +38,8 @@ Feature: Walk the open hallway
   Scenario: A trial passes only when every hallway evaluator passes
     Given the four hallway assessments of one trial
     When policy "all-required-v1" is applied
-    Then any FAIL makes the trial FAIL
-    And a missing or malformed observation is a test-system ERROR on the trial
+    Then any FAIL makes the trial FAIL even when another observation is missing
+    And the missing observation is still reported as a test-system ERROR on the trial
 
   Scenario Outline: A grading policy turns trial outcomes into the run grade
     Given a walk-hallway run of <trials> identical trials at the nominal start
