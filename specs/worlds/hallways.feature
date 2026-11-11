@@ -30,7 +30,7 @@ Feature: Open hallway world
     Given hallway world "hallway-open" at content version "0.1.0" loaded in MuJoCo and in Gazebo
     When a verifier runs the dimension, named-place, floor, side-wall, and open-end checks in each engine
     Then each engine is within tolerance of the canonical values
-    And a cross-engine comparison lists each quantity's canonical value, both measured values, and their difference
+    And a cross-engine agreement check lists each quantity's canonical value, both measured values, and their difference
 
   Scenario: A reviewer inspects retained hallway results from both engines
     Given a completed MuJoCo and Gazebo evaluation of "hallway-open" at content version "0.1.0"

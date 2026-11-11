@@ -98,12 +98,12 @@ collision boundaries, not a robot model.
 Retained evidence records gravity/contact settings, drive method, sampling
 rate, and measurement method.
 
-## Cross-engine comparison
+## Cross-engine agreement check
 
-A verifier produces one comparison record per world version listing, for
+A verifier produces one agreement record per world version listing, for
 each measured quantity (dimensions, named places, collision boundaries), the
 canonical value, each engine's measured value, each engine's deviation, and the
-MuJoCo-minus-Gazebo difference. The comparison passes only when every engine is
+MuJoCo-minus-Gazebo difference. The check passes only when every engine is
 within tolerance of the canonical value; the pairwise difference is reported,
 not used to hide a deviation.
 
@@ -156,6 +156,6 @@ scenario names its scenario in [hallway examples](hallways.feature).
 | --- | --- | --- |
 | As an integrator, I want to select a named, versioned hallway without changing simulator code, so that MuJoCo and Gazebo consumers load the same declared world. | Selecting `hallway-open` at `0.1.0` is configuration only; each consumer loads it without code changes; an unknown identifier or version is reported, not substituted. | `An integrator selects the open hallway by name and version` |
 | As a scenario author, I want the entrance, exit, and passage declared in one world frame, so that a scenario has unambiguous places and poses. | Each consumer reports every named place in the world frame within 0.01 m and 0.5 degrees of the canonical table. | `A scenario author uses the declared hallway places` |
-| As a verifier, I want to compare MuJoCo and Gazebo against the same declaration, so that I can show they loaded equivalent dimensions, placements, and collision boundaries. | Both engines pass the dimension, named-place, floor, side-wall, and open-end checks, and a cross-engine comparison lists each quantity's canonical value, measured values, and difference. | `A verifier compares MuJoCo and Gazebo hallway evidence` |
+| As a verifier, I want to compare MuJoCo and Gazebo against the same declaration, so that I can show they loaded equivalent dimensions, placements, and collision boundaries. | Both engines pass the dimension, named-place, floor, side-wall, and open-end checks, and a cross-engine agreement check lists each quantity's canonical value, measured values, and difference. | `A verifier compares MuJoCo and Gazebo hallway evidence` |
 | As a reviewer, I want screenshots, test results, and exact versions from both engines, so that I can inspect what was evaluated. | The record shows the required screenshots and test results for each engine and identifies the world, world contract, catalog, and adapter versions. | `A reviewer inspects retained hallway results from both engines` |
 | As a verifier, I want an unsupported hallway feature to fail clearly, so that no consumer silently ignores part of the world. | A consumer that cannot load a declared feature returns `UNSUPPORTED` naming the world, version, and feature, and never reports a pass with it ignored. | `A consumer meets an unsupported hallway feature` |

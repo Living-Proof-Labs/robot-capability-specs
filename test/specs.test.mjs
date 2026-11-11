@@ -76,7 +76,7 @@ test('open hallway examples cover five stories in both simulators', async () => 
   for (const simulator of ['MuJoCo', 'Gazebo']) {
     assert.ok(examples.filter(e => e.includes(simulator)).length >= 5);
   }
-  assert.ok(examples.some(e => e.includes('cross-engine comparison')));
+  assert.ok(examples.some(e => e.includes('cross-engine agreement check')));
   assert.ok(examples.some(e => e.includes('UNSUPPORTED')));
 });
 

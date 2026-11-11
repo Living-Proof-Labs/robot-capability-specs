@@ -1,5 +1,5 @@
 {
-  "$comment": "Previous seeded bundle for the Unitree G1 stock walk-hallway run (12/20 PASS), values as capability report v1.10.0 computes them today. The catalog trial model no longer uses this aggregation.",
+  "$comment": "Legacy livingproof-run-assessment/0.1 bundle for the Unitree G1 stock walk-hallway run (12/20 PASS), values as capability report v1.10.0 computes them today. It still stores the seeded aggregation (k, n, required passes, a Wilson interval, and a seed on each failure). Replacing this legacy bundle is separate work.",
   "format": "livingproof-run-assessment/0.1",
   "policy": {
     "id": "all-required-v1",

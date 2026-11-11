@@ -22,7 +22,8 @@ Feature: Compare configuration profiles on one robot
     And their run manifests differ only in the configuration profile
     When the comparison is reported
     Then it shows each run's trial outcomes and grade
-    And it shows both configurations even if one has grade FAIL or ERROR
+    And it shows both configurations even if one has grade FAIL or INSUFFICIENT_EVIDENCE
+    And a test-system ERROR is reported on the job and on the trial and is never a grade
     And the comparison itself is never graded
 
   Scenario: A configuration that is not offered
