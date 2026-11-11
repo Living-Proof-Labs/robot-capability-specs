@@ -25,7 +25,7 @@ Feature: Walk the open hallway
     And thresholds resolved from the robot profile and the selected configuration profile
     When evaluator "<evaluator>" assesses observation "<observation>"
     Then the assessment is FAIL when the observation <rule> <threshold>
-    And a missing or malformed observation gives INSUFFICIENT_EVIDENCE
+    And a missing or malformed observation is a test-system ERROR on the trial
     And the rationale names the check, the time and the margin
 
     Examples:
@@ -39,7 +39,7 @@ Feature: Walk the open hallway
     Given the four hallway assessments of one trial
     When policy "all-required-v1" is applied
     Then any FAIL makes the trial FAIL
-    And any INSUFFICIENT_EVIDENCE without a FAIL makes the trial INSUFFICIENT_EVIDENCE
+    And a missing or malformed observation is a test-system ERROR on the trial
 
   Scenario Outline: A grading policy turns trial outcomes into the run grade
     Given a walk-hallway run of <trials> identical trials at the nominal start
