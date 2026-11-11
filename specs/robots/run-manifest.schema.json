@@ -51,7 +51,7 @@
       "description": "Identical trials of this scenario under the fixed setup above. The default count is 1. Extra trials show repeatability. The start is the nominal pose.",
       "type": "object", "additionalProperties": false, "required": ["count"],
       "properties": {
-        "count": {"type": "integer", "minimum": 1}
+        "count": {"type": "integer", "minimum": 1, "default": 1}
       }
     }
   }

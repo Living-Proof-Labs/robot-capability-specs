@@ -26,7 +26,7 @@
         "text": "Stays within its lateral limit of the hallway centreline."
       }
     ],
-    "grading": "One run is one or more identical trials at the exact nominal pose. The default is 1. A grading policy turns trial outcomes into the run grade. A test-system ERROR is reported and excluded, and is never counted as a robot fail. A failed trial is not retried.",
+    "grading": "One run is one or more identical trials at the exact nominal pose. The default is 1. A grading policy turns completed trial outcomes into the run grade. ERROR is a test-system status reported on the job and on the trial. It is never a robot grade and is never counted as a robot fail. If no trial completes because of test-system errors, the run is not evaluated and the grade is INSUFFICIENT_EVIDENCE. A failed trial is not retried.",
     "time_limit_explained": "27 s is twice the time the route takes at the commanded speed, plus 5 s (2 × 5.5 m ÷ 0.5 m/s + 5 s)."
   },
   "world": {

@@ -15,6 +15,9 @@ test('scenario description schema is versioned and compiles', async () => {
   assert.equal(schema.title, 'livingproof-scenario-description/0.1');
   assert.equal(schema.properties.format.const, schema.title);
   assert.equal(typeof (await validator()), 'function');
+  const trials = schema.properties.parameters.properties.trials;
+  assert.equal(trials.properties.count.default, 1);
+  assert.ok(trials.required.includes('count'));
 });
 
 test('walk-hallway description validates and agrees with the README acceptance', async () => {

@@ -31,6 +31,9 @@ const pickles = async path => {
 test('schemas compile and name their formats', async () => {
   const v = await validators();
   for (const [name, validate] of Object.entries(v)) assert.equal(typeof validate, 'function', name);
+  const manifest = await json(DIR + 'run-manifest.schema.json');
+  assert.equal(manifest.properties.trials.properties.count.default, 1);
+  assert.deepEqual(manifest.properties.trials.required, ['count']);
 });
 
 test('illustrative G1 examples validate and are labelled illustrative', async () => {
@@ -86,6 +89,9 @@ test('schemas reject copied profile contents, malformed names and bad hashes', a
   const profile = await json(EXAMPLE + 'configurations/stock.json');
   assert.equal(v.configuration({ ...profile, name: 'Stock Profile' }), false);
   assert.equal(v.configuration({ ...profile, locomotion: { fall_base_height: { value: 1, unit: 'm', source: 'chosen' } } }), false);
+  const trialsWithoutCount = { ...manifest.trials };
+  delete trialsWithoutCount.count;
+  assert.equal(v.manifest({ ...manifest, trials: trialsWithoutCount }), false);
 });
 
 test('walk-hallway examples parse with no numeric literals', async () => {
@@ -98,7 +104,9 @@ test('walk-hallway examples parse with no numeric literals', async () => {
   }
   const compare = await pickles('specs/scenarios/walk-hallway/compare-configurations.feature');
   assert.ok(compare.some(e => e.includes('"configuration_offered"')));
-  assert.ok(compare.some(e => e.includes('even if one has grade FAIL')));
+  assert.ok(compare.some(e => e.includes('even if one has grade FAIL or INSUFFICIENT_EVIDENCE')));
+  assert.ok(compare.every(e => !e.includes('grade FAIL or ERROR')));
+  assert.ok(compare.some(e => e.includes('reported on the job and on the trial and is never a grade')));
 });
 
 test('walk-hallway names one evaluator per acceptance check', async () => {
@@ -118,10 +126,21 @@ test('scenario example numbers are labelled illustrative and grades are listed',
     assert.match(row, /illustrative/);
   }
   const glossary = await readFile('docs/glossary.md', 'utf8');
-  for (const grade of ['PASS', 'FAIL', 'INSUFFICIENT_EVIDENCE', 'UNSUPPORTED', 'ERROR']) {
+  for (const grade of ['PASS', 'FAIL', 'INSUFFICIENT_EVIDENCE', 'UNSUPPORTED']) {
     assert.match(glossary, new RegExp('\\*\\*`' + grade + '`\\*\\*'));
   }
+  assert.match(glossary, /\*\*`ERROR`\*\*/);
+  assert.match(glossary, /`ERROR` is not a grade/);
+  assert.match(glossary, /never a robot grade/);
+  assert.match(glossary, /If no trial completes because of test-system errors, the run is not evaluated and the grade is `INSUFFICIENT_EVIDENCE`/);
+  assert.doesNotMatch(glossary, /five values/);
   const robots = await readFile(DIR + 'README.md', 'utf8');
   assert.doesNotMatch(doc + robots, /verdict/i);
+  assert.doesNotMatch(robots, /\| `ERROR` \|/);
+  assert.match(robots, /never a robot grade/);
   assert.match(glossary, /replacing the earlier word \*verdict\*/);
+  const feature = await readFile('specs/scenarios/walk-hallway/walk-hallway.feature', 'utf8');
+  assert.match(feature, /\| 1\s+\| 0\s+\| 0\s+\| 1\s+\| INSUFFICIENT_EVIDENCE \|/);
+  assert.match(feature, /reported on the job and on the trial and is never a robot grade/);
+  assert.match(feature, /if no trial completes the run is not evaluated and the grade is INSUFFICIENT_EVIDENCE/);
 });

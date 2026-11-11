@@ -25,7 +25,7 @@ Feature: Walk the open hallway
     And thresholds resolved from the robot profile and the selected configuration profile
     When evaluator "<evaluator>" assesses observation "<observation>"
     Then the assessment is FAIL when the observation <rule> <threshold>
-    And a missing or malformed observation gives INSUFFICIENT_EVIDENCE
+    And a missing or malformed observation is a test-system ERROR on the trial
     And the rationale names the check, the time and the margin
 
     Examples:
@@ -39,15 +39,16 @@ Feature: Walk the open hallway
     Given the four hallway assessments of one trial
     When policy "all-required-v1" is applied
     Then any FAIL makes the trial FAIL
-    And any INSUFFICIENT_EVIDENCE without a FAIL makes the trial INSUFFICIENT_EVIDENCE
+    And a missing or malformed observation is a test-system ERROR on the trial
 
   Scenario Outline: A grading policy turns trial outcomes into the run grade
     Given a walk-hallway run of <trials> identical trials at the nominal start
     And <passed> of those trials have outcome PASS and <failed> have outcome FAIL
-    And <errors> trials are test-system ERROR and are excluded from the grade
-    When the grading policy is applied to the robot outcomes
+    And <errors> trials are test-system ERROR and did not complete
+    When the grading policy is applied to the completed trials
     Then the run grade is <grade>
-    And each excluded ERROR is reported and is never counted as a robot fail
+    And each ERROR is reported on the job and on the trial and is never a robot grade
+    And if no trial completes the run is not evaluated and the grade is INSUFFICIENT_EVIDENCE
 
     Examples:
       | trials | passed | failed | errors | grade                 |
@@ -59,7 +60,7 @@ Feature: Walk the open hallway
     Given a walk-hallway run of identical trials under one fixed setup
     When the run is reported
     Then every trial is listed with its outcome and its first failing metric
-    And a test-system ERROR is listed and excluded from the run grade
+    And a test-system ERROR is reported on the job and on the trial and is excluded from the run grade
 
   Scenario: Disagreeing repeats are a reproducibility finding
     Given a deterministic simulator and a walk-hallway run of identical trials

@@ -43,9 +43,12 @@ the controller loop.
 
 The simulator emits observations only; it does not grade. The capability
 verifier assesses each trial with these evaluators, then applies
-`all-required-v1` to that trial. A grading policy turns the trial outcomes
-into the run grade. The default run is one trial. A test-system ERROR is
-reported and excluded from the run grade, and is never counted as a robot fail.
+`all-required-v1` to that trial. A grading policy turns the completed trial
+outcomes into the run grade. The default run is one trial. `ERROR` is a
+test-system status reported on the job and on the trial. It is never a robot
+grade and is never counted as a robot fail. If no trial completes because of
+test-system errors, the run is not evaluated and the grade is
+`INSUFFICIENT_EVIDENCE`.
 
 | Evaluator | Observation | FAIL when | Threshold source |
 | --- | --- | --- | --- |
@@ -54,7 +57,7 @@ reported and excluded from the run grade, and is never counted as a robot fail.
 | `hallway-wall-contact` | `wall_contacts` (list; each with wall, start and end time, and depth) | the list is not empty | None; contact is real-geometry signed distance at or below zero |
 | `hallway-fall` | `min_base_height` (m, with its time) | less than `fall_height` | Configuration profile `locomotion.fall_base_height` |
 
-A missing or malformed observation gives `INSUFFICIENT_EVIDENCE`. Each
+A missing or malformed observation is a test-system `ERROR` on the trial. Each
 rationale names the check, the time and the margin, for example
 `lateral 0.62 m > 0.49 m at 10.1 s` (illustrative numbers only, not measured).
 
