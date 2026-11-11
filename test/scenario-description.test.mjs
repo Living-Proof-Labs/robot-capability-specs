@@ -30,10 +30,10 @@ test('walk-hallway description validates and agrees with the README acceptance',
   assert.match(readme, /0\.05 m humanoid, 0\.10 m quadruped/);
   assert.equal(p.wall_clearance.humanoid.value, 0.05);
   assert.equal(p.wall_clearance.quadruped.value, 0.1);
-  assert.match(readme, /`required_passes` \| 18 /);
-  assert.equal(p.required_passes, 18);
-  assert.deepEqual(p.trials.seeds, Array.from({ length: 20 }, (_, i) => i + 1));
-  assert.equal(p.trials.count, p.trials.seeds.length);
+  assert.match(readme, /\| `trials` \| 1 \|/);
+  assert.equal(p.trials.count, 1);
+  assert.equal(Object.hasOwn(p.trials, 'seeds'), false);
+  assert.equal(Object.hasOwn(p, 'required_passes'), false);
   assert.equal(p.trials.retries, false);
   for (const c of d.mission.success_criteria) assert.match(readme, new RegExp('`' + c.evaluator + '`'), c.evaluator);
   assert.equal(d.mission.success_criteria.length, 4);

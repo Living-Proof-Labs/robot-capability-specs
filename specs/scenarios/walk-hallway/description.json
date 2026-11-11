@@ -26,7 +26,7 @@
         "text": "Stays within its lateral limit of the hallway centreline."
       }
     ],
-    "grading": "20 runs (seeds 1 to 20), no retries. A configuration passes when at least 18 of 20 runs pass. Results show k/20 with a Wilson 95% interval.",
+    "grading": "One run is one or more identical trials at the exact nominal pose. The default is 1. A grading policy turns trial outcomes into the run grade. A test-system ERROR is reported and excluded, and is never counted as a robot fail. A failed trial is not retried.",
     "time_limit_explained": "27 s is twice the time the route takes at the commanded speed, plus 5 s (2 × 5.5 m ÷ 0.5 m/s + 5 s)."
   },
   "world": {
@@ -68,32 +68,9 @@
       "formula": "2 × route_length ÷ command_speed + 5 s"
     },
     "trials": {
-      "count": 20,
-      "seeds": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20
-      ],
+      "count": 1,
       "retries": false
     },
-    "required_passes": 18,
     "wall_clearance": {
       "humanoid": {
         "value": 0.05,

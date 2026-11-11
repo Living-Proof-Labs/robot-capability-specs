@@ -17,7 +17,7 @@ and the robot and configuration profiles. Formats are defined in
 | --- | --- |
 | As a robot maker, I want my robot walked through a standard hallway with its own published controller, so that I can show it walks a narrow passage without touching the walls or falling. | `A robot walks the open hallway` |
 | As a verifier, I want the scenario judged against each robot's own size and configuration, so that a humanoid and a quadruped are held to fair, declared thresholds. | `A robot walks the open hallway` |
-| As a reviewer, I want every trial reported, including failures, with seeds and versions, so that a pass rate is honest and reproducible. | `Repeated trials are reported in full` |
+| As a reviewer, I want every trial reported, including failures and test-system errors, with versions, so that a run grade is honest and reproducible. | `Repeated trials are reported in full` |
 | As a verifier, I want a robot that cannot fit reported as `UNSUPPORTED` before it runs, so that a non-result is never shown as a pass or a failure. | `A robot that cannot meet the preconditions` |
 | As a robotics team, I want the same G1 walked with each configuration profile, so that evidence shows which pluggable controller is better. | `Each configuration profile walks the same robot` |
 | As a reviewer, I want both configurations shown even when one fails, so that a weak controller is visible rather than dropped. | `The comparison shows both configurations` |
@@ -43,8 +43,9 @@ the controller loop.
 
 The simulator emits observations only; it does not grade. The capability
 verifier assesses each trial with these evaluators, then applies
-`all-required-v1` per trial and aggregates trials as k of N with a Wilson 95%
-interval.
+`all-required-v1` to that trial. A grading policy turns the trial outcomes
+into the run grade. The default run is one trial. A test-system ERROR is
+reported and excluded from the run grade, and is never counted as a robot fail.
 
 | Evaluator | Observation | FAIL when | Threshold source |
 | --- | --- | --- | --- |
@@ -66,8 +67,8 @@ rationale names the check, the time and the margin, for example
 | `fall_height` | `locomotion.fall_base_height` | Selected configuration profile |
 | `wall_clearance` | 0.05 m humanoid, 0.10 m quadruped | Robot class |
 | `lateral_limit` | clear width ÷ 2 − robot width ÷ 2 | World and robot profile |
-| `trials` | 20, seeds 1 to 20 | No retries |
-| `required_passes` | 18 | Grade `PASS` when at least 18 of 20 trials pass |
+| `trials` | 1 | Default. Further identical trials show repeatability. A failed trial is not retried. |
+| Start | exact nominal pose at `spawn-entrance` | A different start, such as a spawn offset of +5 cm, is a declared comparison change. |
 
 Preconditions, checked before any trial and giving `UNSUPPORTED` when unmet:
 `fits_width` (robot width + 2 × `wall_clearance` ≤ clear width),
@@ -83,26 +84,21 @@ is the same in both; selecting a profile is the feature toggle.
 | `stock` | rl_gym `motion.pt` | Unitree Robotics |
 | `playground` | MuJoCo Playground `g1_policy.onnx` | Google DeepMind |
 
-Both runs use the same world, simulator, seeds and command speed; their run
-manifests differ only in `configuration` and `run_id`. The comparison reports
-each run's passed trials, pass rate and grade, always showing both.
+Both runs use the same world, placement, simulator and command speed; their run
+manifests differ only in `configuration` and `run_id`. The comparison sets the
+runs side by side and is never graded. Each run keeps its own grade. The
+comparison reports each run's trial outcomes and grade, always showing both.
 
 Example comparison, **illustrative numbers only, not measured**:
 
-| Configuration | Passed of 20 | Grade | Failing seeds |
-| --- | ---: | --- | --- |
-| `stock` | 9 (illustrative) | `FAIL` | 11 seeds, mostly falls (illustrative) |
-| `playground` | 19 (illustrative) | `PASS` | 1 seed, time limit (illustrative) |
+| Configuration | Run | Grade | Noted failure |
+| --- | --- | --- | --- |
+| `stock` | 1 trial (illustrative) | `FAIL` | fall (illustrative) |
+| `playground` | 1 trial (illustrative) | `PASS` | none (illustrative) |
 
-The comparison ranks configurations by grade (`PASS` > `INSUFFICIENT_EVIDENCE` > `FAIL` >
-`ERROR`; `UNSUPPORTED` and `INCOMPATIBLE` are listed unranked), then passed trials, then
-the Wilson 95% lower bound. Configurations equal on all three share a rank and are listed
-alphabetically. If exactly one configuration has grade `PASS`, it is the winner. If several
-do, the summary reads 'no statistically clear winner' unless the top `PASS` interval's
-lower bound exceeds the upper bound of every other `PASS`. If none passes, the top-ranked
-configuration is named 'closest', 'ahead of the rest' when its interval does not overlap
-the second-ranked one's, otherwise 'not significantly ahead'. A configuration that falls
-is a valid `FAIL`, reported and not retried.
+A configuration that falls is a valid `FAIL`, reported and not retried. In a
+deterministic simulator, identical trials that disagree are a reproducibility
+finding about the test system.
 
 ## Description text
 

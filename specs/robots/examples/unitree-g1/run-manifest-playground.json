@@ -9,5 +9,5 @@
   "robot": {"id": "unitree-g1", "repo": "https://github.com/Living-Proof-Labs/livingproof-unitree-g1", "commit": "0000000000000000000000000000000000000000", "profile_sha256": "49f4c5eea4827428f731b31a5ce70ecdf637fd25c7d0499a1408659d4bd503fe"},
   "configuration": {"name": "playground", "version": "1.0.0", "sha256": "30da63911ad5836b62b97a8d38930f5c4fc77dd7ccc8e2ceec65f14925008414"},
   "parameters": {"command_speed": 0.5, "time_limit": 27.0, "fall_height": 0.5, "wall_clearance": 0.05},
-  "trials": {"count": 20, "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "required_passes": 18}
+  "trials": {"count": 1}
 }

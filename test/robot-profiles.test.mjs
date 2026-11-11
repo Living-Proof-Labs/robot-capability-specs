@@ -65,7 +65,9 @@ test('run manifests cite profiles by name, version and file sha256 only', async 
     assert.deepEqual(manifest.configuration, { name, version: profile.version,
       sha256: await sha256(`${EXAMPLE}configurations/${name}.json`) });
     assert.equal(manifest.robot.profile_sha256, robotHash);
-    assert.equal(manifest.trials.seeds.length, manifest.trials.count);
+    assert.equal(manifest.trials.count, 1);
+    assert.equal(Object.hasOwn(manifest.trials, 'seeds'), false);
+    assert.equal(Object.hasOwn(manifest.trials, 'required_passes'), false);
   }
 });
 
