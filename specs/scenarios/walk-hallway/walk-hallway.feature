@@ -2,11 +2,12 @@
 @walk_hallway
 Feature: Walk the open hallway
   A robot uses the controller in its selected configuration profile to walk from the entrance to the exit.
+  One run is one or more identical trials under the run manifest. The default is one trial at the exact nominal pose.
 
   Scenario Outline: A robot walks the open hallway
     Given world "hallway-open" at its pinned version in simulator <simulator>
     And robot <robot> with configuration profile <configuration>
-    And the robot stands at "spawn-entrance" facing the exit
+    And the robot stands at the exact nominal pose "spawn-entrance" facing the exit
     When the controller is commanded to walk forward at the README parameter command_speed
     Then the robot's base crosses "exit" within the README parameter time_limit
     And no robot body touches either side wall
@@ -40,31 +41,31 @@ Feature: Walk the open hallway
     Then any FAIL makes the trial FAIL
     And any INSUFFICIENT_EVIDENCE without a FAIL makes the trial INSUFFICIENT_EVIDENCE
 
-  Scenario Outline: Trials are aggregated as k of N with a Wilson interval
-    Given <trials> trial results of one configuration, of which <passed> pass
-    When the trial results are aggregated
-    Then the result reports <passed> of <trials> with Wilson 95% interval <wilson_95>
-    And the grade is <grade> because at least <required_passes> trials must pass
+  Scenario Outline: A grading policy turns trial outcomes into the run grade
+    Given a walk-hallway run of <trials> identical trials at the nominal start
+    And <passed> of those trials have outcome PASS and <failed> have outcome FAIL
+    And <errors> trials are test-system ERROR and are excluded from the grade
+    When the grading policy is applied to the robot outcomes
+    Then the run grade is <grade>
+    And each excluded ERROR is reported and is never counted as a robot fail
 
     Examples:
-      | trials | passed | required_passes | wilson_95        | grade |
-      | 20     | 20     | 18              | 0.8389 to 1.0000 | PASS  |
-      | 20     | 18     | 18              | 0.6990 to 0.9721 | PASS  |
-      | 20     | 17     | 18              | 0.6396 to 0.9476 | FAIL  |
-      | 20     | 12     | 18              | 0.3866 to 0.7812 | FAIL  |
+      | trials | passed | failed | errors | grade                 |
+      | 1      | 1      | 0      | 0      | PASS                  |
+      | 1      | 0      | 1      | 0      | FAIL                  |
+      | 1      | 0      | 0      | 1      | INSUFFICIENT_EVIDENCE |
 
-  Scenario Outline: Repeated trials are reported in full
-    Given a walk-hallway run of <trials> seeded trials, of which <passed> pass
-    When the grading policy is applied
-    Then the grade is <grade> because at least <required_passes> trials must pass
-    And all <trials> trials are listed with their seed, trial outcome and first failing metric
+  Scenario: Repeated trials are reported in full
+    Given a walk-hallway run of identical trials under one fixed setup
+    When the run is reported
+    Then every trial is listed with its outcome and its first failing metric
+    And a test-system ERROR is listed and excluded from the run grade
 
-    Examples:
-      | trials | passed | required_passes | grade |
-      | 20     | 20     | 18              | PASS  |
-      | 20     | 18     | 18              | PASS  |
-      | 20     | 17     | 18              | FAIL  |
-      | 20     | 0      | 18              | FAIL  |
+  Scenario: Disagreeing repeats are a reproducibility finding
+    Given a deterministic simulator and a walk-hallway run of identical trials
+    When two trials in that run disagree
+    Then the disagreement is reported as a reproducibility finding about the test system
+    And it is never counted as a robot fail
 
   Scenario Outline: A robot that cannot meet the preconditions
     Given a <robot_class> robot of width <width_m> metres, so wall_clearance is <wall_clearance_m> metres

@@ -140,7 +140,6 @@
         "command_speed",
         "time_limit",
         "trials",
-        "required_passes",
         "wall_clearance"
       ],
       "properties": {
@@ -172,11 +171,11 @@
           }
         },
         "trials": {
+          "description": "How many identical trials one run performs at the nominal start. The default count is 1. A failed trial is not retried.",
           "type": "object",
           "additionalProperties": false,
           "required": [
             "count",
-            "seeds",
             "retries"
           ],
           "properties": {
@@ -184,21 +183,10 @@
               "type": "integer",
               "minimum": 1
             },
-            "seeds": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              },
-              "minItems": 1
-            },
             "retries": {
               "type": "boolean"
             }
           }
-        },
-        "required_passes": {
-          "type": "integer",
-          "minimum": 1
         },
         "wall_clearance": {
           "type": "object",

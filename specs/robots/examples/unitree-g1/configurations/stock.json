@@ -18,5 +18,5 @@
     "fall_base_height": {"value": 0.5, "unit": "m", "source": "chosen", "reason": "About two-thirds of standing pelvis height."}
   },
   "settings": {"pd_gains_source": "deploy_mujoco/configs/g1.yaml", "action_scale": 0.25},
-  "known_issues": "Known to drift and fall on some seeds; expected to fail the hallway."
+  "known_issues": "Known to drift and fall; expected to fail the hallway."
 }

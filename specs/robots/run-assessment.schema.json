@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Living-Proof-Labs/robot-capability-specs/specs/robots/run-assessment.schema.json",
   "title": "livingproof-run-assessment/0.1",
-  "description": "The verifier's decisions for one evidence bundle: a status and reason per result under a named policy, and per run the k-of-N count, the confidence interval and the grade under a named aggregation. Written by the capability verifier into reporter bundle 1.1.0 as `assessment`; a reporter renders it and never recomputes it.",
+  "description": "The verifier's decisions for one evidence bundle: a status and reason per result under a named policy, and per run the grade under a named aggregation. Written by the capability verifier into reporter bundle 1.1.0 as `assessment`; a reporter renders it and never recomputes it. This 0.1 shape still stores the previous seeded aggregation (k, n, required passes, a Wilson interval, and a seed on each failure) as capability report v1.10.0 wrote it. The catalog trial model uses identical trials and no seed; replacing this bundle is separate work.",
   "type": "object",
   "additionalProperties": false,
   "required": ["format", "policy", "aggregation", "decisions", "runs"],

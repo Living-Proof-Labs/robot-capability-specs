@@ -7,7 +7,7 @@
   "world": {"id": "hallway-open", "version": "0.1.0", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
   "simulator": {"engine": "mujoco", "version": "3.3.0", "adapter": "livingproof-sim-mujoco", "adapter_commit": "0000000000000000000000000000000000000000"},
   "robot": {"id": "unitree-g1", "repo": "https://github.com/Living-Proof-Labs/livingproof-unitree-g1", "commit": "0000000000000000000000000000000000000000", "profile_sha256": "49f4c5eea4827428f731b31a5ce70ecdf637fd25c7d0499a1408659d4bd503fe"},
-  "configuration": {"name": "stock", "version": "1.0.0", "sha256": "319e21b306213037993fc74adbba7d66887ae2d038217273c830ec85ee67c6fa"},
+  "configuration": {"name": "stock", "version": "1.0.0", "sha256": "1d6ba77e715588c89aef6fb8305dba4ed7b8a277f30c62ce14e7ed2500147efd"},
   "parameters": {"command_speed": 0.5, "time_limit": 27.0, "fall_height": 0.5, "wall_clearance": 0.05},
-  "trials": {"count": 20, "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "required_passes": 18}
+  "trials": {"count": 1}
 }
