@@ -374,3 +374,69 @@ test('both references word bare numbers and division by -0 the same way', async 
   probes.push(['evaluate', [num({ op: 'div', args: [-1, -0] }), num(parameters)]]);
   assertSame(probes);
 });
+
+// Schema-valid inputs that reach half-up quantizing past 2^53 units, and past the double
+// range: robot-profile dimensions.width and configuration fall_base_height are any JSON
+// number, world clear_width any positive number, and quantize decimals go up to 9. Both
+// references must resolve them to the same exact result, never crash.
+test('both references resolve huge schema-valid widths identically, at 3 and 9 decimals', async () => {
+  const parameters = await json('../specs/scenarios/walk-hallway/parameters.json');
+  const base = (await json('../specs/scenarios/walk-hallway/parameter-cases.json')).cases[0].inputs;
+  const probes = [];
+  for (const decimals of [3, 9]) {
+    const doc = structuredClone(parameters);
+    doc.preconditions.fits_width.quantize.decimals = decimals;
+    for (const width of [9007199254.740993, 9007199254740.993, 1e25, 1.8e305, 1.7976931348623157e308]) {
+      probes.push(['resolve', [num(doc), num({ ...base, robot_width: { value: width, unit: 'm' } })]]);
+      probes.push(['resolve', [num(doc), num({ ...base, clear_width: width, robot_width: { value: width, unit: 'm' } })]]);
+      probes.push(['resolve', [num(doc), num({ ...base, clear_width: width })]]);
+    }
+  }
+  const results = probes.map(runJs);
+  assert.ok(results.every(r => 'ok' in r || r.status === 'ERROR'), JSON.stringify(results.find(r => 'crash' in r)));
+  assertSame(probes);
+});
+
+// Exit steps whose second sample sits on, or one or two ulps either side of, an exit
+// endpoint or the reference, on straight, L, diagonal, obtuse and skewed-exit routes.
+test('both references agree on exit steps one ulp around the segment ends', () => {
+  const routes = [
+    ROUTES.hallway, ROUTES.left,
+    { points: [[0, 0, 0], [3, 3, 0]], exit: { points: [[3 - 0.53, 3 + 0.53, 0], [3 + 0.53, 3 - 0.53, 0]] } },
+    { points: [[-3, 0, 0], [0, 0, 0], [3, 1, 0]], exit: { points: [[3.3, 0.1, 0], [2.7, 1.9, 0]], reference: [3, 1, 0] } },
+    { points: [[-3, 0, 0], [3, 0, 0]], exit: { points: [[3.2, -0.75, 0], [2.8, 0.75, 0]], reference: [3, 0, 0] } },
+  ];
+  const step = (x, k) => { for (let i = 0; i < Math.abs(k); i++) x = k > 0 ? nextUp(x) : nextDown(x); return x; };
+  const probes = [];
+  for (const route of routes) {
+    const [a, b] = route.exit.points;
+    const ref = route.exit.reference ?? [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 0];
+    const [l0, l1] = route.points.slice(-2);
+    const n = Math.hypot(l1[0] - l0[0], l1[1] - l0[1]), u = [(l1[0] - l0[0]) / n, (l1[1] - l0[1]) / n];
+    for (const end of [a, b, ref]) for (let f = -6; f <= 6; f++) for (const k of [-2, -1, 0, 1, 2]) for (const back of [1e-9, 0.01, 0.5]) {
+      const p1 = [step(end[0] + f * 0.001 * u[1], k), step(end[1] - f * 0.001 * u[0], k), 0];
+      const p0 = [p1[0] - back * u[0] + 0.03 * f * u[1], p1[1] - back * u[1] - 0.03 * f * u[0], 0];
+      probes.push(['crosses', [num(p0), num(p1), num(route.points), num(route.exit)]]);
+    }
+  }
+  assertSame(probes);
+});
+
+// Outside a corner the route distance is measured from the vertex. At the corner of the
+// wall-clear region (perpendicular distance L to both extended legs) it is L / cos(φ/2)
+// for a turn of φ: √2 at a right angle, less for gentler turns, more for sharper ones.
+test('outside-corner strictness is 1 / cos(φ/2): √2 only at a right-angle turn', () => {
+  const limit = 0.49;
+  for (const [last, factor] of [[[0, 3], Math.SQRT2], [[3, 1], null], [[-2, 2], null]]) {
+    const route = [[-3, 0, 0], [0, 0, 0], [...last, 0]];
+    const n = Math.hypot(...last), u = [last[0] / n, last[1] / n];
+    const phi = Math.acos(u[0]);
+    const n2 = [u[1], -u[0]];
+    const det = 0 * n2[1] - (-1) * n2[0];
+    const corner = [(limit * n2[1] - limit * -1) / det, (0 * limit - n2[0] * limit) / det];
+    const ratio = distanceToRoute(route, corner) / limit;
+    assert.ok(Math.abs(ratio - 1 / Math.cos(phi / 2)) < 1e-12, `${last}: ${ratio}`);
+    if (factor) assert.ok(Math.abs(ratio - factor) < 1e-12);
+  }
+  assert.ok(distanceToRoute([[-3, 0, 0], [0, 0, 0], [-2, 2, 0]], [1.183, -0.49]) / 0.49 > 2.6);
+});
