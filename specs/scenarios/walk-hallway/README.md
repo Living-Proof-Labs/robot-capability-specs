@@ -142,6 +142,23 @@ fits. The catalog's reference evaluator,
 every case, and other implementations can run the same cases. This README stays
 normative, and the files must agree with it.
 
+Distance from the route and a step across the exit are the same place terms.
+On this straight route the lateral distance is `|y|`, including past either
+end of the centreline, and a step crosses `exit` when the first sample is
+strictly before the exit line and the second sample is at `x ≥ 3.0` with
+`|y| ≤ 0.75`, endpoints included. The lateral test uses that second sample.
+The point where the step meets the line is not tested. A consumer stops at
+the first step for which the crossing is true.
+[route-geometry-cases.json](../route-geometry-cases.json) records those cases
+and the same measures on an L-shaped route. The legs extend only at the
+route's start and end, not through a corner. Cutting an inside corner uses
+the nearer leg. Outside a corner overshoot is measured from the vertex, so
+at a right-angle corner the distance is stricter than the walls by up to √2.
+For a turn of φ the factor is 1 / cos(φ/2): less for gentler turns, more for
+sharper ones. The JavaScript
+reference and the Python package `livingproof_scenario_parameters` both have
+to pass them.
+
 ## Description text
 
 [description.json](description.json) carries the human-readable mission and world

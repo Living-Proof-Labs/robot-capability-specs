@@ -15,10 +15,11 @@ tasks:
       - pip install --require-hashes -r requirements-docs.txt
 
   check:
-    desc: Check JavaScript syntax and patch whitespace with native tools
+    desc: Check JavaScript and Python syntax and patch whitespace with native tools
     cmds:
-      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs, test/result-contract.test.mjs, tooling/compare-results.mjs, test/robot-profiles.test.mjs, test/run-assessment.test.mjs, test/robot-manifest.test.mjs, test/scenario-description.test.mjs, test/scenario-parameters.test.mjs, test/world-layout.test.mjs, tooling/world-layout.mjs, tooling/scenario-parameters.mjs, tooling/validate-manifests.mjs]
+      - for: [tooling/commit-title.mjs, tooling/preview.mjs, test/consumer.test.mjs, test/release-caller.test.mjs, test/result-contract.test.mjs, tooling/compare-results.mjs, test/robot-profiles.test.mjs, test/run-assessment.test.mjs, test/robot-manifest.test.mjs, test/scenario-description.test.mjs, test/scenario-parameters.test.mjs, test/world-layout.test.mjs, test/route-geometry.test.mjs, test/parameter-parity.test.mjs, test/reference-probes.test.mjs, tooling/world-layout.mjs, tooling/scenario-parameters.mjs, tooling/validate-manifests.mjs]
         cmd: node --check "{{.ITEM}}"
+      - python3 -m compileall -q python test/python tooling/run-python-tests.py tooling/check-publication.py
       - git diff --check
 
   test:
@@ -26,6 +27,15 @@ tasks:
     cmds:
       - mkdir -p artifacts
       - node --test --test-reporter=spec --test-reporter=junit --test-reporter-destination=stdout --test-reporter-destination=artifacts/tests.xml tooling/test-suite.mjs
+
+  test:python:
+    desc: Install the scenario parameter package in a clean venv and run its tests
+    cmds:
+      - rm -rf /tmp/livingproof-scenario-parameters-venv
+      - python3 -m venv /tmp/livingproof-scenario-parameters-venv
+      - /tmp/livingproof-scenario-parameters-venv/bin/pip install --no-cache-dir ./python
+      - /tmp/livingproof-scenario-parameters-venv/bin/python -c "import livingproof_scenario_parameters"
+      - /tmp/livingproof-scenario-parameters-venv/bin/python tooling/run-python-tests.py
 
   validate:manifests:
     desc: Validate robot manifests (default the G1, Go1 and T1 examples) against the schema
@@ -38,6 +48,7 @@ tasks:
       - task: check
       - task: validate:manifests
       - task: test
+      - task: test:python
       - task: test:docs
   preview:
     desc: Record exact source preview identity

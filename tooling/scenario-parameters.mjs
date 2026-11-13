@@ -38,7 +38,9 @@ export function roundHalfEvenBinary(x, decimals) {
   let q = num / den;
   const twice = 2n * (num - q * den);
   if (twice > den || (twice === den && q % 2n === 1n)) q += 1n;
-  const result = Number(sign * q) / Number(scale);
+  // Parse the decimal text: the nearest double to q * 10^-decimals. Number(q) / Number(scale)
+  // rounds twice once q passes 2^53 and can land one ulp away from Python's round().
+  const result = Number(`${sign * q}e-${decimals}`);
   return Object.is(result, -0) ? 0 : result;
 }
 
@@ -76,7 +78,7 @@ export function resolveInput(name, spec, raw) {
     return raw;
   }
   let value = raw;
-  if (typeof raw === 'object') {
+  if (typeof raw === 'object' && !Array.isArray(raw)) {
     if (raw.unit !== spec.unit) fail(`input ${name} has unit ${JSON.stringify(raw.unit)}, expected ${spec.unit}`);
     value = raw.value;
   }
@@ -97,7 +99,10 @@ export function readInputs(params, { world, robot, configuration }) {
 
 function parameterValue(params, name, inputs) {
   const p = params.parameters[name];
-  if (p && typeof p.value === 'number') return p.value;
+  if (p && typeof p.value === 'number') {
+    if (name === 'command_speed' && !(p.value > 0)) fail('command_speed must be greater than 0');
+    return p.value;
+  }
   if (p && p.by && p.values) {
     const key = inputs[p.by];
     if (!Object.hasOwn(p.values, key)) fail(`no ${name} for ${p.by} ${JSON.stringify(key)}`);
@@ -116,7 +121,7 @@ export function evaluate(expr, params, inputs) {
   if (typeof expr === 'number') return expr;
   if ('input' in expr) return numericInput(params, expr.input, inputs);
   if ('parameter' in expr) return parameterValue(params, expr.parameter, inputs);
-  const op = ARITHMETIC[expr.op] ?? fail(`unknown operator ${expr.op}`);
+  const op = (Object.hasOwn(ARITHMETIC, expr.op) && ARITHMETIC[expr.op]) || fail(`unknown operator ${expr.op}`);
   const value = expr.args.map(a => evaluate(a, params, inputs)).reduce(op);
   if (!Number.isFinite(value)) fail(`expression gives a non-finite value ${value}`);
   return value;
@@ -147,7 +152,7 @@ function evaluateQuantized(expr, params, inputs, decimals) {
 
 export function evaluateCondition(pre, params, inputs) {
   const { op, args } = pre.condition;
-  const compare = COMPARE[op] ?? fail(`unknown comparison ${op}`);
+  const compare = (Object.hasOwn(COMPARE, op) && COMPARE[op]) || fail(`unknown comparison ${op}`);
   if (pre.quantize) {
     const [a, b] = args.map(x => evaluateQuantized(x, params, inputs, pre.quantize.decimals));
     return compare(a.units, b.units);
@@ -162,7 +167,9 @@ export function resolve(params, raw) {
   if (problems.length) fail(problems.join('; '));
   const inputs = Object.fromEntries(Object.entries(params.inputs).map(([n, s]) => [n, resolveInput(n, s, raw[n])]));
   for (const [name, p] of Object.entries(params.parameters)) {
-    if (p.by) parameterValue(params, name, inputs); // an unknown class is an ERROR up front
+    // An unknown class is an ERROR up front. command_speed <= 0 is an ERROR even
+    // when the arithmetic that uses it would stay finite.
+    if (p.by || name === 'command_speed') parameterValue(params, name, inputs);
   }
   const limits = {};
   for (const [name, l] of Object.entries(params.limits)) {
@@ -193,7 +200,7 @@ export function referenceErrors(params) {
       if (quantized && !Number.isInteger(expr)) errors.push(`${where}: bare number ${expr} under quantize must be an integer`);
       return;
     }
-    if (expr === null || typeof expr !== 'object') return errors.push(`${where}: not an expression`);
+    if (expr === null || typeof expr !== 'object' || Array.isArray(expr)) return errors.push(`${where}: not an expression`);
     if ('input' in expr) {
       if (!Object.hasOwn(inputs, expr.input)) errors.push(`${where}: unknown input ${expr.input}`);
       else if (inputs[expr.input].kind !== 'quantity') errors.push(`${where}: input ${expr.input} is not a quantity`);
@@ -204,14 +211,14 @@ export function referenceErrors(params) {
       else if (!numeric(expr.parameter)) errors.push(`${where}: parameter ${expr.parameter} is not numeric`);
       return;
     }
-    if (!(expr.op in ARITHMETIC)) errors.push(`${where}: unknown operator ${expr.op}`);
+    if (!Object.hasOwn(ARITHMETIC, expr.op)) errors.push(`${where}: unknown operator ${expr.op}`);
     if (quantized && expr.op === 'div') errors.push(`${where}: quantize does not allow div`);
     (expr.args ?? []).forEach((a, i) => walk(a, `${where}.args[${i}]`, quantized));
   };
   for (const key of ['forward', 'sideways', 'turn_rate']) if (params.command?.[key] !== undefined) walk(params.command[key], `command.${key}`, false);
   for (const [name, l] of Object.entries(limits)) walk(l.expression, `limits.${name}.expression`, false);
   for (const [name, pre] of Object.entries(params.preconditions ?? {})) {
-    if (!(pre.condition?.op in COMPARE)) errors.push(`preconditions.${name}: unknown comparison ${pre.condition?.op}`);
+    if (!Object.hasOwn(COMPARE, pre.condition?.op)) errors.push(`preconditions.${name}: unknown comparison ${pre.condition?.op}`);
     (pre.condition?.args ?? []).forEach((a, i) => walk(a, `preconditions.${name}.condition.args[${i}]`, Boolean(pre.quantize)));
   }
   (params.checks ?? []).forEach((c, i) => {

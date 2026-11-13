@@ -76,6 +76,21 @@ this repository's actual host and prepared-environment Taskfiles.
 release or a prediction of the next release version. Tooling is private to this
 repository; no npm package is published.
 
+## Scenario parameters for Python
+
+`livingproof_scenario_parameters` is the Python reference for a scenario
+parameter file and for route distance and exit crossing. It matches
+`tooling/scenario-parameters.mjs` and the route measures in
+`tooling/world-layout.mjs`. The package uses only the Python standard library
+and requires Python 3.10 or newer. Install a released tag. Do not install from
+a branch:
+
+```sh
+pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.Y.Z#subdirectory=python"
+```
+
+`vX.Y.Z` is the catalog tag that contains the package.
+
 ## Releases
 
 Shared [release policy](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/CONTRIBUTING.md#release-from-main)

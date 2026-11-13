@@ -8,10 +8,10 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[2] / 'tooling/check-publication.py'
 
-@pytest.mark.parametrize('reported,expected', [('2', 0), ('1', 1), ('', 1)],
+@pytest.mark.parametrize('reported,expected', [('3', 0), ('2', 1), ('', 1)],
                          ids=['complete', 'lost-case', 'missing-publisher-output'])
 def test_report_completeness(tmp_path, reported, expected):
-    for relative in ('artifacts/tests.xml', 'artifacts/manual/tests.xml'):
+    for relative in ('artifacts/tests.xml', 'artifacts/manual/tests.xml', 'artifacts/python/tests.xml'):
         path = tmp_path / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text('<testsuite><testcase name="fixture"/></testsuite>')
