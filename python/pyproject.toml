@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "livingproof-scenario-parameters"
+version = "2.2.0"
+description = "Reference resolver for livingproof-scenario-parameters/0.1 and route geometry"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Living Proof Labs contributors" }]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Living-Proof-Labs/robot-capability-specs"
+Source = "https://github.com/Living-Proof-Labs/robot-capability-specs"
+
+[tool.setuptools.packages.find]
+include = ["livingproof_scenario_parameters*"]

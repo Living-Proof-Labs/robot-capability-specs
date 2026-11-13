@@ -1,12 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Fail visibly when either report is absent or the publisher lost test cases."""
+"""Fail visibly when a report is absent or the publisher lost test cases."""
 import os
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
 counts = [os.environ[name] for name in ('PASSED', 'FAILED', 'SKIPPED')]
 assert all(count.isdecimal() for count in counts), counts
-reports = [Path('artifacts/tests.xml'), Path('artifacts/manual/tests.xml')]
+reports = [
+    Path('artifacts/tests.xml'),
+    Path('artifacts/manual/tests.xml'),
+    Path('artifacts/python/tests.xml'),
+]
 emitted = sum(len(list(ET.parse(path).iter('testcase'))) for path in reports)
 ingested = sum(map(int, counts))
 with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:

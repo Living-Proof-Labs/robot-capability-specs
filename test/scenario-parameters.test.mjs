@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import Ajv2020 from 'ajv/dist/2020.js';
 import {
@@ -100,14 +101,25 @@ test('inputs read from the example G1 profiles resolve to .value with their unit
   }
 });
 
-test('a non-finite result is an ERROR', async () => {
+test('a non-finite result is an ERROR and command_speed <= 0 is an ERROR', async () => {
   const p = await json(HALLWAY + 'parameters.json');
-  const zero = structuredClone(p);
-  zero.parameters.command_speed.value = 0; // the schema forbids this; the evaluator still guards it
   const c = (await json(HALLWAY + 'parameter-cases.json')).cases[0];
-  assert.throws(() => resolve(zero, c.inputs), isError);
-  assert.throws(() => evaluate({ op: 'div', args: [1, 0] }, p, {}), isError);
+  const message = /command_speed must be greater than 0/;
+  for (const value of [0, -0.5]) {
+    const speed = structuredClone(p);
+    speed.parameters.command_speed.value = value; // the schema forbids this; the evaluator still guards it
+    assert.throws(() => resolve(speed, c.inputs), e => isError(e) && message.test(e.message), String(value));
+  }
+  assert.throws(() => evaluate({ op: 'div', args: [1, 0] }, p, {}), e => isError(e) && /non-finite value Infinity/.test(e.message));
   assert.throws(() => resolve(p, { ...c.inputs, route_length: Infinity }), isError);
+});
+
+test('walk-hallway parameter files are the v2.1.0 bytes', async () => {
+  const hash = async path => createHash('sha256').update(await readFile(path)).digest('hex');
+  assert.equal(await hash(HALLWAY + 'parameters.json'),
+    '9226aa6bc0e577863bdc210514e7e7c3a7edc32f49c4f7b46aa7249837f08b3d');
+  assert.equal(await hash(HALLWAY + 'parameter-cases.json'),
+    '4697196d94df5d7d6aba8059d48d732137a67fcefcde990cd937efa5ad2d44e4');
 });
 
 test('walk-hallway parameters agree with description.json and the README acceptance', async () => {
@@ -179,6 +191,8 @@ test('the reference checker rejects every reference that names nothing real', as
     [p => { p.checks[1].limit = 'lateral'; }, /checks\[1\]\.limit names no limit: lateral/],
     [p => { p.parameters.wall_clearance.by = 'robot_kind'; }, /not a category input/],
     [p => { p.preconditions.fits_width.condition.args[1] = { op: 'div', args: [{ input: 'clear_width' }, 1] }; }, /quantize does not allow div/],
+    [p => { p.preconditions.fits_width.condition.args[0].args[1].args[0] = 0.5; }, /bare number 0\.5 under quantize must be an integer/],
+    [p => { p.command.forward = { input: 'nope' }; }, /command\.forward: unknown input nope/],
   ];
   for (const [mutate, message] of cases) {
     const p = structuredClone(good);
@@ -188,5 +202,20 @@ test('the reference checker rejects every reference that names nothing real', as
     assert.ok(errors.some(e => message.test(e)), `${mutate} gave ${JSON.stringify(errors)}`);
     const c = (await json(HALLWAY + 'parameter-cases.json')).cases[0];
     assert.throws(() => resolve(p, c.inputs), isError);
+  }
+});
+
+test('the reference checker reports a structural rule the schema also rejects', async () => {
+  const good = await json(HALLWAY + 'parameters.json');
+  const cases = [
+    [p => { p.limits.fall_height.expression = null; }, /not an expression/],
+    [p => { p.limits.time_limit.expression = { op: 'pow', args: [2, 3] }; }, /unknown operator pow/],
+    [p => { p.preconditions.fits_width.condition.op = 'eq'; }, /unknown comparison eq/],
+  ];
+  for (const [mutate, message] of cases) {
+    const p = structuredClone(good);
+    mutate(p);
+    const errors = referenceErrors(p);
+    assert.ok(errors.some(e => message.test(e)), `${mutate} gave ${JSON.stringify(errors)}`);
   }
 });

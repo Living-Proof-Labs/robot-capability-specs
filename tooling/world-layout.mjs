@@ -2,6 +2,9 @@
 // Geometric rules of the world layout contract (specs/worlds/README.md, "Any layout")
 // that JSON Schema cannot express, and the route measures a scenario reads from a world.
 // Reference implementation for the catalog tests; consumers may implement the same rules.
+// distanceToRoute and crossesExit are the place terms in
+// specs/scenarios/scenario-parameters.schema.json and are checked by
+// specs/scenarios/route-geometry-cases.json. The Python package implements the same two.
 const EPS = 1e-9;
 const SPAWN_CLEARANCE = 0.25; // m, every pose place from every wall
 
@@ -130,4 +133,55 @@ export function layoutErrors(world, { route: routeName }) {
     }
   }
   return errors;
+}
+
+const xy = p => [p[0], p[1]];
+
+// Floor-plane distance from point to the route polyline. The first leg extends
+// backward past the start and the last leg extends forward past the end, so a
+// point just past the exit is measured sideways. One leg is that line in both
+// directions. Interior ends are not extended, and middle legs stay finite.
+export function distanceToRoute(points, point) {
+  const route = points.map(xy), p = xy(point), legs = route.length - 1;
+  if (legs < 1) throw new Error('route needs at least 2 points');
+  let best = Infinity;
+  for (let i = 0; i < legs; i++) {
+    const a = route[i], b = route[i + 1], ab = sub(b, a), denom = dot(ab, ab);
+    let dist;
+    if (denom === 0) dist = len(sub(p, a));
+    else {
+      let t = dot(sub(p, a), ab) / denom;
+      if (legs !== 1) {
+        if (i === 0) t = Math.min(t, 1);
+        else if (i === legs - 1) t = Math.max(t, 0);
+        else t = Math.min(1, Math.max(0, t));
+      }
+      dist = len(sub(p, [a[0] + t * ab[0], a[1] + t * ab[1]]));
+    }
+    if (dist < best) best = dist;
+  }
+  return best;
+}
+
+// A step crosses the exit when it goes from strictly before the exit line to on
+// or past it, on the side the route's last leg points toward, and the meeting
+// point lies on the segment, endpoints included. A step that starts already on
+// or past the line does not cross again. exit is {points: [a, b], reference}.
+export function crossesExit(p0, p1, points, exit) {
+  if (points.length < 2) throw new Error('route needs at least 2 points');
+  const leg = sub(xy(points.at(-1)), xy(points.at(-2)));
+  if (dot(leg, leg) === 0) throw new Error('route last leg has zero length');
+  const e0 = xy(exit.points[0]), e1 = xy(exit.points[1]), edge = sub(e1, e0), elen = len(edge);
+  if (elen === 0) throw new Error('exit segment has zero length');
+  const u = [edge[0] / elen, edge[1] / elen];
+  const ref = exit.reference ? xy(exit.reference) : [(e0[0] + e1[0]) / 2, (e0[1] + e1[1]) / 2];
+  const n1 = [-u[1], u[0]], n2 = [u[1], -u[0]];
+  const n = dot(n1, leg) > 0 ? n1 : n2;
+  if (dot(n, leg) === 0) throw new Error("exit line is parallel to the route's last leg");
+  const signed = q => dot(sub(xy(q), ref), n);
+  const s0 = signed(p0), s1 = signed(p1);
+  if (!(s0 < 0 && s1 >= 0)) return false;
+  const t = s0 / (s0 - s1);
+  const meeting = [p0[0] + t * (p1[0] - p0[0]), p0[1] + t * (p1[1] - p0[1])];
+  return Math.abs(dot(sub(meeting, ref), u)) <= elen / 2;
 }

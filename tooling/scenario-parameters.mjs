@@ -97,7 +97,10 @@ export function readInputs(params, { world, robot, configuration }) {
 
 function parameterValue(params, name, inputs) {
   const p = params.parameters[name];
-  if (p && typeof p.value === 'number') return p.value;
+  if (p && typeof p.value === 'number') {
+    if (name === 'command_speed' && !(p.value > 0)) fail('command_speed must be greater than 0');
+    return p.value;
+  }
   if (p && p.by && p.values) {
     const key = inputs[p.by];
     if (!Object.hasOwn(p.values, key)) fail(`no ${name} for ${p.by} ${JSON.stringify(key)}`);
@@ -162,7 +165,9 @@ export function resolve(params, raw) {
   if (problems.length) fail(problems.join('; '));
   const inputs = Object.fromEntries(Object.entries(params.inputs).map(([n, s]) => [n, resolveInput(n, s, raw[n])]));
   for (const [name, p] of Object.entries(params.parameters)) {
-    if (p.by) parameterValue(params, name, inputs); // an unknown class is an ERROR up front
+    // An unknown class is an ERROR up front. command_speed <= 0 is an ERROR even
+    // when the arithmetic that uses it would stay finite.
+    if (p.by || name === 'command_speed') parameterValue(params, name, inputs);
   }
   const limits = {};
   for (const [name, l] of Object.entries(params.limits)) {

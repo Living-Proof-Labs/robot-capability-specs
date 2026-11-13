@@ -142,6 +142,14 @@ fits. The catalog's reference evaluator,
 every case, and other implementations can run the same cases. This README stays
 normative, and the files must agree with it.
 
+Distance from the route and a step across the exit are the same place terms.
+On this straight route the lateral distance is `|y|`, including past either
+end of the centreline, and a step crosses `exit` when it reaches `x ≥ 3.0`
+with `|y| ≤ 0.75` at the meeting point, endpoints included.
+[route-geometry-cases.json](../route-geometry-cases.json) records those cases
+and the same measures on an L-shaped route. The JavaScript reference and the
+Python package `livingproof_scenario_parameters` both have to pass them.
+
 ## Description text
 
 [description.json](description.json) carries the human-readable mission and world
