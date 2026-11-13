@@ -23,6 +23,8 @@ test('world layout schema is versioned and the contract names it', async () => {
   assert.match(readme, /^## Any layout$/m);
   assert.match(readme, /\[world-layout\.schema\.json\]\(world-layout\.schema\.json\)/);
   assert.match(readme, /`route-centreline`/);
+  assert.match(readme, /at least 0\.25 m from every wall/);
+  assert.match(readme, /`\+z` up/);
 });
 
 test('hallway-open 0.1.0 conforms to the layout contract unchanged', async () => {
@@ -77,6 +79,7 @@ test('layout rules reject overlaps, a route that cuts a wall and a misplaced sta
     [w => { w.places.find(p => p.name === 'spawn-entrance').yaw_deg = 90; }, /must face along/],
     [w => { w.places.find(p => p.name === 'exit').points[1] = [0.5, 3, 0]; }, /span the clear width/],
     [w => { w.geometry[3].size[2] = 2.0; }, /wall_height/],
+    [w => { w.places.push({ name: 'spawn-wall', type: 'pose', position: [-2.0, 0.6, 0], yaw_deg: 0 }); }, /closer than 0\.25 m/],
     [w => { w.places.push({ name: 'entrance', type: 'pose', position: [0, 0, 0], yaw_deg: 0 }); }, /unique/],
   ];
   for (const [mutate, message] of cases) {

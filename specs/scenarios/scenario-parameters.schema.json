@@ -2,69 +2,173 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Living-Proof-Labs/robot-capability-specs/specs/scenarios/scenario-parameters.schema.json",
   "title": "livingproof-scenario-parameters/0.1",
-  "description": "Machine-readable acceptance for one scenario revision: the named places it uses in its world, the command, the shared parameters, and the rule for each limit a verifier resolves per robot. Each rule is a small arithmetic expression over named inputs and parameters, so a verifier and an evaluator compute the same value from this file instead of keeping their own copy of the formula. The scenario README states the same acceptance in words, and the catalog tests keep the two equal.",
+  "description": "Machine-readable acceptance for one scenario revision: the named places it uses in its world, the command, the shared parameters, and the rule for each limit a verifier resolves per robot. Each rule is a small expression over named inputs and parameters, so a verifier and an evaluator compute the same value from this file instead of keeping their own copy of the formula. Errors: a missing input, a value that is not a number, a unit that differs from the input's declared unit, a robot class with no wall clearance, or any result that is not finite (infinite or not a number, for example after dividing by zero) is a test-system ERROR, never a robot FAIL and never UNSUPPORTED. tooling/scenario-parameters.mjs is the reference implementation, and each scenario's parameter-cases.json holds conformance cases for other implementations. The scenario README states the same acceptance in words, and the catalog tests keep the two equal.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["format", "scenario", "world", "places", "command", "parameters", "inputs", "limits", "preconditions", "checks"],
+  "required": [
+    "format",
+    "scenario",
+    "world",
+    "places",
+    "command",
+    "parameters",
+    "inputs",
+    "limits",
+    "preconditions",
+    "checks"
+  ],
   "properties": {
-    "$comment": {"type": "string"},
-    "format": {"const": "livingproof-scenario-parameters/0.1"},
+    "$comment": {
+      "type": "string"
+    },
+    "format": {
+      "const": "livingproof-scenario-parameters/0.1"
+    },
     "scenario": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "revision"],
-      "properties": {"id": {"$ref": "#/$defs/id"}, "revision": {"$ref": "#/$defs/version"}}
+      "required": [
+        "id",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "revision": {
+          "$ref": "#/$defs/version"
+        }
+      }
     },
     "world": {
       "description": "The world content this revision is judged in.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "content_version"],
-      "properties": {"id": {"$ref": "#/$defs/id"}, "content_version": {"$ref": "#/$defs/version"}}
+      "required": [
+        "id",
+        "content_version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "content_version": {
+          "$ref": "#/$defs/version"
+        }
+      }
     },
     "places": {
       "description": "Names of the world places the scenario uses. The world declares their coordinates; nothing here repeats them.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["start", "exit", "route", "through"],
+      "required": [
+        "start",
+        "exit",
+        "route",
+        "through"
+      ],
       "properties": {
-        "start": {"description": "Pose place the robot starts at, exactly, with no offset.", "$ref": "#/$defs/id"},
-        "exit": {"description": "Segment place the base must cross.", "$ref": "#/$defs/id"},
-        "route": {"description": "Polyline place that lateral distance and route length are measured along.", "$ref": "#/$defs/id"},
-        "through": {"description": "Places the base must pass through, in order, before it crosses the exit. Empty when there are none.", "type": "array", "items": {"$ref": "#/$defs/id"}, "uniqueItems": true}
+        "start": {
+          "description": "Pose place the robot starts at, exactly, with no offset.",
+          "$ref": "#/$defs/id"
+        },
+        "exit": {
+          "description": "Segment place the base point must cross; see checks[].measure exit-crossing-time.",
+          "$ref": "#/$defs/id"
+        },
+        "route": {
+          "description": "Polyline place that distance from the route and route_length are measured along.",
+          "$ref": "#/$defs/id"
+        },
+        "through": {
+          "description": "Places the base must pass through, in order, before it crosses the exit. Empty when there are none.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
       }
     },
     "command": {
       "description": "What the runner sends the robot. constant: the same forward, sideways and turn-rate command at every step.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode", "forward", "sideways", "turn_rate"],
+      "required": [
+        "mode",
+        "forward",
+        "sideways",
+        "turn_rate"
+      ],
       "properties": {
-        "mode": {"enum": ["constant"]},
-        "forward": {"$ref": "#/$defs/expression"},
-        "sideways": {"$ref": "#/$defs/expression"},
-        "turn_rate": {"$ref": "#/$defs/expression"}
+        "mode": {
+          "enum": [
+            "constant"
+          ]
+        },
+        "forward": {
+          "$ref": "#/$defs/expression"
+        },
+        "sideways": {
+          "$ref": "#/$defs/expression"
+        },
+        "turn_rate": {
+          "$ref": "#/$defs/expression"
+        }
       }
     },
     "parameters": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["command_speed", "wall_clearance", "trials"],
+      "required": [
+        "command_speed",
+        "wall_clearance",
+        "trials"
+      ],
       "properties": {
-        "command_speed": {"$ref": "#/$defs/quantity"},
-        "wall_clearance": {
-          "description": "Clearance from each wall the fit check requires, by robot class.",
+        "command_speed": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["by", "unit", "values"],
+          "required": [
+            "value",
+            "unit"
+          ],
           "properties": {
-            "by": {"const": "robot_class"},
-            "unit": {"const": "m"},
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "const": "m/s"
+            }
+          }
+        },
+        "wall_clearance": {
+          "description": "Clearance from each wall the fit check requires, by robot class. by names the category input that selects the value. A class with no entry here is a test-system ERROR.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "by",
+            "unit",
+            "values"
+          ],
+          "properties": {
+            "by": {
+              "$ref": "#/$defs/name"
+            },
+            "unit": {
+              "const": "m"
+            },
             "values": {
               "type": "object",
               "minProperties": 1,
-              "propertyNames": {"$ref": "#/$defs/id"},
-              "additionalProperties": {"type": "number", "exclusiveMinimum": 0}
+              "propertyNames": {
+                "$ref": "#/$defs/id"
+              },
+              "additionalProperties": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
             }
           }
         },
@@ -72,50 +176,166 @@
           "description": "A run is count identical trials at the exact nominal start. There are no seeds. Identical trials check repeatability; they are not independent samples, and trials that disagree are a test-system finding.",
           "type": "object",
           "additionalProperties": false,
-          "required": ["count", "identical", "retries", "trial_policy", "run_rule"],
+          "required": [
+            "count",
+            "identical",
+            "retries",
+            "trial_policy",
+            "run_rule"
+          ],
           "properties": {
-            "count": {"type": "integer", "minimum": 1, "default": 1},
-            "identical": {"const": true},
-            "retries": {"const": false},
-            "trial_policy": {"description": "Policy that turns one trial's evaluator results into its outcome.", "const": "all-required-v1"},
-            "run_rule": {"description": "How trial outcomes become the run grade. every-trial-passes: the run passes only when every completed trial passes.", "const": "every-trial-passes"}
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "identical": {
+              "const": true
+            },
+            "retries": {
+              "const": false
+            },
+            "trial_policy": {
+              "description": "Policy that turns one trial's evaluator results into its outcome.",
+              "const": "all-required-v1"
+            },
+            "run_rule": {
+              "description": "How trial outcomes become the run grade. every-trial-passes: the run passes only when every completed trial passes.",
+              "const": "every-trial-passes"
+            }
           }
         }
       }
     },
     "inputs": {
-      "description": "Values a verifier reads before resolving the limits, each with where it comes from.",
+      "description": "Values a verifier reads before resolving the limits, each with where it comes from. A quantity input resolves to a number: when the source field is an object such as {value, unit, source, ref}, it resolves to .value, and its unit must equal the declared unit, or the run is a test-system ERROR; a bare number (as in world dimensions) is already in the declared unit. A category input resolves to a string, such as the robot class, and is used only to select a parameter value; it never appears in arithmetic.",
       "type": "object",
       "minProperties": 1,
-      "propertyNames": {"$ref": "#/$defs/name"},
+      "propertyNames": {
+        "$ref": "#/$defs/name"
+      },
       "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["unit", "source", "text"],
-        "properties": {
-          "unit": {"$ref": "#/$defs/unit"},
-          "source": {"enum": ["world", "robot-profile", "configuration-profile"]},
-          "path": {"description": "Field in the source document, when the value is read directly.", "type": "string", "minLength": 1},
-          "rule": {"description": "How the value is measured in the world, when it is not a field.", "enum": ["route-length-from-start-to-exit"]},
-          "text": {"$ref": "#/$defs/text"}
-        },
-        "oneOf": [{"required": ["path"]}, {"required": ["rule"]}]
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "unit",
+              "source",
+              "text"
+            ],
+            "properties": {
+              "kind": {
+                "const": "quantity"
+              },
+              "unit": {
+                "$ref": "#/$defs/unit"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              },
+              "path": {
+                "description": "Field in the source document, when the value is read directly.",
+                "type": "string",
+                "minLength": 1
+              },
+              "rule": {
+                "description": "How the value is measured in the world, when it is not a field. route-length-from-start-to-exit: distance along the route polyline from the point on it nearest the start pose to the route's last point, which the world layout contract places at the exit reference point.",
+                "enum": [
+                  "route-length-from-start-to-exit"
+                ]
+              },
+              "text": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "path"
+                ]
+              },
+              {
+                "required": [
+                  "rule"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "source",
+              "path",
+              "text"
+            ],
+            "properties": {
+              "kind": {
+                "const": "category"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "text": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          }
+        ]
       }
     },
     "limits": {
-      "description": "Each limit a verifier resolves per robot. The verifier rounds the value to round_decimals places, when given, and grades against that value.",
+      "description": "Each limit a verifier resolves per robot. When round is given, the verifier rounds the value as stated there and grades against the rounded value.",
       "type": "object",
       "minProperties": 1,
-      "propertyNames": {"$ref": "#/$defs/name"},
+      "propertyNames": {
+        "$ref": "#/$defs/name"
+      },
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["unit", "expression", "formula"],
+        "required": [
+          "unit",
+          "expression",
+          "formula"
+        ],
         "properties": {
-          "unit": {"$ref": "#/$defs/unit"},
-          "expression": {"$ref": "#/$defs/expression"},
-          "formula": {"description": "The same rule in words-and-symbols form, exactly as description.json writes it.", "$ref": "#/$defs/text"},
-          "round_decimals": {"type": "integer", "minimum": 0, "maximum": 9}
+          "unit": {
+            "$ref": "#/$defs/unit"
+          },
+          "expression": {
+            "$ref": "#/$defs/expression"
+          },
+          "formula": {
+            "description": "The same rule in words-and-symbols form.",
+            "$ref": "#/$defs/text"
+          },
+          "round": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "decimals",
+              "mode"
+            ],
+            "properties": {
+              "decimals": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "mode": {
+                "description": "half-even-binary: round the exact binary value of the IEEE 754 double to the nearest multiple of 10^-decimals, ties to even, then take the double nearest that decimal. This is Python's round(x, decimals), which capability-verifier v1.18.1 uses: 0.40625 gives 0.4062 and 0.21875 gives 0.2188.",
+                "const": "half-even-binary"
+              }
+            }
+          }
         }
       }
     },
@@ -123,59 +343,182 @@
       "description": "Conditions checked before any trial. An unmet condition makes the run UNSUPPORTED.",
       "type": "object",
       "minProperties": 1,
-      "propertyNames": {"$ref": "#/$defs/name"},
+      "propertyNames": {
+        "$ref": "#/$defs/name"
+      },
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["condition", "formula"],
+        "required": [
+          "condition",
+          "formula"
+        ],
         "properties": {
-          "condition": {"$ref": "#/$defs/condition"},
-          "formula": {"$ref": "#/$defs/text"}
+          "condition": {
+            "$ref": "#/$defs/condition"
+          },
+          "formula": {
+            "$ref": "#/$defs/text"
+          },
+          "quantize": {
+            "description": "Fixed resolution for the comparison. half-up-decimal-text: convert each input and parameter value to a whole number of 10^-decimals units, rounding half up from its shortest decimal text (Python Decimal(str(x)) with ROUND_HALF_UP), then evaluate exactly on those whole numbers. Bare numbers are exact. Under quantize only add, sub and mul by a bare integer are allowed. With decimals 3 this is whole millimetres, as capability-verifier v1.18.1 and livingproof-sim-mujoco v2.0.4 compare, so 1.03 + 2 × 0.05 ≤ 1.13 holds.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "decimals",
+              "mode"
+            ],
+            "properties": {
+              "decimals": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "mode": {
+                "const": "half-up-decimal-text"
+              }
+            }
+          }
         }
       }
     },
     "checks": {
-      "description": "The evaluator that judges each step and the limit it uses. measure names how the observation is taken.",
+      "description": "The evaluator that judges each step, how its observation is taken and when it fails. The body point is the base body's origin in the world frame, at every recorded sample of the trial; distances are in the floor plane (x, y) unless stated. Measures: exit-crossing-time is the time of the first sample at which the base point is on or past the line through the exit segment, measured along the direction of the route's last leg; the crossing counts only when, at that sample, the base point is within half the segment's length of the exit reference point along the segment's line (inclusive). A first arrival outside the segment ends the trial with no crossing. max-distance-from-route is the largest distance from the base point to the route, with the first and last legs extended past their ends so a point just past the exit is measured sideways, over every sample up to and including the crossing sample. wall-contacts is every contact between any robot collision body and any wall, a sample whose clearance is at or below zero. min-base-height is the lowest height of the base point above the floor top surface (z = 0). passes-through-places: for each place in places.through, in order, the first sample at which the base point is inside it (boundaries included), each no earlier than the previous one and no later than the crossing sample. fail_when: absent-or-greater-than-limit fails when there is no crossing or its time is strictly greater than the limit; greater-than-limit fails when the value is strictly greater than the limit; less-than-limit fails when the value is strictly less than the limit; not-empty fails when any contact is recorded; not-in-order fails when a place is never entered or entered out of order. In hallway-open these are today's hallway checks: exit at x ≥ 3.0 with |y| ≤ 0.75, lateral |y|, base z.",
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["evaluator", "measure", "fail_when"],
+        "required": [
+          "evaluator",
+          "measure",
+          "fail_when"
+        ],
         "properties": {
-          "evaluator": {"$ref": "#/$defs/id"},
-          "measure": {"enum": ["exit-crossing-time", "max-distance-from-route", "wall-contacts", "min-base-height", "passes-through-places"]},
-          "fail_when": {"enum": ["absent-or-greater-than-limit", "greater-than-limit", "not-empty", "less-than-limit", "not-in-order"]},
-          "limit": {"$ref": "#/$defs/name"}
+          "evaluator": {
+            "$ref": "#/$defs/id"
+          },
+          "measure": {
+            "enum": [
+              "exit-crossing-time",
+              "max-distance-from-route",
+              "wall-contacts",
+              "min-base-height",
+              "passes-through-places"
+            ]
+          },
+          "fail_when": {
+            "enum": [
+              "absent-or-greater-than-limit",
+              "greater-than-limit",
+              "not-empty",
+              "less-than-limit",
+              "not-in-order"
+            ]
+          },
+          "limit": {
+            "description": "A key of limits.",
+            "$ref": "#/$defs/name"
+          }
         }
       }
     }
   },
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
-    "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-    "version": {"type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"},
-    "text": {"type": "string", "minLength": 1},
-    "unit": {"enum": ["m", "s", "m/s", "rad/s", "1"]},
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unit": {
+      "enum": [
+        "m",
+        "s",
+        "m/s",
+        "rad/s",
+        "1"
+      ]
+    },
     "quantity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["value", "unit"],
-      "properties": {"value": {"type": "number"}, "unit": {"$ref": "#/$defs/unit"}}
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "$ref": "#/$defs/unit"
+        }
+      }
     },
     "expression": {
-      "description": "A number, a named input, a named parameter (wall_clearance resolves for the robot's class), or add/sub/mul/div over two or more expressions, applied left to right.",
+      "description": "A number, a named quantity input, a named numeric parameter, or an arithmetic operator over two or more expressions, applied left to right. Operators: add, sub, mul and div in expressions; le (≤), lt (<), ge (≥) and gt (>) between two expressions in conditions. A parameter reference must name a numeric parameter: command_speed, or wall_clearance, which resolves for the robot's class. trials is not numeric.",
       "oneOf": [
-        {"type": "number"},
-        {"type": "object", "additionalProperties": false, "required": ["input"], "properties": {"input": {"$ref": "#/$defs/name"}}},
-        {"type": "object", "additionalProperties": false, "required": ["parameter"], "properties": {"parameter": {"$ref": "#/$defs/name"}}},
+        {
+          "type": "number"
+        },
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["op", "args"],
+          "required": [
+            "input"
+          ],
           "properties": {
-            "op": {"enum": ["add", "sub", "mul", "div"]},
-            "args": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/expression"}}
+            "input": {
+              "$ref": "#/$defs/name"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "parameter"
+          ],
+          "properties": {
+            "parameter": {
+              "$ref": "#/$defs/name"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "args"
+          ],
+          "properties": {
+            "op": {
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "div"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/expression"
+              }
+            }
           }
         }
       ]
@@ -183,11 +526,35 @@
     "condition": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["op", "args"],
+      "required": [
+        "op",
+        "args"
+      ],
       "properties": {
-        "op": {"enum": ["le", "lt", "ge", "gt"]},
-        "args": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/expression"}}
+        "op": {
+          "enum": [
+            "le",
+            "lt",
+            "ge",
+            "gt"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/expression"
+          }
+        }
       }
+    },
+    "source": {
+      "enum": [
+        "world",
+        "robot-profile",
+        "configuration-profile"
+      ]
     }
   }
 }

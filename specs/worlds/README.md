@@ -59,6 +59,10 @@ and these rules, which a schema cannot express:
   reference point, and stays at least `clear_width ÷ 2` from every wall, so it
   runs down the middle of each hallway.
 - `spawn-entrance` is a pose on the route, facing along the route leg it lies on.
+- Every pose place is at least 0.25 m from every wall in the floor plane, so a
+  robot is never placed against a wall.
+- The frame is right-handed with `+z` up and the floor top surface at `z = 0`.
+  A pose's yaw is in degrees, counterclockwise about `+z` from `+x`.
 
 Distances are compared within the world's `tolerances.distance_m` and angles
 within `tolerances.angle_deg`.

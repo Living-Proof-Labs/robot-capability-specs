@@ -113,13 +113,34 @@ format, so a verifier and an evaluator compute limits from one file instead of
 keeping their own copy of each formula. It names the places used in the world
 (`spawn-entrance`, `exit` and the route `passage-centreline`), the constant
 `[command_speed, 0, 0]` command, the shared parameters and the trial rule, and
-writes each limit and precondition as an arithmetic expression over named
-inputs. `route_length` is measured along the route from the point nearest the
-start pose to the exit: 5.5 m in `hallway-open` 0.1.0. Lateral distance is the
-distance from the route, which in this straight hallway is the sideways
-distance from the centreline. The catalog tests check that the file reproduces
-the limits capability-verifier v1.18.1 grades against. This README stays
-normative, and the two must agree.
+writes each limit and precondition as an expression over named inputs.
+
+- **Inputs.** `route_length` is measured along the route from the point on it
+  nearest the start pose to the route's last point, the exit reference point:
+  5.5 m in `hallway-open` 0.1.0. A profile value such as `dimensions.width`
+  resolves to its `value`, and its unit must be the declared unit. The robot
+  class selects the wall clearance. A missing input, a wrong unit, an unknown
+  class or a result that is not finite is a test-system `ERROR`.
+- **Rounding.** `time_limit`, `lateral_limit` and `exit_segment` are rounded to
+  4 decimal places the way Python's `round()` does, ties to even on the exact
+  binary value, so 0.40625 gives 0.4062.
+- **Fit.** `fits_width` compares whole millimetres: each value is rounded half
+  up from its decimal text before adding, so 1.03 m + 2 × 0.05 m fits a 1.13 m
+  hallway exactly.
+- **Places, not axes.** The body point is the base origin at each recorded
+  sample. The exit counts at the first sample on or past the exit line,
+  measured along the route's last leg, with the base point within half the
+  segment's length of the exit reference point. Distance from the route extends
+  its first and last legs past their ends. Limits fail only when strictly
+  exceeded. In `hallway-open` these are today's checks: `x ≥ 3.00` with
+  `|y| ≤ 0.75`, and lateral `|y|`.
+
+[parameter-cases.json](parameter-cases.json) lists conformance cases with
+the values capability-verifier v1.18.1 resolves, including the ties and exact
+fits. The catalog's reference evaluator,
+`tooling/scenario-parameters.mjs`, passes
+every case, and other implementations can run the same cases. This README stays
+normative, and the files must agree with it.
 
 ## Description text
 

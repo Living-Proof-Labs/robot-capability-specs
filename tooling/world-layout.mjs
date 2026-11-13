@@ -3,6 +3,7 @@
 // that JSON Schema cannot express, and the route measures a scenario reads from a world.
 // Reference implementation for the catalog tests; consumers may implement the same rules.
 const EPS = 1e-9;
+const SPAWN_CLEARANCE = 0.25; // m, every pose place from every wall
 
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
@@ -52,7 +53,8 @@ export function stationOf(route, p) {
   return { distance: best[0], station: best[1], length: walked };
 }
 
-// route_length: from the point on the route nearest the start pose to the route's end on the exit.
+// route_length: from the point on the route nearest the start pose to the route's last point,
+// which the layout contract places at the exit reference point.
 export function routeLength(world, { start, route }) {
   const places = Object.fromEntries(world.places.map(p => [p.name, p]));
   const s = stationOf(places[route], places[start].position);
@@ -103,6 +105,11 @@ export function layoutErrors(world, { route: routeName }) {
   for (const w of walls) {
     for (const [a, b] of routeLegs(route)) {
       if (legToBox(a, b, w) < d.clear_width / 2 - tol) errors.push(`${routeName}: passes closer than clear_width / 2 to ${w.name}`);
+    }
+  }
+  for (const p of world.places.filter(q => q.type === 'pose')) {
+    if (Math.min(...walls.map(w => pointToBox(p.position, w))) < SPAWN_CLEARANCE - EPS) {
+      errors.push(`${p.name}: closer than ${SPAWN_CLEARANCE} m to a wall`);
     }
   }
   const spawn = places['spawn-entrance'];
