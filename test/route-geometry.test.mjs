@@ -50,6 +50,9 @@ test('route geometry cases match the place terms in both closed form and the ref
   assert.ok(straight.crossings.some(q => q.name.includes('second sample is inside')));
   assert.ok(corner.distances.some(q => q.name.includes('endpoint')));
   assert.ok(corner.distances.some(q => q.name.includes('tie')));
+  const outsideCorner = corner.distances.find(q => q.point[0] === 0.5 && q.point[1] === 0.5);
+  assert.equal(outsideCorner.name, 'outside the corner, nearer the last leg');
+  assert.equal(outsideCorner.distance, 0.5);
   assert.ok(corner.crossings.some(q => q.name.includes('second sample is outside')));
   assert.ok(corner.crossings.some(q => q.name.includes('second sample is inside')));
   for (const query of straight.distances) {

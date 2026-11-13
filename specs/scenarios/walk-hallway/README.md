@@ -150,8 +150,12 @@ strictly before the exit line and the second sample is at `x ≥ 3.0` with
 The point where the step meets the line is not tested. A consumer stops at
 the first step for which the crossing is true.
 [route-geometry-cases.json](../route-geometry-cases.json) records those cases
-and the same measures on an L-shaped route. The JavaScript reference and the
-Python package `livingproof_scenario_parameters` both have to pass them.
+and the same measures on an L-shaped route. The legs extend only at the
+route's start and end, not through a corner. Cutting an inside corner uses
+the nearer leg. Outside a corner the distance is stricter than the walls by
+up to √2, because overshoot is measured from the vertex. The JavaScript
+reference and the Python package `livingproof_scenario_parameters` both have
+to pass them.
 
 ## Description text
 

@@ -222,6 +222,9 @@ class ScenarioParameterTests(unittest.TestCase):
         self.assertTrue(any('second sample is outside' in query['name'] for query in straight['crossings']))
         self.assertTrue(any('second sample is inside' in query['name'] for query in straight['crossings']))
         self.assertTrue(any('tie' in query['name'] for query in corner['distances']))
+        outside = next(query for query in corner['distances'] if query['point'][:2] == [0.5, 0.5])
+        self.assertEqual(outside['name'], 'outside the corner, nearer the last leg')
+        self.assertEqual(outside['distance'], 0.5)
         self.assertTrue(any('second sample is outside' in query['name'] for query in corner['crossings']))
         self.assertTrue(any('second sample is inside' in query['name'] for query in corner['crossings']))
         for query in straight['distances']:

@@ -332,6 +332,12 @@ test('route distance is |y| on the straight route, continuous round a corner and
   // Inside the corner it is from the nearer leg.
   assert.equal(distanceToRoute(ROUTES.left.points, [-0.5, 0.25]), 0.25);
   assert.equal(distanceToRoute(ROUTES.left.points, [-0.49, 0.49]), 0.49);
+  // Outside, (a, -a) is measured from the vertex: a * √2, stricter than the
+  // perpendicular distance a to either extended leg by up to √2.
+  const a = 0.4;
+  const fromVertex = distanceToRoute(ROUTES.left.points, [a, -a]);
+  assert.equal(fromVertex, Math.sqrt(a * a + a * a));
+  assert.ok(Math.abs(fromVertex / a - Math.SQRT2) < 1e-12);
 });
 
 // Probes that differed between the references at 4e673d3: distances measured from a

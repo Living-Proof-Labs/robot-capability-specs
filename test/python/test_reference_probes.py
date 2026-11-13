@@ -223,6 +223,11 @@ class RouteGeometryEdges(unittest.TestCase):
         self.assertEqual(distance_to_route(LEFT, [0, -1]), 1)
         self.assertEqual(distance_to_route(LEFT, [-0.5, 0.25]), 0.25)  # inside: from the nearer leg
         self.assertEqual(distance_to_route(LEFT, [-0.49, 0.49]), 0.49)
+        # Outside, (a, -a) is measured from the vertex: a * sqrt(2).
+        offset = 0.4
+        from_vertex = distance_to_route(LEFT, [offset, -offset])
+        self.assertEqual(from_vertex, math.sqrt(offset * offset + offset * offset))
+        self.assertAlmostEqual(from_vertex / offset, math.sqrt(2))
         for x in (-10, -3, 0, 1.234, 3, 10):
             for y in (-0.75, -0.49, 0.4795, 0.49, 0.609, 0.75, 2):
                 self.assertEqual(distance_to_route(HALLWAY, [x, y, 0]), abs(y))
