@@ -105,6 +105,22 @@ A configuration that falls is a valid `FAIL`, reported and not retried. In a
 deterministic simulator, identical trials that disagree are a reproducibility
 finding about the test system.
 
+## Parameter file
+
+[parameters.json](parameters.json) states the acceptance above in the
+[`livingproof-scenario-parameters/0.1`](../scenario-parameters.schema.json)
+format, so a verifier and an evaluator compute limits from one file instead of
+keeping their own copy of each formula. It names the places used in the world
+(`spawn-entrance`, `exit` and the route `passage-centreline`), the constant
+`[command_speed, 0, 0]` command, the shared parameters and the trial rule, and
+writes each limit and precondition as an arithmetic expression over named
+inputs. `route_length` is measured along the route from the point nearest the
+start pose to the exit: 5.5 m in `hallway-open` 0.1.0. Lateral distance is the
+distance from the route, which in this straight hallway is the sideways
+distance from the centreline. The catalog tests check that the file reproduces
+the limits capability-verifier v1.18.1 grades against. This README stays
+normative, and the two must agree.
+
 ## Description text
 
 [description.json](description.json) carries the human-readable mission and world

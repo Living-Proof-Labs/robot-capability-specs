@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# World contract, revision 0.2.0
+# World contract, revision 0.3.0
 
 Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
 
@@ -38,6 +38,38 @@ are one selected world and consumer matrix; they do not constrain other worlds.
 A world may declare named places in its own frame: points, line segments,
 regions, polylines, and poses. Consumers and scenarios refer to a place by name
 and world version, never by re-deriving its coordinates in consumer code.
+
+## Any layout
+
+Revision 0.3.0 adds a layout contract for scenarios that need more than a
+straight hallway. A world conforms to it when it meets
+[world-layout.schema.json](world-layout.schema.json) (`livingproof-world-layout/0.1`)
+and these rules, which a schema cannot express:
+
+- Every floor and wall is an axis-aligned box: a centre and a size, with no
+  rotation. Walls may form any layout, such as two hallways meeting at a corner.
+  No two boxes overlap, though they may touch.
+- Each floor's top surface is at `z = 0` and it is `floor_thickness` thick.
+  Each wall rises from `z = 0` to `wall_height` and is `wall_thickness` thick
+  across its thin side.
+- `entrance` and `exit` are segments on the floor that span `clear_width`, with
+  their reference point at the midpoint.
+- The route is a polyline on the floor with at least 2 points and no repeated
+  point. It starts at the `entrance` reference point, ends at the `exit`
+  reference point, and stays at least `clear_width ÷ 2` from every wall, so it
+  runs down the middle of each hallway.
+- `spawn-entrance` is a pose on the route, facing along the route leg it lies on.
+
+Distances are compared within the world's `tolerances.distance_m` and angles
+within `tolerances.angle_deg`.
+
+A scenario names its route polyline in its
+[parameter file](../scenarios/walk-hallway/parameters.json) and measures
+`route_length` along it, from the point nearest the start pose to the exit.
+Worlds written for this layout revision name the route `route-centreline`.
+`hallway-open` 0.1.0 predates that name. Its route is `passage-centreline`, and
+it conforms unchanged: its released bytes are tested against this contract,
+with a route length of 5.5 m.
 
 ## Unsupported features
 
