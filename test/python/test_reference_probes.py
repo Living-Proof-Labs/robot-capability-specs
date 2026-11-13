@@ -172,6 +172,14 @@ STEPS = [
     ('on the - endpoint', (2.9, -0.75), (3.1, -0.75), True),
     ('along the line', (3, -0.5), (3, 0.5), False),
     ('backward across the line', (3.1, 0.25), (2.9, 0.25), False),
+    # Meeting point on the segment, second sample outside: does not cross.
+    ('meeting point on the endpoint, second sample outside', (2.5, 0), (3.5, 1.5), False),
+    ('meeting point inside, second sample outside', (2.9, 0.7), (3.5, 0.95), False),
+    ('one centimetre step, second sample outside', (2.996, 0.7475), (3.006, 0.7505), False),
+    # Meeting point outside the segment, second sample inside: does cross.
+    ('meeting point outside, second sample inside', (2, 2), (4, 0), True),
+    ('meeting point outside the band, second sample inside', (2.8, 0.9), (3.2, 0.7), True),
+    ('one centimetre step, second sample inside', (2.996, 0.7525), (3.006, 0.7495), True),
 ]
 
 

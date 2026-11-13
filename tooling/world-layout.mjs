@@ -164,10 +164,14 @@ export function distanceToRoute(points, point) {
   return best;
 }
 
-// A step crosses the exit when it goes from strictly before the exit line to on
-// or past it, on the side the route's last leg points toward, and the meeting
-// point lies on the segment, endpoints included. A step that starts already on
-// or past the line does not cross again. exit is {points: [a, b], reference}.
+// u below is the unit vector along the exit segment (perpendicular to the route's
+// last leg). n is that last leg's direction. The exit line passes through the
+// reference and is perpendicular to the last leg. A step crosses when p0 is
+// strictly before the line and p1 is on or past it, and the second sample passes
+// the lateral test |dot(p1 - ref, u)| <= half the segment length. The meeting
+// point is not tested. A step that starts already on or past the line does not
+// cross again. On hallway-open this is x >= 3 with |y| <= 0.75 at p1.
+// exit is {points: [a, b], reference}.
 export function crossesExit(p0, p1, points, exit) {
   if (points.length < 2) throw new Error('route needs at least 2 points');
   const leg = sub(xy(points.at(-1)), xy(points.at(-2)));
@@ -182,7 +186,5 @@ export function crossesExit(p0, p1, points, exit) {
   const signed = q => dot(sub(xy(q), ref), n);
   const s0 = signed(p0), s1 = signed(p1);
   if (!(s0 < 0 && s1 >= 0)) return false;
-  const t = s0 / (s0 - s1);
-  const meeting = [p0[0] + t * (p1[0] - p0[0]), p0[1] + t * (p1[1] - p0[1])];
-  return Math.abs(dot(sub(meeting, ref), u)) <= elen / 2;
+  return Math.abs(dot(sub(xy(p1), ref), u)) <= elen / 2;
 }

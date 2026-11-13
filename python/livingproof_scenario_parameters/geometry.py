@@ -102,14 +102,18 @@ def distance_to_route(points, point):
 def crosses_exit(p0, p1, points, exit):
     """Whether the step from ``p0`` to ``p1`` crosses the exit segment.
 
-    The step crosses when it goes from strictly before the line through the exit
-    segment to on or past that line, on the side the route's last leg points
-    toward, and the meeting point lies on the segment (endpoints included).
-    A step that starts already on or past the line does not cross again: that
-    arrival belongs to the earlier step, and a first sample already past the
-    line is judged on its own, not as a step. Landing on the line counts.
-    ``exit`` is ``{"points": [a, b], "reference": midpoint}``; a missing
-    reference is the midpoint of the two points.
+    ``u`` is the direction of the route's last leg. The exit line passes through
+    the exit reference and is perpendicular to ``u``. The step crosses when
+    ``p0`` is strictly before that line and ``p1`` is on or past it, and the
+    second sample is within half the segment's length of the reference along
+    the segment (endpoints included): ``|dot(p1 - ref, u_perp)| <= half``.
+    The point where the step meets the line is not tested. A step that starts
+    already on or past the line does not cross again: that arrival belongs to
+    the earlier step, and a first sample already past the line is judged on
+    its own, not as a step. Landing on the line counts. ``exit`` is
+    ``{"points": [a, b], "reference": midpoint}``; a missing reference is the
+    midpoint of the two points. On hallway-open this is ``x >= 3`` with
+    ``|y| <= 0.75`` at the second sample.
     """
     if len(points) < 2:
         _fail('route needs at least 2 points')
@@ -122,12 +126,15 @@ def crosses_exit(p0, p1, points, exit):
     edge_length = _len(edge)
     if edge_length == 0:
         _fail('exit segment has zero length')
+    # along_unit is u_perp: the unit vector along the exit segment.
     along_unit = (edge[0] / edge_length, edge[1] / edge_length)
     reference = exit.get('reference')
     if reference is None:
         reference = ((edge_start[0] + edge_end[0]) / 2, (edge_start[1] + edge_end[1]) / 2)
     else:
         reference = _xy(reference)
+    # normal is u, the direction of the last leg, when the segment is perpendicular
+    # to that leg. The exit line is the line through the segment, perpendicular to u.
     normal_left = (-along_unit[1], along_unit[0])
     normal_right = (along_unit[1], -along_unit[0])
     normal = normal_left if _dot(normal_left, leg) > 0 else normal_right
@@ -140,7 +147,6 @@ def crosses_exit(p0, p1, points, exit):
     before, after = signed(p0), signed(p1)
     if not (before < 0 <= after):
         return False
-    fraction = before / (before - after)
-    meeting = (p0[0] + fraction * (p1[0] - p0[0]), p0[1] + fraction * (p1[1] - p0[1]))
-    offset = _dot(_sub(meeting, reference), along_unit)
+    # Lateral test on the second sample, along the segment. Not the meeting point.
+    offset = _dot(_sub(_xy(p1), reference), along_unit)
     return abs(offset) <= edge_length / 2

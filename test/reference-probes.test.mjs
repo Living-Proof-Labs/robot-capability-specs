@@ -257,8 +257,9 @@ test('both references give identical route distances and crossings on extra rout
   assertSame(probes);
 });
 
-// The step rule on the straight route, in words. The L and right-turn routes must give the
-// same answers for the same steps rotated into their exit frames.
+// The sample rule on the straight route: p0 strictly before x = 3, and p1 at x >= 3
+// with |y| <= 0.75. The meeting point is not tested. The L and right-turn routes must
+// give the same answers for the same steps rotated into their exit frames.
 const STEPS = [
   ['crosses inside the segment', [2.9, 0], [3.1, 0], true],
   ['starts exactly on the line', [3, 0], [3.2, 0], false],
@@ -275,6 +276,14 @@ const STEPS = [
   ['on the - endpoint', [2.9, -0.75], [3.1, -0.75], true],
   ['along the line', [3, -0.5], [3, 0.5], false],
   ['backward across the line', [3.1, 0.25], [2.9, 0.25], false],
+  // Meeting point on the segment, second sample outside: does not cross.
+  ['meeting point on the endpoint, second sample outside', [2.5, 0], [3.5, 1.5], false],
+  ['meeting point inside, second sample outside', [2.9, 0.7], [3.5, 0.95], false],
+  ['one centimetre step, second sample outside', [2.996, 0.7475], [3.006, 0.7505], false],
+  // Meeting point outside the segment, second sample inside: does cross.
+  ['meeting point outside, second sample inside', [2, 2], [4, 0], true],
+  ['meeting point outside the band, second sample inside', [2.8, 0.9], [3.2, 0.7], true],
+  ['one centimetre step, second sample inside', [2.996, 0.7525], [3.006, 0.7495], true],
 ];
 const toLeft = ([x, y]) => [-y, x];
 const toRight = ([x, y]) => [y, -x];

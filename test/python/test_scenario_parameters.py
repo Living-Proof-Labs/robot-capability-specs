@@ -40,7 +40,14 @@ def load(path):
 
 
 def hallway_crosses(p0, p1):
-    """Forward step on the straight route: meeting point at x = 3 with |y| <= 0.75."""
+    """Forward step on the straight route: x >= 3 with |y| <= 0.75 at the second sample."""
+    if not (p0[0] < 3 <= p1[0]):
+        return False
+    return abs(p1[1]) <= 0.75
+
+
+def hallway_meeting(p0, p1):
+    """Rejected reading: the lateral test at the interpolated meeting point."""
     if not (p0[0] < 3 <= p1[0]):
         return False
     fraction = (3 - p0[0]) / (p1[0] - p0[0])
@@ -57,7 +64,14 @@ def l_distance(point):
 
 
 def l_crosses(p0, p1):
-    """Forward step on the L route: meeting point at y = 3 with |x| <= 0.75."""
+    """Forward step on the L route: y >= 3 with |x| <= 0.75 at the second sample."""
+    if not (p0[1] < 3 <= p1[1]):
+        return False
+    return abs(p1[0]) <= 0.75
+
+
+def l_meeting(p0, p1):
+    """Rejected reading: the lateral test at the interpolated meeting point."""
     if not (p0[1] < 3 <= p1[1]):
         return False
     fraction = (3 - p0[1]) / (p1[1] - p0[1])
@@ -205,8 +219,11 @@ class ScenarioParameterTests(unittest.TestCase):
         self.assertEqual(straight['name'], 'hallway-open passage-centreline')
         self.assertEqual(corner['name'], 'L-shaped route')
         self.assertTrue(any('endpoint' in query['name'] for query in straight['distances']))
-        self.assertTrue(any('tie' in query['name'] for query in straight['crossings']))
+        self.assertTrue(any('second sample is outside' in query['name'] for query in straight['crossings']))
+        self.assertTrue(any('second sample is inside' in query['name'] for query in straight['crossings']))
         self.assertTrue(any('tie' in query['name'] for query in corner['distances']))
+        self.assertTrue(any('second sample is outside' in query['name'] for query in corner['crossings']))
+        self.assertTrue(any('second sample is inside' in query['name'] for query in corner['crossings']))
         for query in straight['distances']:
             self.assertEqual(query['distance'], abs(query['point'][1]), query['name'])
             self.assertEqual(distance_to_route(straight['route'], query['point']), query['distance'], query['name'])
@@ -221,6 +238,33 @@ class ScenarioParameterTests(unittest.TestCase):
             self.assertEqual(query['crosses'], l_crosses(query['p0'], query['p1']), query['name'])
             self.assertEqual(crosses_exit(query['p0'], query['p1'], corner['route'], corner['exit']),
                              query['crosses'], query['name'])
+        # The meeting-point reading must disagree, both ways, on the named cases.
+        disagreed = []
+        for query in straight['crossings']:
+            if 'meeting point' not in query['name'] and 'one centimetre' not in query['name']:
+                continue
+            self.assertNotEqual(hallway_meeting(query['p0'], query['p1']), query['crosses'], query['name'])
+            disagreed.append(query['crosses'])
+        for query in corner['crossings']:
+            if 'meeting point' not in query['name']:
+                continue
+            self.assertNotEqual(l_meeting(query['p0'], query['p1']), query['crosses'], query['name'])
+            disagreed.append(query['crosses'])
+        self.assertIn(True, disagreed)
+        self.assertIn(False, disagreed)
+
+    def test_hallway_open_crossing_is_the_second_sample(self):
+        straight = self.geometry['cases'][0]
+        xs = [-1, 0, 2, 2.5, 2.8, 2.9, 2.996, 3, 3.006, 3.1, 3.2, 3.5, 4]
+        ys = [-1.5, -1, -0.8, -0.75, -0.5, 0, 0.5, 0.7, 0.7475, 0.7495, 0.75,
+              0.7505, 0.7525, 0.8, 0.9, 0.95, 1, 1.5, 2]
+        for x0 in xs:
+            for y0 in ys:
+                for x1 in xs:
+                    for y1 in ys:
+                        expected = x0 < 3 <= x1 and abs(y1) <= 0.75
+                        got = crosses_exit([x0, y0, 0], [x1, y1, 0], straight['route'], straight['exit'])
+                        self.assertEqual(got, expected, f'{x0},{y0} -> {x1},{y1}')
 
     def test_route_length_matches_hallway_open_and_the_l_shape(self):
         hallway = load('test/fixtures/worlds/hallway-open-0.1.0.world.json')

@@ -144,8 +144,11 @@ normative, and the files must agree with it.
 
 Distance from the route and a step across the exit are the same place terms.
 On this straight route the lateral distance is `|y|`, including past either
-end of the centreline, and a step crosses `exit` when it reaches `x ≥ 3.0`
-with `|y| ≤ 0.75` at the meeting point, endpoints included.
+end of the centreline, and a step crosses `exit` when the first sample is
+strictly before the exit line and the second sample is at `x ≥ 3.0` with
+`|y| ≤ 0.75`, endpoints included. The lateral test uses that second sample.
+The point where the step meets the line is not tested. A consumer stops at
+the first step for which the crossing is true.
 [route-geometry-cases.json](../route-geometry-cases.json) records those cases
 and the same measures on an L-shaped route. The JavaScript reference and the
 Python package `livingproof_scenario_parameters` both have to pass them.
