@@ -89,7 +89,7 @@ test('open hallway contract declares named places, tolerances and scope limits',
   assert.match(doc, /within 0\.01 m/);
   assert.match(doc, /0\.10 m\nthick/);
   assert.match(doc, /separate from\nthe world content version/);
-  assert.match(await readFile('specs/worlds/README.md', 'utf8'), /^# World contract, revision 0\.2\.0$/m);
+  assert.match(await readFile('specs/worlds/README.md', 'utf8'), /^# World contract, revision 0\.3\.0$/m);
   assert.match(doc, /0\.5 degrees/);
   assert.match(doc, /0\.10 m-radius non-robot sphere/);
   assert.match(doc, /Equivalent geometry does not imply identical physics/);

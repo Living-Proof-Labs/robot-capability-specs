@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Living-Proof-Labs/robot-capability-specs/specs/worlds/world-layout.schema.json",
+  "title": "livingproof-world-layout/0.1",
+  "description": "The part of a world description that a scenario needs, for any layout: metre units, axis-aligned box geometry (floor and walls, with no rotation), the clear width between walls, and named places including entrance, exit, spawn-entrance and at least one route polyline. Other world fields are allowed and ignored by this contract. The geometric rules a schema cannot express (no overlaps, route endpoints, clearances) are in the world contract README section 'Any layout'.",
+  "type": "object",
+  "required": ["id", "content_version", "units", "dimensions", "geometry", "places", "tolerances"],
+  "properties": {
+    "id": {"$ref": "#/$defs/name"},
+    "content_version": {"type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"},
+    "units": {"const": "m"},
+    "dimensions": {
+      "type": "object",
+      "required": ["clear_width", "wall_height", "wall_thickness", "floor_thickness"],
+      "properties": {
+        "clear_width": {"$ref": "#/$defs/positive"},
+        "wall_height": {"$ref": "#/$defs/positive"},
+        "wall_thickness": {"$ref": "#/$defs/positive"},
+        "floor_thickness": {"$ref": "#/$defs/positive"}
+      }
+    },
+    "geometry": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "description": "An axis-aligned box. There is no rotation field: a rotated or non-box shape is not part of this layout revision.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "role", "centre", "size"],
+        "properties": {
+          "name": {"$ref": "#/$defs/name"},
+          "type": {"const": "box"},
+          "role": {"enum": ["floor", "wall"]},
+          "centre": {"$ref": "#/$defs/vec3"},
+          "size": {"type": "array", "items": {"$ref": "#/$defs/positive"}, "minItems": 3, "maxItems": 3}
+        }
+      },
+      "allOf": [
+        {"contains": {"type": "object", "properties": {"role": {"const": "floor"}}}},
+        {"contains": {"type": "object", "properties": {"role": {"const": "wall"}}}}
+      ]
+    },
+    "places": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {"name": {"$ref": "#/$defs/name"}, "type": {"enum": ["segment", "region", "polyline", "pose"]}},
+        "allOf": [
+          {"if": {"properties": {"type": {"const": "segment"}}}, "then": {"required": ["points", "reference"], "properties": {"points": {"type": "array", "items": {"$ref": "#/$defs/vec3"}, "minItems": 2, "maxItems": 2}, "reference": {"$ref": "#/$defs/vec3"}}}},
+          {"if": {"properties": {"type": {"const": "polyline"}}}, "then": {"required": ["points"], "properties": {"points": {"type": "array", "items": {"$ref": "#/$defs/vec3"}, "minItems": 2}}}},
+          {"if": {"properties": {"type": {"const": "pose"}}}, "then": {"required": ["position", "yaw_deg"], "properties": {"position": {"$ref": "#/$defs/vec3"}, "yaw_deg": {"type": "number"}}}},
+          {"if": {"properties": {"type": {"const": "region"}}}, "then": {"required": ["x", "y"]}}
+        ]
+      },
+      "allOf": [
+        {"contains": {"type": "object", "properties": {"name": {"const": "entrance"}, "type": {"const": "segment"}}}},
+        {"contains": {"type": "object", "properties": {"name": {"const": "exit"}, "type": {"const": "segment"}}}},
+        {"contains": {"type": "object", "properties": {"name": {"const": "spawn-entrance"}, "type": {"const": "pose"}}}},
+        {"contains": {"type": "object", "properties": {"type": {"const": "polyline"}}}}
+      ]
+    },
+    "tolerances": {
+      "type": "object",
+      "required": ["distance_m", "angle_deg"],
+      "properties": {"distance_m": {"$ref": "#/$defs/positive"}, "angle_deg": {"$ref": "#/$defs/positive"}}
+    }
+  },
+  "$defs": {
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "vec3": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}
+  }
+}
