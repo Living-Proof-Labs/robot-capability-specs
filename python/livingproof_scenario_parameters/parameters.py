@@ -8,7 +8,7 @@ Argument order matches ``tooling/scenario-parameters.mjs``:
 
 import json
 import math
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Context, Decimal, ROUND_HALF_UP, localcontext
 
 _ARITHMETIC = {
     'add': lambda a, b: a + b,
@@ -40,7 +40,12 @@ def _is_number(value):
 
 
 def _finite(value):
-    return _is_number(value) and math.isfinite(value)
+    if not _is_number(value):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:  # an int beyond the double range: JavaScript reads it as Infinity
+        return False
 
 
 def _js_integer(value):
@@ -52,13 +57,36 @@ def _js_integer(value):
 
 
 def _js_number(value):
+    """The text JavaScript's String(number) gives, so messages match the JS reference."""
     if isinstance(value, float) and math.isnan(value):
         return 'NaN'
     if value == math.inf:
         return 'Infinity'
     if value == -math.inf:
         return '-Infinity'
-    return str(value)
+    if isinstance(value, int) and not isinstance(value, bool) and abs(value) < 2 ** 53:
+        return str(value)
+    value = float(value)
+    if value == 0:
+        return '0'
+    sign = '-' if value < 0 else ''
+    # repr gives the shortest round-trip digits, as JavaScript does; only the layout differs.
+    mantissa, _, exponent = repr(abs(value)).partition('e')
+    whole, _, fraction = mantissa.partition('.')
+    point = len(whole) + int(exponent or 0)  # decimal point position relative to the digits
+    digits = whole + fraction
+    stripped = digits.lstrip('0')
+    point -= len(digits) - len(stripped)
+    digits = stripped.rstrip('0')
+    count = len(digits)
+    if count <= point <= 21:
+        return sign + digits + '0' * (point - count)
+    if 0 < point <= 21:
+        return sign + digits[:point] + '.' + digits[point:]
+    if -6 < point <= 0:
+        return sign + '0.' + '0' * -point + digits
+    shown = digits[0] + ('.' + digits[1:] if count > 1 else '')
+    return f'{sign}{shown}e{"+" if point > 0 else "-"}{abs(point - 1)}'
 
 
 def _js_json(value):
@@ -66,13 +94,12 @@ def _js_json(value):
 
 
 def _div(left, right):
-    # JavaScript 1/0 is Infinity. Python raises, so the non-finite result is made here.
+    # JavaScript 1/0 is Infinity and 1/-0 is -Infinity. Python raises, so the non-finite
+    # result is made here, with the sign of the zero.
     if right == 0:
-        if left > 0:
-            return math.inf
-        if left < 0:
-            return -math.inf
-        return math.nan
+        if left == 0 or math.isnan(left):
+            return math.nan
+        return math.copysign(math.inf, left) * math.copysign(1.0, right)
     return left / right
 
 
@@ -98,9 +125,12 @@ def quantize_half_up_decimal_text(value, decimals):
     """
     if not _finite(value):
         _fail(f'cannot quantize a non-finite value {_js_number(value)}')
-    quantum = Decimal(1).scaleb(-int(decimals))
-    quantized = Decimal(str(value)).quantize(quantum, rounding=ROUND_HALF_UP)
-    return int(quantized.scaleb(int(decimals)))
+    # Enough precision for any finite double at 9 decimals (the default 28 digits raises
+    # decimal.InvalidOperation from about 1e19 m at 9 decimals).
+    with localcontext(Context(prec=400)):
+        quantum = Decimal(1).scaleb(-int(decimals))
+        quantized = Decimal(str(value)).quantize(quantum, rounding=ROUND_HALF_UP)
+        return int(quantized.scaleb(int(decimals)))
 
 
 def resolve_input(name, spec, raw):
@@ -119,6 +149,8 @@ def resolve_input(name, spec, raw):
         value = raw.get('value')
     if not _finite(value):
         _fail(f'input {name} is not a finite number')
+    if isinstance(value, int) and abs(value) > 2 ** 53:
+        value = float(value)  # JavaScript holds the nearest double, so hold the same
     return value
 
 
@@ -172,6 +204,8 @@ def _numeric_input(parameters, name, inputs):
 def evaluate(expr, parameters, inputs):
     """Evaluate one expression. Same argument order as the JavaScript reference."""
     if _is_number(expr):
+        if isinstance(expr, int) and abs(expr) > 2 ** 53:
+            return float(expr)  # JavaScript holds the nearest double
         return expr
     if not isinstance(expr, dict):
         _fail('not an expression')
@@ -195,7 +229,7 @@ def evaluate(expr, parameters, inputs):
 def _evaluate_quantized(expr, parameters, inputs, decimals):
     if _is_number(expr):
         if not _js_integer(expr):
-            _fail(f'bare number {expr} under quantize must be an integer')
+            _fail(f'bare number {_js_number(expr)} under quantize must be an integer')
         return {'units': int(expr), 'quantity': False}
     if isinstance(expr, dict) and ('input' in expr or 'parameter' in expr):
         return {
@@ -293,7 +327,7 @@ def reference_errors(parameters):
     def walk(expr, where, quantized):
         if _is_number(expr):
             if quantized and not _js_integer(expr):
-                errors.append(f'{where}: bare number {expr} under quantize must be an integer')
+                errors.append(f'{where}: bare number {_js_number(expr)} under quantize must be an integer')
             return
         if not isinstance(expr, dict):
             errors.append(f'{where}: not an expression')

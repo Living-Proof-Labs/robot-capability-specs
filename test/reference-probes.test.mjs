@@ -324,3 +324,38 @@ test('route distance is |y| on the straight route, continuous round a corner and
   assert.equal(distanceToRoute(ROUTES.left.points, [-0.5, 0.25]), 0.25);
   assert.equal(distanceToRoute(ROUTES.left.points, [-0.49, 0.49]), 0.49);
 });
+
+// Probes that differed between the references at 4e673d3: distances measured from a
+// corner vertex or along a diagonal leg (hypot routines differ in the last bit), rounding
+// once q * 10^decimals passes 2^53, quantizing past 28 significant digits, bare numbers
+// below 1e-4 in messages, and division by -0.
+test('both references agree on corner, diagonal, large-value and message probes', () => {
+  const probes = [];
+  const diagonal = { points: [[0, 0, 0], [3, 3, 0]] };
+  const obtuse = { points: [[-3, 0, 0], [0, 0, 0], [3, 1, 0]] };
+  for (let i = 0; i <= 2000; i++) {
+    const angle = 2 * Math.PI * i / 2000;
+    for (const radius of [0.3, 0.49, 0.609]) {
+      const point = [radius * Math.cos(angle), radius * Math.sin(angle), 0];
+      for (const route of [ROUTES.left, ROUTES.right, ROUTES.u, diagonal, obtuse]) probes.push(['distance', [num(route.points), num(point)]]);
+    }
+  }
+  probes.push(['distance', [num(ROUTES.left.points), num([0.0001225, -0.4899999846874998, 0])]]);
+  for (const v of [123456789.12345678, 1e12 + 0.12345, 1e15 + 0.5, 4503599627370497, 1e21, 1.7976931348623157e308, -1e300]) {
+    for (let d = 0; d <= 9; d++) probes.push(['round', [num(v), d]], ['quantize', [num(v), d]]);
+  }
+  assertSame(probes);
+});
+
+test('both references word bare numbers and division by -0 the same way', async () => {
+  const parameters = await json('../specs/scenarios/walk-hallway/parameters.json');
+  const probes = [];
+  for (const v of [0.00005, 0.00001, 1e-7, 1.5e-10, 1.5e21 + 0.5]) {
+    const copy = structuredClone(parameters);
+    copy.preconditions.fits_width.condition.args[0].args[1].args[0] = v;
+    probes.push(['reference_errors', [num(copy)]]);
+  }
+  probes.push(['evaluate', [num({ op: 'div', args: [1, -0] }), num(parameters)]]);
+  probes.push(['evaluate', [num({ op: 'div', args: [-1, -0] }), num(parameters)]]);
+  assertSame(probes);
+});

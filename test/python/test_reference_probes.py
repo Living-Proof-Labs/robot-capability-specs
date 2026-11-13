@@ -123,6 +123,21 @@ class CommandSpeed(unittest.TestCase):
                     self.assertEqual(str(caught.exception), 'command_speed must be greater than 0')
 
 
+class LargeValues(unittest.TestCase):
+    def test_large_values_resolve_or_fail_as_scenario_errors(self):
+        params = load('specs/scenarios/walk-hallway/parameters.json')
+        sample = load('specs/scenarios/walk-hallway/parameter-cases.json')['cases'][0]['inputs']
+        for width in (1e300, 1.7e308, 10 ** 30):
+            with self.subTest(width=width):
+                result = resolve(params, dict(sample, robot_width={'value': width, 'unit': 'm'}))
+                self.assertFalse(result['preconditions']['fits_width'])
+        with self.assertRaises(ScenarioParameterError) as caught:
+            resolve(params, dict(sample, route_length=10 ** 400))
+        self.assertEqual(str(caught.exception), 'input route_length is not a finite number')
+        # JSON integers past 2^53 are held as the nearest double, as JavaScript holds them.
+        self.assertEqual(resolve(params, dict(sample, route_length=2 ** 53 + 1))['inputs']['route_length'], 2.0 ** 53)
+
+
 class Quantize(unittest.TestCase):
     def test_a_whole_float_under_quantize_is_the_same_as_the_integer(self):
         params = load('specs/scenarios/walk-hallway/parameters.json')

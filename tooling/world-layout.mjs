@@ -10,7 +10,8 @@ const SPAWN_CLEARANCE = 0.25; // m, every pose place from every wall
 
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
-const len = a => Math.hypot(a[0], a[1]);
+// Math.sqrt of the sum of squares, not Math.hypot, so Python's math.sqrt gives the same bits.
+const len = a => Math.sqrt(a[0] * a[0] + a[1] * a[1]);
 
 // Nearest point on segment a-b to p, in the floor plane: [distance, fraction along a-b].
 function nearestOnLeg(p, a, b) {

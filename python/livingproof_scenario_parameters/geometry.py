@@ -26,7 +26,11 @@ def _dot(a, b):
     return a[0] * b[0] + a[1] * b[1]
 
 def _len(vector):
-    return math.hypot(vector[0], vector[1])
+    # sqrt(x*x + y*y), not math.hypot: the four IEEE 754 operations give the same bits as
+    # Math.sqrt(x * x + y * y) in tooling/world-layout.mjs. hypot routines differ in the
+    # last bit between Python and V8 (and across Python versions), which can move a
+    # distance across a rounded limit such as 0.49.
+    return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
 
 def _nearest_on_leg(point, start, end):
     """Nearest point on the finite segment start-end. Returns distance and fraction."""
