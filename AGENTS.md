@@ -17,7 +17,7 @@ independent work covered by available instructions. Do not substitute `main` or
 ## Local additions
 
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) for draft PRs, release conventions,
-  maintainer approval, and validation evidence.
+  release-automation activation, and validation evidence.
 - Use Docker, Git, and Task; the tooling image supplies Node.js 24 and npm.
   Run `task verify` (container build, checks, and tests); individual commands are `task setup`, `task check`,
   and `task test`. Use native provider CLIs when authenticated appropriately.
@@ -26,9 +26,10 @@ independent work covered by available instructions. Do not substitute `main` or
 
 ## Local overrides
 
-- The shared rule permits routine authorized merges without a human review gate.
-  This repository's contribution procedure requires maintainer approval to merge
-  or activate release automation; honor that approval requirement.
+- The engineering lead (Rivet) may merge once required checks pass on the exact
+  head revision and verification evidence is recorded. A human approval is not
+  a merge gate. Activating release automation, including enabling publication
+  credentials, still requires the organization owner's approval.
 
 Container override: host Task now delegates to the tooling Docker image. Inside
 that image use `task -t Taskfile.runtime.yml`; no host Node runtime is required.
