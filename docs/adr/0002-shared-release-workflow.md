@@ -5,7 +5,7 @@ workflow and a credential-free Git tag lookup confirmed public source access.
 The source was private when the draft was prepared; migration waited for the owner
 to make it public. No credentials or access settings were changed by this migration.
 
-Use the reusable workflow at:
+The original adoption used the reusable workflow at:
 
 `Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v2.0.0`
 
@@ -45,3 +45,7 @@ After source visibility is verified, run hosted consumer checks before merge, th
 verify the post-merge generated release and tag. Keep generated notes in GitHub
 Releases, without tracked changelogs or version-bump commits. ADR 0001's accepted
 release semantics remain; this changes ownership of machinery, not that policy.
+
+The current caller uses `semantic-release.yml@v7.10.8` after the upgrade in
+[PR #38](https://github.com/Living-Proof-Labs/robot-capability-specs/pull/38).
+The historical v2.0.0 reference above records the original decision.

@@ -221,3 +221,27 @@ def test_keyboard_task_navigation_and_deep_reload(browser, server, javascript):
     # Navigation and identity are ordinary anchors, not dependent on badge scripts.
     assert page.locator('footer a').count() >= 5
     context.close()
+
+
+def test_shared_brand_provenance_and_render(output):
+    lock = json.loads((ROOT / 'docs-brand.lock.json').read_text())
+    assert json.loads((output / 'html/build.json').read_text())['docs_brand'] == lock
+    assert hashlib.sha256((output / 'html/assets/brand.css').read_bytes()).hexdigest() == lock['sha256']
+    for path in (output / 'html').rglob('*.html'):
+        html = path.read_text()
+        assert any(link.endswith('assets/brand.css') for link in Document(html).links), path
+        assert 'data-md-color-primary="indigo"' not in html, path
+        assert 'data-md-color-primary="custom"' in html, path
+
+
+@pytest.mark.parametrize('mode,accent', [('light', 'rgb(15, 118, 110)'),
+                                         ('dark', 'rgb(45, 212, 191)')])
+def test_shared_brand_computed_styles(browser, server, mode, accent):
+    context = browser.new_context(color_scheme=mode)
+    page = context.new_page()
+    page.goto(server + '/specs/v1/index.html')
+    link = page.locator('article a:not(.headerlink)').first
+    expect(link).to_have_css('color', accent)
+    assert 'Instrument Serif' in page.locator('article h1').evaluate('(el) => getComputedStyle(el).fontFamily')
+    assert 'DM Sans' in page.locator('article').evaluate('(el) => getComputedStyle(el).fontFamily')
+    context.close()

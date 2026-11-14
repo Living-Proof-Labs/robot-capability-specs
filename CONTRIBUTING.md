@@ -1,9 +1,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # Contributing
 
-Use the released [shared contribution and release rules](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/CONTRIBUTING.md),
-[developer interface](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/developer-interface.md),
-and [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/independent-review.md).
+Use the released [shared contribution and release rules](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/CONTRIBUTING.md),
+[developer interface](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/developer-interface.md),
+and [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md).
 [AGENTS.md](AGENTS.md) records this repository's explicit adoption and overrides.
 
 ## Catalog additions and override
@@ -21,7 +21,13 @@ separate contract revisions and catalog bundle identity.
 Run `task verify` on the Docker/Task host, or
 `task -t Taskfile.runtime.yml verify` inside the prepared image. The manual's
 Tasks reference is generated from those actual definitions. PRs have no release
-token; catalog publication remains in the separately pinned v2.0.3 workflow.
+token; catalog publication uses the v7.10.8 shared workflow, pinned independently
+in `.github/workflows/release.yml`.
+
+Changes to user-run paths need a verification-agent comment before merge, tied
+to the full candidate commit and reporting passed, failed, blocked and unrun
+checks. Request Light verification for documentation and styling changes; see
+the shared independent review procedure above. Maintainer approval still applies.
 
 Contribute only work you have the right to publish. Preserve
 [path-specific licenses and attribution](LICENSE.md): specifications are CC BY 4.0,

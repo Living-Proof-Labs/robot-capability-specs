@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts/manual'
@@ -40,10 +41,25 @@ def render_tasks(records):
             text += f"### {task['name']}\n\n```text\n{task['summary']}```\n\n"
     return text
 
+def stage_brand():
+    lock = json.loads((ROOT / 'docs-brand.lock.json').read_text())
+    url = f"https://raw.githubusercontent.com/{lock['repository']}/{lock['commit']}/{lock['path']}"
+    with urlopen(url, timeout=30) as response:
+        content = response.read()
+    actual = hashlib.sha256(content).hexdigest()
+    if actual != lock['sha256']:
+        raise ValueError(f"Docs brand checksum mismatch: expected {lock['sha256']}, got {actual}")
+    target = SOURCE / 'assets/brand.css'
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(content)
+    return lock
+
+
 def build():
     OUT.mkdir(parents=True, exist_ok=True)
     shutil.rmtree(SOURCE, ignore_errors=True)
     SOURCE.mkdir()
+    brand = stage_brand()
     paths = [ROOT / p for p in ('README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'LICENSE.md')]
     paths += sorted((ROOT / 'docs').rglob('*.md'))
     paths += sorted((ROOT / 'specs').rglob('*.md'))
@@ -78,7 +94,7 @@ def build():
     shutil.copytree(ROOT / 'LICENSES', SOURCE / 'LICENSES')
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
-    build_info = {'revision': head, 'dirty': dirty, 'generator': 'zensical==0.0.73', 'sources': manifest}
+    build_info = {'revision': head, 'dirty': dirty, 'generator': 'zensical==0.0.73', 'sources': manifest, 'docs_brand': brand}
     records = task_reference()
     build_info['task_sources'] = [{'path': row['path'], 'sha256': row['sha256']} for row in records]
     (SOURCE / 'task-reference.json').write_text(json.dumps(records, indent=2) + '\n')

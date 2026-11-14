@@ -5,8 +5,8 @@
 ## Shared working guidelines
 
 Read and apply the Living Proof Labs baseline at the published version
-`v6.0.0`:
-https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/AGENTS.md
+`v7.10.9`:
+https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/AGENTS.md
 
 Fetch and read that file through authorized tools before relying on it. Read
 relevant linked procedures at the same version. A link does not load instructions.
@@ -35,8 +35,8 @@ that image use `task -t Taskfile.runtime.yml`; no host Node runtime is required.
 
 ## Documentation ownership
 
-Apply the released [documentation recipe](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/documentation-recipe.md)
-and [ownership decision](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/documentation-ownership.md).
+Apply the released [documentation recipe](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/documentation-recipe.md)
+and [ownership decision](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/documentation-ownership.md).
 Root owns organization vision/discovery; shared standards remain in guidelines;
 this repository owns capability requirements, acceptance semantics and revisions.
 Current rendered manual/root/source-directory links are bounded navigation

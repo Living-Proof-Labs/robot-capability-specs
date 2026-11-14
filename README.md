@@ -41,7 +41,7 @@ page identifies the exact source revision.
 ## Collaboration and mirrors
 
 Shared collaboration and engineering procedures belong to
-[collaboration-guidelines v6.0.0](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/collaboration.md).
+[collaboration-guidelines v7.10.9](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/collaboration.md).
 [AGENTS.md](AGENTS.md) adopts that baseline; [CONTRIBUTING.md](CONTRIBUTING.md)
 retains this catalog's additions and maintainer-approval override.
 
@@ -68,7 +68,7 @@ task preview
 Individual commands are `task setup` (build tooling), `task check` (syntax
 and whitespace), and `task test` (tests). `task verify` builds and runs checks
 and tests. Inside the prepared image use `task -t Taskfile.runtime.yml verify`.
-See the released [developer interface](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/developer-interface.md)
+See the released [developer interface](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/developer-interface.md)
 for shared tooling conventions. The manual generates its Tasks reference from
 this repository's actual host and prepared-environment Taskfiles.
 
@@ -93,10 +93,10 @@ pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.
 
 ## Releases
 
-Shared [release policy](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/CONTRIBUTING.md#release-from-main)
-and the separately pinned [v2.0.3 release implementation](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v2.0.3/docs/releases.md)
+Shared [release policy](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/CONTRIBUTING.md#release-from-main)
+and the [v7.10.8 release implementation](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.8/docs/releases.md)
 remain canonical; see [ADR 0002](docs/adr/0002-shared-release-workflow.md).
-The working-guidelines update does not upgrade the release workflow.
+The release workflow remains independently pinned in `.github/workflows/release.yml`.
 
 Catalog tags version the complete bundle; capability revisions identify individual
 contracts. Criteria changes that invalidate previously valid evidence or consumers

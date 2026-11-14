@@ -14,8 +14,8 @@ The initial gaps were no browsable manual, no authoring entry point, no manual
 artifact or browser checks, and no development-container configuration. This
 initial #14 change adopted the shared working baseline from v4.1.0 to
 [v5.0.0](https://github.com/Living-Proof-Labs/collaboration-guidelines/tree/v5.0.0),
-resolved to `dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. The separately pinned
-v2.0.3 release workflow remains unchanged. No local `.agents/skills` exist.
+resolved to `dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. At that time, the separately pinned
+v2.0.3 release workflow remained unchanged. No local `.agents/skills` exist.
 
 ## Bounded feature inventory
 
@@ -67,7 +67,7 @@ failures when available. The Actions summary must show individual cases and
 matching emitted/ingested counts; a report upload alone is not completion.
 A failed test must retain its nonzero exit status. Independent review must repeat
 these checks on the downloaded artifact and post evidence using the pinned
-[review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v6.0.0/docs/independent-review.md).
+[review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md).
 
 The [public manual](https://docs.livingprooflabs.com/robot-capability-specs/) is
 published from main. See [deployment and live verification](../.github/PAGES.md)
@@ -81,8 +81,8 @@ adopts guidelines v6.0.0, resolved to
 `52a2f274576dab20e96ee1152b6c8d187cfbf377`. Shared mechanics now link to their
 released owner; catalog semantics, source paths, historical headings and the
 maintainer-approval override stay here. The prepared #14 publication cleanup is
-included rather than published as a second PR. Release workflow v2.0.3 and
-executable example pins remain unchanged.
+included rather than published as a second PR. That adoption left release workflow v2.0.3 and
+executable example pins unchanged.
 
 The manual adds common root/source/help/license navigation and exact documentation
 identity on every page. Catalog releases remain a separate link, not a badge
@@ -96,3 +96,28 @@ Additional checks preserve historical headings, compare generated Task summaries
 with native output, and exercise nested navigation with keyboard input and deep
 link reload. Root/manual links are current reading destinations; shared guidance
 and executable dependencies remain pinned to explicit releases.
+
+
+## Shared documentation brand
+
+Issue [#44](https://github.com/Living-Proof-Labs/robot-capability-specs/issues/44)
+adopts the released guidelines and docs brand at v7.10.9, commit
+`c5fa9d9794d0ebd289f51b247fe7872de0db9c27`. The root
+`docs-brand.lock.json` records the tag, resolved commit, source path and SHA-256.
+The build downloads that immutable source, rejects checksum mismatches, and
+stages it as `assets/brand.css`; no editable stylesheet copy is maintained here.
+Rendered-page and browser checks guard shared colours and fonts, including
+light/dark modes. The shared stylesheet loads fonts from Google Fonts; fallback
+fonts remain available when that service is unavailable.
+
+The release caller currently uses v7.10.8; the separate dependency PR owns its
+next update. Historical adoption notes above describe their original revisions.
+Tooling-image publication, required checks, weekly drift scheduling and Pages
+HTTPS enforcement remain separate items in #44. The shared Renovate brand-lock
+updater is maintained in collaboration-guidelines, not implemented here.
+
+Before calling this migration live, obtain maintainer approval and merge the
+verified revision, let the main-only Pages build and deployment succeed, then
+check live `build.json` for that clean source and brand lock. Repeat the landing,
+contract links, search, desktop/mobile and light/dark checks on the live URL.
+A local build or draft PR does not establish deployment.
