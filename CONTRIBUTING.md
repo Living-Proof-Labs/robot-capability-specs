@@ -10,8 +10,11 @@ and [independent review procedure](https://github.com/Living-Proof-Labs/collabor
 
 Start with a [catalog issue](https://github.com/Living-Proof-Labs/robot-capability-specs/issues)
 describing the requirement and observable acceptance criteria. Open a draft PR,
-link the issue, and include test evidence. **Do not merge or activate release
-automation without maintainer approval.** This is an explicit local override.
+link the issue, and include test evidence. The engineering lead (Rivet) may merge
+once required checks pass on the exact head revision and verification evidence
+is recorded. A human approval is not a merge gate. Activating release
+automation, including enabling publication credentials, still requires the
+organization owner's approval.
 
 Follow the [authoring guide](docs/authoring.md). Criteria changes that invalidate
 previously valid consumers or evidence are breaking; meaning-preserving
@@ -27,7 +30,7 @@ in `.github/workflows/release.yml`.
 Changes to user-run paths need a verification-agent comment before merge, tied
 to the full candidate commit and reporting passed, failed, blocked and unrun
 checks. Request Light verification for documentation and styling changes; see
-the shared independent review procedure above. Maintainer approval still applies.
+the shared independent review procedure above.
 
 Contribute only work you have the right to publish. Preserve
 [path-specific licenses and attribution](LICENSE.md): specifications are CC BY 4.0,

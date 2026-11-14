@@ -116,8 +116,10 @@ Tooling-image publication, required checks, weekly drift scheduling and Pages
 HTTPS enforcement remain separate items in #44. The shared Renovate brand-lock
 updater is maintained in collaboration-guidelines, not implemented here.
 
-Before calling this migration live, obtain maintainer approval and merge the
-verified revision, let the main-only Pages build and deployment succeed, then
-check live `build.json` for that clean source and brand lock. Repeat the landing,
+Before calling this migration live, the engineering lead may merge the verified
+revision once required checks pass and verification evidence is recorded. Live
+Pages publication remains a separately authorized step. After a successful
+main-only Pages build and deployment, check live `build.json` for that clean
+source and brand lock. Repeat the landing,
 contract links, search, desktop/mobile and light/dark checks on the live URL.
 A local build or draft PR does not establish deployment.
