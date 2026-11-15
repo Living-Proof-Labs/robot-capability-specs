@@ -33,7 +33,7 @@ this catalog contains neither world assets nor engine results.
 
 Two scenarios use these contracts: [walk the open hallway](scenarios/walk-hallway/README.md)
 and [walk around the corner](scenarios/walk-corner/README.md), which turns at a
-right angle between two hallways and is steered by the
-[route follower](scenarios/walk-corner/README.md#the-route-follower). Each has a
-machine-readable parameter file in the
+right angle between two hallways and states only the outcome, so each robot
+adapter that [declares the scenario](robots/README.md#scenario-support) drives
+its robot its own way. Each has a machine-readable parameter file in the
 [scenario parameters format](scenarios/scenario-parameters.schema.json).

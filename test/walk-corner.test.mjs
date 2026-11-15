@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // walk-corner 0.1.0 on hallway-corner 0.1.0 (specs #40, Part B step 9), tested the way
-// walk-hallway is, plus the route-follower command it is the first to use.
+// walk-hallway is. It states only the outcome: no command, and the adapter drives the robot.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -9,9 +9,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import { generateMessages } from '@cucumber/gherkin';
 import { IdGenerator, SourceMediaType } from '@cucumber/messages';
 import { readInputs, referenceErrors, resolve, ScenarioParameterError } from '../tooling/scenario-parameters.mjs';
-import {
-  crossesExit, distanceToRoute, followRoute, layoutErrors, pointAlongRoute, routeLength,
-} from '../tooling/world-layout.mjs';
+import { layoutErrors, routeLength } from '../tooling/world-layout.mjs';
 
 const CORNER = 'specs/scenarios/walk-corner/';
 const HALLWAY = 'specs/scenarios/walk-hallway/';
@@ -20,7 +18,6 @@ const HALLWAY = 'specs/scenarios/walk-hallway/';
 // the released copy once livingproof-worlds releases it (expected v1.3.0).
 const WORLD = 'test/fixtures/worlds/hallway-corner-0.1.0.world.json';
 const WORLD_SHA256 = '8393881e8b38a090f51c3a424ca444623a901f642f75186cb4d41ac7482898f5';
-const FOLLOWER_CASES = 'specs/scenarios/route-follower-cases.json';
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const ajv = () => new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
 const parametersValidator = async () => ajv().compile(await json('specs/scenarios/scenario-parameters.schema.json'));
@@ -80,16 +77,15 @@ test('walk-corner uses the issue #40 step vocabulary: one check per observable s
   for (const c of p.checks) assert.match(c.evaluator, /^corner-/);
 });
 
-test('walk-corner keeps every walk-hallway rule except the places, the command and the checks', async () => {
+test('walk-corner keeps every walk-hallway rule except the places and the checks, and has no command', async () => {
   const corner = await json(CORNER + 'parameters.json');
   const hallway = await json(HALLWAY + 'parameters.json');
   for (const key of ['format', 'parameters', 'inputs', 'limits', 'preconditions']) {
     assert.deepEqual(corner[key], hallway[key], key);
   }
   assert.deepEqual([corner.places.start, corner.places.exit], [hallway.places.start, hallway.places.exit]);
-  assert.deepEqual([corner.command.forward, corner.command.sideways], [hallway.command.forward, hallway.command.sideways]);
   assert.equal(hallway.command.mode, 'constant');
-  assert.equal(corner.command.mode, 'route-follower');
+  assert.equal('command' in corner, false);
 });
 
 test('every walk-corner conformance case resolves exactly', async () => {
@@ -147,15 +143,14 @@ test('walk-corner parameters agree with description.json and the README acceptan
   assert.match(readme, /Route length 5\.5 m/);
   assert.match(readme, /0\.05 m humanoid, 0\.10 m quadruped/);
   assert.match(readme, /\| `trials` \| 1 \|/);
-  assert.match(readme, new RegExp(`\\| \`lookahead\` \\| ${p.command.turn_rate.lookahead.value} m \\|`));
-  assert.match(readme, new RegExp(`\\| \`max_turn_rate\` \\| ${p.command.turn_rate.max_turn_rate.value.toFixed(1)} rad/s \\|`));
-  assert.match(readme, /`pure-pursuit-v1`/);
-  assert.match(readme, /`turn_interface`/);
+  assert.match(readme, /`scenario_supported`/);
+  assert.ok(readme.includes('](../../robots/README.md#scenario-support)'));
+  assert.doesNotMatch(readme, /follower|pursuit|lookahead|turn_interface|velocity_interface/);
   for (const c of p.checks) assert.match(readme, new RegExp('`' + c.evaluator + '`'), c.evaluator);
   for (const name of ['clear width ÷ 2 − robot width ÷ 2', 'robot width + 2 × `wall_clearance` ≤ clear width']) {
     assert.ok(readme.includes(name), name);
   }
-  for (const link of ['parameters.json', 'parameter-cases.json', 'description.json', 'walk-corner.feature', '../route-follower-cases.json']) {
+  for (const link of ['parameters.json', 'parameter-cases.json', 'description.json', 'walk-corner.feature']) {
     assert.ok(readme.includes(`](${link})`), link);
   }
 });
@@ -203,119 +198,35 @@ test('walk-corner Gherkin parses, uses the step vocabulary and names every evalu
   ]) assert.ok(walk.includes(step), step);
   const p = await json(CORNER + 'parameters.json');
   for (const c of p.checks) assert.ok(steps.some(e => e.includes('"' + c.evaluator + '"')), c.evaluator);
-  assert.ok(steps.some(e => e.includes('precondition "turn_interface"')));
+  assert.ok(steps.some(e => e.includes('precondition "scenario_supported"')));
   assert.ok(steps.some(e => e.includes('precondition "fits_width"')));
-  assert.ok(steps.some(e => e.includes('rule "pure-pursuit-v1"')));
+  assert.ok(walk.includes('robot manifest lists scenario "walk-corner"'));
+  assert.ok(walk.includes('the robot adapter drives the robot its own way'));
+  assert.doesNotMatch(source, /pursuit|follower|turn rate|turn_interface/);
   assert.match(source, /\| 1\s+\| 0\s+\| 0\s+\| 1\s+\| INSUFFICIENT_EVIDENCE \|/);
 });
 
-test('the route-follower cases match the reference: exact zeros, the rest within tolerance', async () => {
-  const doc = await json(FOLLOWER_CASES);
-  assert.equal(doc.format, 'livingproof-route-follower-cases/0.1');
-  assert.equal(doc.rule, 'pure-pursuit-v1');
-  const p = await json(CORNER + 'parameters.json');
-  const t = p.command.turn_rate;
-  assert.deepEqual(doc.follower, {
-    forward: p.parameters.command_speed.value, sideways: p.command.sideways,
-    lookahead: t.lookahead.value, max_turn_rate: t.max_turn_rate.value,
-  });
-  const options = { forward: doc.follower.forward, sideways: doc.follower.sideways, lookahead: doc.follower.lookahead, maxTurnRate: doc.follower.max_turn_rate };
-  let exact = 0, clamped = 0;
-  for (const c of doc.cases) {
-    for (const s of c.steps) {
-      const got = followRoute(c.route, s.base, s.yaw_deg * Math.PI / 180, options);
-      assert.equal(got.length, 3);
-      for (let i = 0; i < 3; i++) {
-        if (s.command[i] === 0) { assert.ok(Object.is(got[i], 0), `${c.name}: ${s.name} [${i}] must be exactly 0`); exact++; }
-        else assert.ok(Math.abs(got[i] - s.command[i]) <= doc.tolerance, `${c.name}: ${s.name} [${i}] ${got[i]} vs ${s.command[i]}`);
-      }
-      if (Math.abs(s.command[2]) === doc.follower.max_turn_rate) clamped++;
-    }
-  }
-  assert.ok(exact >= 10 && clamped === 2);
-  // The straight-route steps are exactly the walk-hallway constant command.
-  for (const s of doc.cases[0].steps) assert.deepEqual(s.command, [0.5, 0, 0]);
-});
-
-test('the follower measures along the route, past the end and on ties as the rule states', () => {
-  const L = [[-3, 0, 0], [0, 0, 0], [0, 3, 0]];
-  assert.deepEqual(pointAlongRoute(L, 0), [-3, 0]);
-  assert.deepEqual(pointAlongRoute(L, 3.75), [0, 0.75]);
-  assert.deepEqual(pointAlongRoute(L, 6.5), [0, 3.5]);
-  assert.deepEqual(pointAlongRoute(L, -1), [-3, 0]);
-  // (-0.5, 0.5) is 0.5 m from both legs; the earlier leg wins, so the target is (0, 0.25).
-  const got = followRoute(L, [-0.5, 0.5], 0, { forward: 0.5, lookahead: 0.75, maxTurnRate: 1 });
-  const alpha = Math.atan2(0.25 - 0.5, 0 + 0.5);
-  assert.ok(Math.abs(got[2] - 2 * 0.5 * Math.sin(alpha) / 0.75) < 1e-12);
-  assert.throws(() => followRoute(L, [0, 0], 0, { forward: 0.5, lookahead: 0, maxTurnRate: 1 }), /lookahead/);
-  assert.throws(() => followRoute(L, [0, 0], 0, { forward: 0.5, lookahead: 0.75, maxTurnRate: 0 }), /max_turn_rate/);
-});
-
-test('an ideal robot steered by the follower walks around the corner and meets every walk-corner check', async () => {
-  // Kinematic check only: a unicycle that turns exactly as commanded, at the controller
-  // rate of the example profiles. It shows the rule and its values can pass the scenario;
-  // it says nothing about a real robot or controller.
-  const p = await json(CORNER + 'parameters.json');
-  const world = await json(WORLD);
-  const places = placesOf(world);
-  const route = places['route-centreline'].points;
-  const walls = world.geometry.filter(g => g.role === 'wall');
-  const corner = places.corner;
-  const t = p.command.turn_rate;
-  const options = { forward: p.parameters.command_speed.value, lookahead: t.lookahead.value, maxTurnRate: t.max_turn_rate.value };
-  const limits = resolve(p, (await json(CORNER + 'parameter-cases.json')).cases[2].inputs).limits; // T1, the tightest
-  let [x, y] = places['spawn-entrance'].position;
-  let yaw = places['spawn-entrance'].yaw_deg * Math.PI / 180;
-  const dt = 0.02;
-  let time = 0, entered = null, exitTime = null, maxDistance = 0, minWallGap = Infinity, maxTurn = 0;
-  while (time < limits.time_limit && exitTime === null) {
-    const [v, , w] = followRoute(route, [x, y], yaw, options);
-    maxTurn = Math.max(maxTurn, Math.abs(w));
-    const next = [x + v * Math.cos(yaw) * dt, y + v * Math.sin(yaw) * dt];
-    yaw += w * dt;
-    time += dt;
-    if (crossesExit([x, y], next, route, places.exit)) exitTime = time;
-    [x, y] = next;
-    if (entered === null && x >= corner.x[0] && x <= corner.x[1] && y >= corner.y[0] && y <= corner.y[1]) entered = time;
-    maxDistance = Math.max(maxDistance, distanceToRoute(route, [x, y]));
-    for (const wall of walls) {
-      const dx = Math.max(Math.abs(x - wall.centre[0]) - wall.size[0] / 2, 0);
-      const dy = Math.max(Math.abs(y - wall.centre[1]) - wall.size[1] / 2, 0);
-      minWallGap = Math.min(minWallGap, Math.hypot(dx, dy));
-    }
-  }
-  assert.ok(exitTime !== null && exitTime <= limits.time_limit, `exit at ${exitTime}`);
-  assert.ok(entered !== null && entered <= exitTime, `corner at ${entered}`);
-  assert.ok(maxDistance < 0.2 && maxDistance <= limits.lateral_limit, `route distance ${maxDistance}`);
-  assert.ok(minWallGap > 0.5, `wall gap ${minWallGap}`);
-  assert.ok(maxTurn <= options.maxTurnRate && maxTurn > 0.5, `turn rate ${maxTurn}`);
-});
-
-test('the command schema accepts the follower only in route-follower mode', async () => {
+test('the command is optional: walk-corner has none, walk-hallway keeps its constant command', async () => {
   const validate = await parametersValidator();
   const corner = await json(CORNER + 'parameters.json');
   const hallway = await json(HALLWAY + 'parameters.json');
+  assert.ok(validate(hallway), JSON.stringify(validate.errors));
+  const schema = await json('specs/scenarios/scenario-parameters.schema.json');
+  assert.equal(schema.required.includes('command'), false);
+  assert.deepEqual(schema.properties.command.properties.mode.enum, ['constant']);
+  const withoutCommand = structuredClone(hallway);
+  delete withoutCommand.command;
+  assert.ok(validate(withoutCommand), JSON.stringify(validate.errors));
+  assert.deepEqual(referenceErrors(withoutCommand), []);
+  // A command that is present must still be a whole constant command.
   const bad = [
-    [corner, p => { p.command.mode = 'constant'; }],
-    [corner, p => { p.command.turn_rate = 0; }],
-    [corner, p => { p.command.turn_rate.rule = 'stanley'; }],
-    [corner, p => { p.command.turn_rate.lookahead.value = 0; }],
-    [corner, p => { p.command.turn_rate.lookahead.unit = 'cm'; }],
-    [corner, p => { p.command.turn_rate.max_turn_rate.unit = 'deg/s'; }],
-    [corner, p => { delete p.command.turn_rate.max_turn_rate; }],
-    [corner, p => { p.command.turn_rate.gain = 2; }],
-    [hallway, p => { p.command.turn_rate = structuredClone(corner.command.turn_rate); }],
+    p => { p.command = { mode: 'constant', forward: { parameter: 'command_speed' }, sideways: 0 }; },
+    p => { p.command = { mode: 'route-follower', forward: 0.5, sideways: 0, turn_rate: 0 }; },
+    p => { p.command = {}; },
   ];
-  for (const [good, mutate] of bad) {
-    const p = structuredClone(good);
+  for (const mutate of bad) {
+    const p = structuredClone(corner);
     mutate(p);
     assert.equal(validate(p), false, mutate.toString());
   }
-  // The reference checker reports the same mistakes when the schema is not run.
-  const unchecked = structuredClone(corner);
-  unchecked.command.turn_rate.rule = 'stanley';
-  unchecked.command.turn_rate.lookahead.value = 0;
-  const errors = referenceErrors(unchecked);
-  assert.ok(errors.some(e => /needs rule pure-pursuit-v1, got stanley/.test(e)), JSON.stringify(errors));
-  assert.ok(errors.some(e => /turn_rate\.lookahead must be greater than 0/.test(e)), JSON.stringify(errors));
 });

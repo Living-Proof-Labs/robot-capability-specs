@@ -7,7 +7,7 @@
   },
   "mission": {
     "title": "Walk around the corner",
-    "description": "The robot walks down one hallway, turns the corner, and reaches the end of the next hallway. It starts at the entrance and is commanded to walk forward at 0.5 m/s while the runner steers it along the route. It must pass through the corner and reach the exit, 5.5 m along the route, within 27 s, staying upright, never touching a wall, and staying within its limit of the route.",
+    "description": "The robot walks down one hallway, turns the corner, and reaches the end of the next hallway. It starts at the entrance and gets there its own way: its adapter chooses how to steer it. It must pass through the corner and reach the exit, 5.5 m along the route, within 27 s, staying upright, never touching a wall, and staying within its limit of the route.",
     "success_criteria": [
       {
         "evaluator": "corner-turned",
@@ -31,13 +31,13 @@
       }
     ],
     "grading": "One run is one or more identical trials at the exact nominal pose. The default is 1. A grading policy turns completed trial outcomes into the run grade. ERROR is a test-system status reported on the job and on the trial. It is never a robot grade and is never counted as a robot fail. If no trial completes because of test-system errors, the run is not evaluated and the grade is INSUFFICIENT_EVIDENCE. A failed trial is not retried.",
-    "time_limit_explained": "27 s is twice the time the route takes at the commanded speed, plus 5 s (2 × 5.5 m ÷ 0.5 m/s + 5 s)."
+    "time_limit_explained": "27 s is twice the time the route takes at the reference speed of 0.5 m/s, plus 5 s (2 × 5.5 m ÷ 0.5 m/s + 5 s)."
   },
   "world": {
     "id": "hallway-corner",
     "content_version": "0.1.0",
     "title": "Corner hallway",
-    "description": "Two straight, empty hallways, each 1.50 m wide between the walls, meeting at a right angle, with 2.50 m-high walls. The route runs 6.00 m down the middle of both: 3.00 m to the centre of the corner square, then 3.00 m to the exit. Nothing else is in it: the test is whether the robot can follow the route around the corner.",
+    "description": "Two straight, empty hallways, each 1.50 m wide between the walls, meeting at a right angle, with 2.50 m-high walls. The route runs 6.00 m down the middle of both: 3.00 m to the centre of the corner square, then 3.00 m to the exit. Nothing else is in it: the test is whether the robot can get around the corner.",
     "dimensions": {
       "clear_width": {
         "value": 1.5,

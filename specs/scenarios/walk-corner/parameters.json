@@ -1,5 +1,5 @@
 {
-  "$comment": "Machine-readable acceptance for walk-corner 0.1.0 on hallway-corner 0.1.0 (specs #40, Part B step 9). The README Acceptance table states the same rules; the catalog tests keep them equal (parameter-cases.json, route-follower-cases.json).",
+  "$comment": "Machine-readable acceptance for walk-corner 0.1.0 on hallway-corner 0.1.0 (specs #40, Part B step 9). The README Acceptance table states the same rules; the catalog tests keep them equal (parameter-cases.json). There is no command: the scenario states only the outcome, and the robot adapter drives the robot its own way.",
   "format": "livingproof-scenario-parameters/0.1",
   "scenario": {"id": "walk-corner", "revision": "0.1.0"},
   "world": {"id": "hallway-corner", "content_version": "0.1.0"},
@@ -8,12 +8,6 @@
     "exit": "exit",
     "route": "route-centreline",
     "through": ["corner"]
-  },
-  "command": {
-    "mode": "route-follower",
-    "forward": {"parameter": "command_speed"},
-    "sideways": 0,
-    "turn_rate": {"rule": "pure-pursuit-v1", "lookahead": {"value": 0.75, "unit": "m"}, "max_turn_rate": {"value": 1.0, "unit": "rad/s"}}
   },
   "parameters": {
     "command_speed": {"value": 0.5, "unit": "m/s"},

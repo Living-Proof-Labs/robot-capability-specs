@@ -6,9 +6,9 @@ Feature: Walk around the corner
 
   Scenario Outline: A robot walks around the corner
     Given world "hallway-corner" at its pinned version in simulator <simulator>
-    And robot <robot> with configuration profile <configuration>
+    And robot <robot> with configuration profile <configuration>, whose robot manifest lists scenario "walk-corner"
     And the robot stands at the exact nominal pose "spawn-entrance" facing along "route-centreline"
-    When the runner commands the README parameter command_speed and steers along "route-centreline" with rule "pure-pursuit-v1"
+    When the robot adapter drives the robot its own way
     Then the base enters "exit" within the README parameter time_limit
     And the base passes through "corner" before it enters "exit"
     And the base stays within the README parameter lateral_limit of "route-centreline"
@@ -48,11 +48,12 @@ Feature: Walk around the corner
     Then any FAIL makes the trial FAIL even when another observation is missing
     And the missing observation is still reported as a test-system ERROR on the trial
 
-  Scenario: The runner steers along the route
-    Given the base on a straight leg of "route-centreline" and facing along it
-    When the runner computes the command with rule "pure-pursuit-v1"
-    Then the command is exactly the README parameter command_speed forward, zero sideways and zero turn rate
-    And the turn rate never exceeds the README parameter max_turn_rate in either direction
+  Scenario: The adapter drives the robot its own way
+    Given a robot manifest that lists scenario "walk-corner"
+    When a walk-corner trial runs
+    Then the runner sends no command from the scenario
+    And the adapter drives the robot with its own steering, mission or other interface
+    And only the observed outcome is assessed, with "route-centreline" as the reference path
 
   Scenario Outline: A grading policy turns trial outcomes into the run grade
     Given a walk-corner run of <trials> identical trials at the nominal start
@@ -82,6 +83,6 @@ Feature: Walk around the corner
     And no trial is run
 
     Examples:
-      | precondition   | unmet                                                              |
-      | fits_width     | width plus twice its wall_clearance is more than the clear width   |
-      | turn_interface | selected configuration profile does not accept a turn-rate command |
+      | precondition       | unmet                                                            |
+      | fits_width         | width plus twice its wall_clearance is more than the clear width |
+      | scenario_supported | robot manifest does not list scenario "walk-corner"              |

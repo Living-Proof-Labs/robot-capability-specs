@@ -22,9 +22,9 @@ profiles. Formats are defined in
 | As a robot maker, I want my robot walked around a standard corner with its own published controller, so that I can show it turns in a narrow passage without touching the walls or falling. | `A robot walks around the corner` |
 | As a verifier, I want the corner judged against each robot's own size and configuration, so that a humanoid and a quadruped are held to fair, declared thresholds. | `A robot walks around the corner` |
 | As a reader of a report, I want turning the corner to be its own step, so that "never reached the corner" and "turned the corner but drifted" are different results. | `The verifier assesses each trial with the corner evaluators` |
-| As a verifier, I want every robot steered by the same declared rule, so that a turn is a test of the controller, not of each runner's own steering. | `The runner steers along the route` |
+| As a robot maker, I want my robot to reach the exit its own way, with joystick steering, a mission or anything else my adapter implements, so that the corner tests the outcome, not one shared way of driving. | `The adapter drives the robot its own way` |
 | As a reviewer, I want every trial reported, including failures and test-system errors, with versions, so that a run grade is honest and reproducible. | `Repeated trials are reported in full` |
-| As a verifier, I want a robot that cannot fit, or cannot be told to turn, reported as `UNSUPPORTED` before it runs, so that a non-result is never shown as a pass or a failure. | `A robot that cannot meet the preconditions` |
+| As a verifier, I want a robot that cannot fit, or whose adapter does not declare this scenario, reported as `UNSUPPORTED` before it runs, so that a non-result is never shown as a pass or a failure. | `A robot that cannot meet the preconditions` |
 
 Examples: [walk-corner.feature](walk-corner.feature).
 
@@ -70,21 +70,20 @@ Each rationale names the check, the time and the margin, for example
 
 | Parameter | Value | Source |
 | --- | --- | --- |
-| `command_speed` | 0.5 m/s | Shared with walk-hallway, so robots, configurations and scenarios are comparable |
+| `command_speed` | 0.5 m/s | The reference speed the time limit assumes, shared with walk-hallway. Nothing is sent at this speed: the adapter chooses how fast to go. |
 | `time_limit` | 2 × route length ÷ `command_speed` + 5 s | Route length 5.5 m |
 | `fall_height` | `locomotion.fall_base_height` | Selected configuration profile |
 | `wall_clearance` | 0.05 m humanoid, 0.10 m quadruped | Robot class |
 | `lateral_limit` | clear width ÷ 2 − robot width ÷ 2 | World and robot profile |
-| `lookahead` | 0.75 m | Route follower, the same for every robot |
-| `max_turn_rate` | 1.0 rad/s | Route follower, the same for every robot |
 | `trials` | 1 | Default. Further identical trials show repeatability. A failed trial is not retried. |
 | Start | exact nominal pose at `spawn-entrance` | A different start, such as a spawn offset of +5 cm, is a declared comparison change. |
 
 Preconditions, checked before any trial and giving `UNSUPPORTED` when unmet:
 `fits_width` (robot width + 2 × `wall_clearance` ≤ clear width),
-`configuration_offered`, `velocity_interface`, `turn_interface` (the selected
-configuration profile states that its velocity command accepts a turn rate)
-and `simulator_declared`.
+`configuration_offered`, `scenario_supported` (the robot manifest's
+`scenarios` list names `walk-corner`; see
+[Scenario support](../../robots/README.md#scenario-support)) and
+`simulator_declared`.
 
 ## The world
 
@@ -105,41 +104,32 @@ provides what this scenario needs:
 Its route length from `spawn-entrance` is 5.5 m, the same as `hallway-open`,
 so `time_limit` is the same 27 s.
 
-## The route follower
+## How the robot is driven
 
-The robot receives only velocity commands through its adapter, as in
-walk-hallway. Here the runner steers: at each control step it sends
-`[command_speed, 0, turn_rate]` (forward m/s, sideways m/s, turn rate rad/s),
-where the turn rate comes from the base pose by the rule `pure-pursuit-v1`:
+This scenario states only the outcome. It has no command: the runner does not
+send the robot a velocity or a steering rule. The robot adapter drives the
+robot from `spawn-entrance` its own way, for example velocity commands with its
+own steering, a mission or waypoint interface, or a planner. It may read the
+world's places, including `route-centreline`. The checks judge only what the
+robot does: whether it passes through `corner` before it reaches `exit` within
+`time_limit`, stays within `lateral_limit` of the route, touches no wall, and
+stays upright.
 
-1. Find the point on `route-centreline` nearest the base origin, and its
-   distance `s` along the route from the first point (the earlier leg on a
-   tie).
-2. Take the target point `lookahead` further along the route, at `s` +
-   `lookahead`. Past the route's end the target continues straight along the
-   last leg.
-3. `alpha` is the heading from the base origin to the target, minus the base
-   yaw, wrapped to [−π, π).
-4. `turn_rate` = 2 × `command_speed` × sin(`alpha`) ÷ `lookahead`, clamped to
-   ±`max_turn_rate`.
-
-On a straight leg, with the base on the route and facing along it, `alpha` is
-exactly 0, so the command is exactly `[command_speed, 0, 0]`, the walk-hallway
-command. The rule and its two values are the same for every robot, so a robot
-that cannot follow the route fails on its own controller. With an ideal robot
-that turns exactly as commanded, the rule keeps the base within about 0.15 m
-of the route around this corner, against limits of 0.4795 m to 0.609 m for the
-current robots (illustrative kinematic estimate, not a measured robot result).
+`route-centreline` is the reference path for evaluation, not a path the robot
+is told to follow. An adapter runs this scenario only when its robot manifest
+lists `walk-corner` in `scenarios`. Otherwise the run is `UNSUPPORTED`
+naming `scenario_supported`, before any trial and never a `FAIL`. The run
+manifest pins the adapter commit and configuration profile, so how the robot
+was driven is reproducible.
 
 ## Parameter file
 
 [parameters.json](parameters.json) states the acceptance above in the
 [`livingproof-scenario-parameters/0.1`](../scenario-parameters.schema.json)
-format, so a verifier and an evaluator compute limits from one file instead of
-keeping their own copy of each formula. It names the places used in the world
+format, with no `command`, so a verifier and an evaluator compute limits from
+one file instead of keeping their own copy of each formula. It names the places used in the world
 (`spawn-entrance`, `exit`, the route `route-centreline`, and `corner` as a place
-to pass through), the `route-follower` command with its rule and values, the
-shared parameters and the trial rule, and writes each limit and precondition as
+to pass through), the shared parameters and the trial rule, and writes each limit and precondition as
 an expression over named inputs. The inputs, rounding, fit check and place terms
 are the same as walk-hallway's: `route_length` is measured along the route
 from the point on it nearest the start pose, limits round to 4 decimal places
@@ -158,11 +148,8 @@ the way Python's `round()` does, and `fits_width` compares whole millimetres.
   half the segment's length of the exit reference point.
 
 [parameter-cases.json](parameter-cases.json) lists conformance cases for the
-G1, Go1 and T1 widths and the fit edges, and
-[route-follower-cases.json](../route-follower-cases.json) lists the follower
-commands on this route and on the straight hallway route. The reference
-implementations, `tooling/scenario-parameters.mjs` and
-`tooling/world-layout.mjs`, and the Python package
+G1, Go1 and T1 widths and the fit edges. The reference implementations,
+`tooling/scenario-parameters.mjs` and `tooling/world-layout.mjs`, and the Python package
 `livingproof_scenario_parameters` pass every case. This README stays normative,
 and the files must agree with it.
 
@@ -181,5 +168,5 @@ README stays normative.
 
 The stories and Gherkin examples are parser-validated in this catalog. Runners,
 recordings and the evaluator live in the simulator and robot repositories. No
-runner implements the `route-follower` command yet, and no robot has been
+robot manifest lists `walk-corner` yet, and no robot has been
 walked around the corner.

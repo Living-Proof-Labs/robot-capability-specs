@@ -352,23 +352,9 @@ def reference_errors(parameters):
             walk(arg, f'{where}.args[{index}]', quantized)
 
     command = parameters.get('command') or {}
-    mode = command.get('mode') if isinstance(command, dict) else None
     for key in ('forward', 'sideways', 'turn_rate'):
-        if key not in command:
-            continue
-        # In route-follower mode turn_rate is the follower rule, not an expression.
-        if key == 'turn_rate' and mode == 'route-follower':
-            rule = command[key] if isinstance(command[key], dict) else {}
-            if rule.get('rule') != 'pure-pursuit-v1':
-                shown = rule.get('rule', 'undefined')
-                errors.append(f'command.turn_rate: route-follower needs rule pure-pursuit-v1, got {shown}')
-            for name in ('lookahead', 'max_turn_rate'):
-                quantity = rule.get(name)
-                value = quantity.get('value') if isinstance(quantity, dict) else None
-                if isinstance(value, bool) or not isinstance(value, (int, float)) or not value > 0:
-                    errors.append(f'command.turn_rate.{name} must be greater than 0')
-            continue
-        walk(command[key], f'command.{key}', False)
+        if key in command:
+            walk(command[key], f'command.{key}', False)
     for name, limit in limits.items():
         expression = limit.get('expression') if isinstance(limit, dict) else None
         walk(expression, f'limits.{name}.expression', False)

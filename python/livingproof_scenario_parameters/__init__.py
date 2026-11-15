@@ -10,13 +10,7 @@ Install a released catalog tag, never a branch::
     pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.Y.Z#subdirectory=python"
 """
 
-from livingproof_scenario_parameters.geometry import (
-    crosses_exit,
-    distance_to_route,
-    follow_route,
-    point_along_route,
-    route_length,
-)
+from livingproof_scenario_parameters.geometry import crosses_exit, distance_to_route, route_length
 from livingproof_scenario_parameters.parameters import (
     ScenarioParameterError,
     evaluate,
@@ -33,8 +27,6 @@ __all__ = [
     'crosses_exit',
     'distance_to_route',
     'evaluate',
-    'follow_route',
-    'point_along_route',
     'quantize_half_up_decimal_text',
     'read_inputs',
     'reference_errors',

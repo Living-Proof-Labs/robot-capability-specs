@@ -215,18 +215,7 @@ export function referenceErrors(params) {
     if (quantized && expr.op === 'div') errors.push(`${where}: quantize does not allow div`);
     (expr.args ?? []).forEach((a, i) => walk(a, `${where}.args[${i}]`, quantized));
   };
-  const mode = params.command?.mode;
-  for (const key of ['forward', 'sideways', 'turn_rate']) {
-    const expr = params.command?.[key];
-    if (expr === undefined) continue;
-    // In route-follower mode turn_rate is the follower rule, not an expression.
-    if (key === 'turn_rate' && mode === 'route-follower') {
-      if (expr?.rule !== 'pure-pursuit-v1') errors.push(`command.turn_rate: route-follower needs rule pure-pursuit-v1, got ${expr?.rule}`);
-      for (const k of ['lookahead', 'max_turn_rate']) if (!(expr?.[k]?.value > 0)) errors.push(`command.turn_rate.${k} must be greater than 0`);
-      continue;
-    }
-    walk(expr, `command.${key}`, false);
-  }
+  for (const key of ['forward', 'sideways', 'turn_rate']) if (params.command?.[key] !== undefined) walk(params.command[key], `command.${key}`, false);
   for (const [name, l] of Object.entries(limits)) walk(l.expression, `limits.${name}.expression`, false);
   for (const [name, pre] of Object.entries(params.preconditions ?? {})) {
     if (!Object.hasOwn(COMPARE, pre.condition?.op)) errors.push(`preconditions.${name}: unknown comparison ${pre.condition?.op}`);

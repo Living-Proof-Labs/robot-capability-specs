@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Living-Proof-Labs/robot-capability-specs/specs/robots/robot-manifest.schema.json",
   "title": "livingproof-robot-manifest/0.1",
-  "description": "What one robot repository offers a verifier, in one file: its configurations, the adapter entry point, every pinned asset with its digest, feature flags, and optional per-simulator compatibility. It cites the robot profile and configuration profiles by path and sha256 rather than copying them.",
+  "description": "What one robot repository offers a verifier, in one file: its configurations, the adapter entry point, every pinned asset with its digest, feature flags, the scenarios its adapter supports, and optional per-simulator compatibility. It cites the robot profile and configuration profiles by path and sha256 rather than copying them.",
   "type": "object",
   "additionalProperties": false,
   "required": ["format", "robot", "source", "profile", "adapter", "configurations", "assets", "features"],
@@ -71,6 +71,12 @@
       "type": "object",
       "propertyNames": {"$ref": "#/$defs/name"},
       "additionalProperties": {"type": "boolean"}
+    },
+    "scenarios": {
+      "description": "Optional. The scenario ids this repository's adapter supports, such as walk-hallway. A scenario that requires the precondition scenario_supported and is not listed here, or any such scenario when this list is absent, is UNSUPPORTED before any trial, never a FAIL. How the adapter drives the robot for each scenario is its own.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}
     },
     "simulators": {
       "description": "Optional per-simulator compatibility, keyed by simulator id (as in the robot profile's simulators).",

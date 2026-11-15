@@ -110,6 +110,8 @@ profile and each configuration profile by path and sha256 instead of copying the
 - `assets` lists every upstream file with its repository, commit, sha256 and size,
   as fetched and checked from `pins.json`; nothing is vendored.
 - `features` are boolean flags; a missing flag means false.
+- `scenarios` is optional: the scenario ids the adapter supports (see
+  [Scenario support](#scenario-support)).
 - `simulators` is optional: per simulator, the engine version, the runner release
   and a status of `verified`, `experimental` or `unsupported`.
 
@@ -119,3 +121,29 @@ Example manifests for the
 [Booster T1](examples/manifests/booster-t1.json) are built from those repositories' `robot.json`,
 `verification.lock.json`, `pins.json` and `pyproject.toml`. Check any manifest
 with `task validate:manifests -- path/to/manifest.json`.
+
+## Scenario support
+
+Each robot reaches a scenario's outcome its own way: velocity commands with its
+own steering, a mission or waypoint interface, or anything else its adapter
+implements. So the adapter, through its robot manifest, says which scenarios
+it supports.
+
+- **Declared in the robot manifest.** The optional `scenarios` list names each
+  scenario id the adapter implements, such as `["walk-hallway", "walk-corner"]`.
+  Ids are unique. The scenario revision comes from the specification the run
+  pins, as for every other input.
+- **Undeclared is not supported.** A scenario that lists the precondition
+  `scenario_supported` is checked against that list before any trial. A
+  scenario the list does not name, or a manifest with no `scenarios` list, gives
+  the run grade `UNSUPPORTED` naming `scenario_supported`. No trial runs, and the
+  result is never a `FAIL`.
+- **How the adapter drives the robot is its own.** It is pinned by the adapter
+  commit and the configuration profile in the run manifest, so a run stays
+  reproducible. The scenario's checks judge only the observed outcome.
+
+The list is a declaration, not evidence: the run grade still comes from the
+trials. It is optional, so every existing manifest still validates.
+`walk-corner` is the first scenario to require it. `walk-hallway` does not list
+`scenario_supported` yet, so manifests without the list keep running it until
+the robot repositories declare it.
