@@ -13,9 +13,7 @@ import { layoutErrors, routeLength } from '../tooling/world-layout.mjs';
 
 const CORNER = 'specs/scenarios/walk-corner/';
 const HALLWAY = 'specs/scenarios/walk-hallway/';
-// Copy of livingproof-worlds worlds/hallway-corner/0.1.0/world.json from pull request 14 at
-// 90cde4fa27839405067515595f418a20cabf4ae8; its release.json lists this sha256. Replace with
-// the released copy once livingproof-worlds releases it (expected v1.3.0).
+// world.json of hallway-corner 0.1.0 as listed in livingproof-worlds v1.3.0 release.json.
 const WORLD = 'test/fixtures/worlds/hallway-corner-0.1.0.world.json';
 const WORLD_SHA256 = '8393881e8b38a090f51c3a424ca444623a901f642f75186cb4d41ac7482898f5';
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
