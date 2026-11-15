@@ -52,3 +52,38 @@ test('manifest rejects a bad digest, an unknown field and a malformed adapter', 
   delete minimal.simulators;
   assert.ok(validate(minimal), 'simulators is optional');
 });
+
+test('scenarios is an optional list of unique scenario ids the adapter supports', async () => {
+  const validate = await validator();
+  const good = await json(EXAMPLES + 'unitree-g1.json');
+  const schema = await json(DIR + 'robot-manifest.schema.json');
+  assert.equal(schema.required.includes('scenarios'), false);
+  for (const name of await readdir(EXAMPLES)) {
+    assert.equal('scenarios' in (await json(EXAMPLES + name)), false, `${name} predates the list and still validates`);
+  }
+  const declared = structuredClone(good);
+  declared.scenarios = ['walk-hallway', 'walk-corner'];
+  assert.ok(validate(declared), JSON.stringify(validate.errors));
+  const empty = structuredClone(good);
+  empty.scenarios = [];
+  assert.ok(validate(empty), 'an empty list declares no scenario');
+  for (const scenarios of [['walk-corner', 'walk-corner'], ['Walk-Corner'], ['walk_corner'], ['walk-corner-'], 'walk-corner', [{ id: 'walk-corner' }]]) {
+    const m = structuredClone(good);
+    m.scenarios = scenarios;
+    assert.equal(validate(m), false, JSON.stringify(scenarios));
+  }
+  // Every id a manifest can declare has the scenario parameters id form, and the catalog's scenarios fit it.
+  const pattern = new RegExp(schema.properties.scenarios.items.pattern);
+  const parameters = await json('specs/scenarios/scenario-parameters.schema.json');
+  assert.equal(schema.properties.scenarios.items.pattern, parameters.$defs.id.pattern);
+  for (const id of ['walk-hallway', 'walk-corner']) assert.match(id, pattern);
+});
+
+test('the README states that an undeclared scenario is UNSUPPORTED, never a FAIL', async () => {
+  const readme = await readFile(DIR + 'README.md', 'utf8');
+  const section = readme.slice(readme.indexOf('## Scenario support'));
+  assert.ok(section.startsWith('## Scenario support'));
+  for (const phrase of ['`scenarios`', '`scenario_supported`', '`UNSUPPORTED`', 'never a `FAIL`', 'No trial runs']) {
+    assert.ok(section.includes(phrase), phrase);
+  }
+});
