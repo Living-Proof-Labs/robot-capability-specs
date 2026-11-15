@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Route length, distance to a route, and exit crossing.
+"""Route length, distance to a route, exit crossing and the route follower.
 
 ``route_length`` matches ``routeLength`` in ``tooling/world-layout.mjs``.
 ``distance_to_route`` and ``crosses_exit`` match ``distanceToRoute`` and
 ``crossesExit`` there, and the cases in
-``specs/scenarios/route-geometry-cases.json``.
+``specs/scenarios/route-geometry-cases.json``. ``follow_route`` matches
+``followRoute`` and the cases in ``specs/scenarios/route-follower-cases.json``.
 """
 
 import math
@@ -150,3 +151,51 @@ def crosses_exit(p0, p1, points, exit):
     # Lateral test on the second sample, along the segment. Not the meeting point.
     offset = _dot(_sub(_xy(p1), reference), along_unit)
     return abs(offset) <= edge_length / 2
+
+def point_along_route(points, station):
+    """Point at distance ``station`` along the route from its first point.
+
+    Past the last point it continues straight along the last leg; before the first
+    point it is the first point. Matches ``pointAlongRoute`` in ``tooling/world-layout.mjs``.
+    """
+    route = [_xy(item) for item in points]
+    if len(route) < 2:
+        _fail('route needs at least 2 points')
+    walked = 0.0
+    for index in range(len(route) - 1):
+        start, end = route[index], route[index + 1]
+        length = _len(_sub(end, start))
+        if station <= walked + length:
+            fraction = 0.0 if length == 0 else max(0.0, station - walked) / length
+            return (start[0] + fraction * (end[0] - start[0]), start[1] + fraction * (end[1] - start[1]))
+        walked += length
+    start, end = route[-2], route[-1]
+    length = _len(_sub(end, start))
+    if length == 0:
+        _fail('route last leg has zero length')
+    extra = station - walked
+    return (end[0] + extra * (end[0] - start[0]) / length, end[1] + extra * (end[1] - start[1]) / length)
+
+def follow_route(points, base, yaw, forward, lookahead, max_turn_rate, sideways=0.0):
+    """One control step of command mode ``route-follower``, rule ``pure-pursuit-v1``.
+
+    Returns ``[forward, sideways, turn_rate]`` from the base point and yaw (radians).
+    ``s`` is the station of the base point on the route, ``q`` the point ``lookahead``
+    further along it, ``alpha`` the heading to ``q`` minus ``yaw`` wrapped to
+    ``[-pi, pi)``, and ``turn_rate = 2 * forward * sin(alpha) / lookahead`` clamped to
+    ``[-max_turn_rate, max_turn_rate]``. On a straight route with the base on it and
+    facing along it the command is exactly ``[forward, sideways, 0]``. Matches
+    ``followRoute`` in ``tooling/world-layout.mjs`` and the cases in
+    ``specs/scenarios/route-follower-cases.json``.
+    """
+    if not lookahead > 0:
+        _fail('lookahead must be greater than 0')
+    if not max_turn_rate > 0:
+        _fail('max_turn_rate must be greater than 0')
+    point = _xy(base)
+    _distance, station, _length = _station_of(points, point)
+    target = point_along_route(points, station + lookahead)
+    raw = math.atan2(target[1] - point[1], target[0] - point[0]) - yaw
+    alpha = raw - 2 * math.pi * math.floor((raw + math.pi) / (2 * math.pi))
+    turn = max(-max_turn_rate, min(max_turn_rate, 2 * forward * math.sin(alpha) / lookahead))
+    return [forward, sideways, 0.0 if turn == 0 else turn]

@@ -91,7 +91,7 @@
       }
     },
     "command": {
-      "description": "What the runner sends the robot. constant: the same forward, sideways and turn-rate command at every step.",
+      "description": "What the runner sends the robot at each control step, as [forward, sideways, turn_rate] in m/s, m/s and rad/s. constant: the same forward, sideways and turn-rate expressions at every step. route-follower: forward and sideways are expressions as in constant, and turn_rate is the follower rule given in turn_rate (see $defs.follower), computed from the base pose at each step. On a straight route, with the base on the route and facing along it, route-follower sends exactly the constant command [forward, sideways, 0].",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -103,7 +103,8 @@
       "properties": {
         "mode": {
           "enum": [
-            "constant"
+            "constant",
+            "route-follower"
           ]
         },
         "forward": {
@@ -113,9 +114,56 @@
           "$ref": "#/$defs/expression"
         },
         "turn_rate": {
-          "$ref": "#/$defs/expression"
+          "oneOf": [
+            {
+              "$ref": "#/$defs/expression"
+            },
+            {
+              "$ref": "#/$defs/follower"
+            }
+          ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "mode"
+            ],
+            "properties": {
+              "mode": {
+                "const": "constant"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "turn_rate": {
+                "$ref": "#/$defs/expression"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "mode"
+            ],
+            "properties": {
+              "mode": {
+                "const": "route-follower"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "turn_rate": {
+                "$ref": "#/$defs/follower"
+              }
+            }
+          }
+        }
+      ]
     },
     "parameters": {
       "type": "object",
@@ -555,6 +603,55 @@
         "robot-profile",
         "configuration-profile"
       ]
+    },
+    "follower": {
+      "description": "Turn-rate rule for command mode route-follower. pure-pursuit-v1, at each control step: s is the distance along places.route from its first point to the point on it nearest the base point (the earlier leg on a tie); q is the point lookahead further along the route, continuing straight along the last leg past the route's end; alpha is the heading from the base point to q minus the base yaw, wrapped to [−π, π); turn_rate = 2 × forward × sin(alpha) ÷ lookahead, clamped to [-max_turn_rate, max_turn_rate]. Distances are in the floor plane. followRoute in tooling/world-layout.mjs and follow_route in the Python package implement it; specs/scenarios/route-follower-cases.json holds its conformance cases.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule",
+        "lookahead",
+        "max_turn_rate"
+      ],
+      "properties": {
+        "rule": {
+          "const": "pure-pursuit-v1"
+        },
+        "lookahead": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "const": "m"
+            }
+          }
+        },
+        "max_turn_rate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "const": "rad/s"
+            }
+          }
+        }
+      }
     }
   }
 }

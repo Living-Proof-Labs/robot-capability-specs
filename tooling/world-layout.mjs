@@ -188,3 +188,40 @@ export function crossesExit(p0, p1, points, exit) {
   if (!(s0 < 0 && s1 >= 0)) return false;
   return Math.abs(dot(sub(xy(p1), ref), u)) <= elen / 2;
 }
+
+// Point at distance s along the route from its first point. Past the last point it
+// continues straight along the last leg; before the first point it is the first point.
+export function pointAlongRoute(points, s) {
+  const route = points.map(xy);
+  if (route.length < 2) throw new Error('route needs at least 2 points');
+  let walked = 0;
+  for (let i = 0; i < route.length - 1; i++) {
+    const a = route[i], b = route[i + 1], l = len(sub(b, a));
+    if (s <= walked + l) {
+      const t = l === 0 ? 0 : Math.max(0, s - walked) / l;
+      return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
+    }
+    walked += l;
+  }
+  const a = route.at(-2), b = route.at(-1), l = len(sub(b, a)), extra = s - walked;
+  if (l === 0) throw new Error('route last leg has zero length');
+  return [b[0] + extra * (b[0] - a[0]) / l, b[1] + extra * (b[1] - a[1]) / l];
+}
+
+// Command mode route-follower, turn-rate rule pure-pursuit-v1
+// (specs/scenarios/scenario-parameters.schema.json, $defs.follower). Returns
+// [forward, sideways, turn_rate] for one control step from the base point and yaw (rad).
+// On a straight route with the base on it and facing along it, alpha is exactly 0, so
+// the command is exactly [forward, sideways, 0]. specs/scenarios/route-follower-cases.json
+// holds the conformance cases.
+export function followRoute(points, base, yaw, { forward, sideways = 0, lookahead, maxTurnRate }) {
+  if (!(lookahead > 0)) throw new Error('lookahead must be greater than 0');
+  if (!(maxTurnRate > 0)) throw new Error('max_turn_rate must be greater than 0');
+  const p = xy(base);
+  const { station } = stationOf({ points }, p);
+  const q = pointAlongRoute(points, station + lookahead);
+  const raw = Math.atan2(q[1] - p[1], q[0] - p[0]) - yaw;
+  const alpha = raw - 2 * Math.PI * Math.floor((raw + Math.PI) / (2 * Math.PI));
+  const turn = Math.max(-maxTurnRate, Math.min(maxTurnRate, 2 * forward * Math.sin(alpha) / lookahead));
+  return [forward, sideways, turn === 0 ? 0 : turn];
+}

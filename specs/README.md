@@ -30,3 +30,10 @@ conformance evidence without constraining world geometry or consumers. The
 [open hallway world](worlds/hallways.md) defines one door-free hallway with
 named places and its MuJoCo/Gazebo matrix. They are authored and parser-validated only;
 this catalog contains neither world assets nor engine results.
+
+Two scenarios use these contracts: [walk the open hallway](scenarios/walk-hallway/README.md)
+and [walk around the corner](scenarios/walk-corner/README.md), which turns at a
+right angle between two hallways and is steered by the
+[route follower](scenarios/walk-corner/README.md#the-route-follower). Each has a
+machine-readable parameter file in the
+[scenario parameters format](scenarios/scenario-parameters.schema.json).
