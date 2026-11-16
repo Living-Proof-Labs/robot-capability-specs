@@ -12,8 +12,10 @@ API verification returned `has_pages: true`, `build_type: workflow`, and
 1. GitHub Pages uses the GitHub Actions build source.
 2. `github-pages` is configured to permit deployments only from main.
 3. The `pages.yml` workflow is active. Only its separate
-   deploy job requests `pages: write` and `id-token: write`; build remains
-   `contents: read`. The deploy job executes no checkout or project code.
+   deploy job requests `pages: write` and `id-token: write`, plus
+   `contents: read` for the main-freshness read, which sends the workflow
+   token. Build remains `contents: read`. The deploy job executes no
+   checkout or project code.
 
 The published URL is `https://docs.livingprooflabs.com/robot-capability-specs/`.
 No per-project custom domain, CNAME, DNS, mail or organization setting change is
