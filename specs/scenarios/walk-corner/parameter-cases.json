@@ -5,6 +5,15 @@
   "cases": [
     {
       "name": "G1 width from livingproof-unitree-g1 robot.json",
+      "source": {
+        "repository": "Living-Proof-Labs/livingproof-unitree-g1",
+        "release": "v1.0.3",
+        "inputs": {
+          "robot_width": "robot.json#/dimensions/width",
+          "robot_class": "robot.json#/class",
+          "fall_base_height": "configurations/stock.json#/locomotion/fall_base_height"
+        }
+      },
       "inputs": {
         "route_length": 5.5,
         "clear_width": 1.5,
@@ -32,6 +41,15 @@
     },
     {
       "name": "Go1 width from livingproof-unitree-go1 robot.json",
+      "source": {
+        "repository": "Living-Proof-Labs/livingproof-unitree-go1",
+        "release": "v1.0.3",
+        "inputs": {
+          "robot_width": "robot.json#/dimensions/width",
+          "robot_class": "robot.json#/class",
+          "fall_base_height": "configurations/playground.json#/locomotion/fall_base_height"
+        }
+      },
       "inputs": {
         "route_length": 5.5,
         "clear_width": 1.5,
@@ -59,6 +77,15 @@
     },
     {
       "name": "T1 width from livingproof-booster-t1 robot.json",
+      "source": {
+        "repository": "Living-Proof-Labs/livingproof-booster-t1",
+        "release": "v1.0.3",
+        "inputs": {
+          "robot_width": "robot.json#/dimensions/width",
+          "robot_class": "robot.json#/class",
+          "fall_base_height": "configurations/stock.json#/locomotion/fall_base_height"
+        }
+      },
       "inputs": {
         "route_length": 5.5,
         "clear_width": 1.5,
@@ -68,7 +95,7 @@
         },
         "robot_class": "humanoid",
         "fall_base_height": {
-          "value": 0.45,
+          "value": 0.44,
           "unit": "m"
         }
       },
@@ -77,7 +104,7 @@
           "time_limit": 27,
           "lateral_limit": 0.4795,
           "exit_segment": 0.75,
-          "fall_height": 0.45
+          "fall_height": 0.44
         },
         "preconditions": {
           "fits_width": true

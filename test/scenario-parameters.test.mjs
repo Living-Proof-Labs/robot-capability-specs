@@ -114,12 +114,14 @@ test('a non-finite result is an ERROR and command_speed <= 0 is an ERROR', async
   assert.throws(() => resolve(p, { ...c.inputs, route_length: Infinity }), isError);
 });
 
-test('walk-hallway parameter files are the v2.1.0 bytes', async () => {
+// parameters.json is unchanged since v2.1.0. parameter-cases.json changed in #49: each robot case
+// cites its robot release, and the T1 fall_base_height is 0.44 from livingproof-booster-t1 v1.0.3.
+test('walk-hallway parameters.json is the v2.1.0 bytes and parameter-cases.json the #49 bytes', async () => {
   const hash = async path => createHash('sha256').update(await readFile(path)).digest('hex');
   assert.equal(await hash(HALLWAY + 'parameters.json'),
     '9226aa6bc0e577863bdc210514e7e7c3a7edc32f49c4f7b46aa7249837f08b3d');
   assert.equal(await hash(HALLWAY + 'parameter-cases.json'),
-    '4697196d94df5d7d6aba8059d48d732137a67fcefcde990cd937efa5ad2d44e4');
+    '1bee4bdd6001a322bb8d27d2106319256dd712655b8584870d753ef5fd032904');
 });
 
 test('walk-hallway parameters agree with description.json and the README acceptance', async () => {
