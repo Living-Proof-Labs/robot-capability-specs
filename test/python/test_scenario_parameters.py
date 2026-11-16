@@ -24,7 +24,8 @@ from livingproof_scenario_parameters import (
 
 ROOT = Path(__file__).resolve().parents[2]
 PARAMETERS_SHA256 = '9226aa6bc0e577863bdc210514e7e7c3a7edc32f49c4f7b46aa7249837f08b3d'
-CASES_SHA256 = '4697196d94df5d7d6aba8059d48d732137a67fcefcde990cd937efa5ad2d44e4'
+# parameter-cases.json changed in #49 (robot case sources, T1 fall_base_height 0.44).
+CASES_SHA256 = '1bee4bdd6001a322bb8d27d2106319256dd712655b8584870d753ef5fd032904'
 ERROR_MESSAGES = {
     'Robot width in centimetres is an ERROR': 'input robot_width has unit "cm", expected m',
     'Fall height without a unit is an ERROR': 'input fall_base_height has unit undefined, expected m',
@@ -288,7 +289,7 @@ class ScenarioParameterTests(unittest.TestCase):
             self.assertEqual(result['limits']['lateral_limit'], 0.525)
             self.assertTrue(result['preconditions']['fits_width'])
 
-    def test_parameter_files_are_the_v2_1_0_bytes(self):
+    def test_parameter_files_are_the_pinned_bytes(self):
         self.assertEqual(hashlib.sha256((ROOT / 'specs/scenarios/walk-hallway/parameters.json').read_bytes()).hexdigest(),
                          PARAMETERS_SHA256)
         self.assertEqual(hashlib.sha256((ROOT / 'specs/scenarios/walk-hallway/parameter-cases.json').read_bytes()).hexdigest(),
