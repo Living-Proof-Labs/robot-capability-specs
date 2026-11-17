@@ -1,0 +1,188 @@
+{
+  "$comment": "Unchanged acceptance conformance cases for walk-corner-left 0.2.0; historical walk-corner acceptance is preserved on the shared corner 0.2.0 forward traversal.",
+  "format": "livingproof-scenario-parameter-cases/0.1",
+  "parameters": "parameters.json",
+  "cases": [
+    {
+      "name": "G1 width from livingproof-unitree-g1 robot.json",
+      "source": {
+        "repository": "Living-Proof-Labs/livingproof-unitree-g1",
+        "release": "v1.0.3",
+        "inputs": {
+          "robot_width": "robot.json#/dimensions/width",
+          "robot_class": "robot.json#/class",
+          "fall_base_height": "configurations/stock.json#/locomotion/fall_base_height"
+        }
+      },
+      "inputs": {
+        "route_length": 5.5,
+        "clear_width": 1.5,
+        "robot_width": {
+          "value": 0.52,
+          "unit": "m"
+        },
+        "robot_class": "humanoid",
+        "fall_base_height": {
+          "value": 0.5,
+          "unit": "m"
+        }
+      },
+      "expect": {
+        "limits": {
+          "time_limit": 27,
+          "lateral_limit": 0.49,
+          "exit_segment": 0.75,
+          "fall_height": 0.5
+        },
+        "preconditions": {
+          "fits_width": true
+        }
+      }
+    },
+    {
+      "name": "Go1 width from livingproof-unitree-go1 robot.json",
+      "source": {
+        "repository": "Living-Proof-Labs/livingproof-unitree-go1",
+        "release": "v1.0.3",
+        "inputs": {
+          "robot_width": "robot.json#/dimensions/width",
+          "robot_class": "robot.json#/class",
+          "fall_base_height": "configurations/playground.json#/locomotion/fall_base_height"
+        }
+      },
+      "inputs": {
+        "route_length": 5.5,
+        "clear_width": 1.5,
+        "robot_width": {
+          "value": 0.282,
+          "unit": "m"
+        },
+        "robot_class": "quadruped",
+        "fall_base_height": {
+          "value": 0.18,
+          "unit": "m"
+        }
+      },
+      "expect": {
+        "limits": {
+          "time_limit": 27,
+          "lateral_limit": 0.609,
+          "exit_segment": 0.75,
+          "fall_height": 0.18
+        },
+        "preconditions": {
+          "fits_width": true
+        }
+      }
+    },
+    {
+      "name": "T1 width from livingproof-booster-t1 robot.json",
+      "source": {
+        "repository": "Living-Proof-Labs/livingproof-booster-t1",
+        "release": "v1.0.3",
+        "inputs": {
+          "robot_width": "robot.json#/dimensions/width",
+          "robot_class": "robot.json#/class",
+          "fall_base_height": "configurations/stock.json#/locomotion/fall_base_height"
+        }
+      },
+      "inputs": {
+        "route_length": 5.5,
+        "clear_width": 1.5,
+        "robot_width": {
+          "value": 0.541,
+          "unit": "m"
+        },
+        "robot_class": "humanoid",
+        "fall_base_height": {
+          "value": 0.44,
+          "unit": "m"
+        }
+      },
+      "expect": {
+        "limits": {
+          "time_limit": 27,
+          "lateral_limit": 0.4795,
+          "exit_segment": 0.75,
+          "fall_height": 0.44
+        },
+        "preconditions": {
+          "fits_width": true
+        }
+      }
+    },
+    {
+      "name": "Humanoid of exactly 1.40 m fits: 1.40 + 2 \u00d7 0.05 = 1.50",
+      "inputs": {
+        "route_length": 5.5,
+        "clear_width": 1.5,
+        "robot_width": {
+          "value": 1.4,
+          "unit": "m"
+        },
+        "robot_class": "humanoid",
+        "fall_base_height": {
+          "value": 0.5,
+          "unit": "m"
+        }
+      },
+      "expect": {
+        "limits": {
+          "time_limit": 27,
+          "lateral_limit": 0.05,
+          "exit_segment": 0.75,
+          "fall_height": 0.5
+        },
+        "preconditions": {
+          "fits_width": true
+        }
+      }
+    },
+    {
+      "name": "One millimetre too wide: 1.401 + 2 \u00d7 0.05 > 1.50",
+      "inputs": {
+        "route_length": 5.5,
+        "clear_width": 1.5,
+        "robot_width": {
+          "value": 1.401,
+          "unit": "m"
+        },
+        "robot_class": "humanoid",
+        "fall_base_height": {
+          "value": 0.5,
+          "unit": "m"
+        }
+      },
+      "expect": {
+        "limits": {
+          "time_limit": 27,
+          "lateral_limit": 0.0495,
+          "exit_segment": 0.75,
+          "fall_height": 0.5
+        },
+        "preconditions": {
+          "fits_width": false
+        }
+      }
+    },
+    {
+      "name": "A robot class with no wall clearance is an ERROR",
+      "inputs": {
+        "route_length": 5.5,
+        "clear_width": 1.5,
+        "robot_width": {
+          "value": 0.52,
+          "unit": "m"
+        },
+        "robot_class": "wheeled",
+        "fall_base_height": {
+          "value": 0.5,
+          "unit": "m"
+        }
+      },
+      "expect": {
+        "error": "ERROR"
+      }
+    }
+  ]
+}

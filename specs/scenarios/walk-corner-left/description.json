@@ -1,0 +1,128 @@
+{
+  "$comment": "Description for walk-corner-left 0.2.0 on shared hallway-corner 0.2.0, forward traversal. world-source.json identifies released provenance. Text only; README.md stays normative.",
+  "format": "livingproof-scenario-description/0.1",
+  "scenario": {
+    "id": "walk-corner-left",
+    "revision": "0.2.0"
+  },
+  "mission": {
+    "title": "Walk around the left corner",
+    "description": "The robot walks down one hallway, turns left at the corner, and reaches the end of the next hallway. It starts at spawn-west, facing east and gets there its own way: its adapter chooses how to steer it. It must pass through the corner and reach end-north, 5.5 m along the route, within 27 s, staying upright, never touching a wall, and staying within its limit of the route.",
+    "success_criteria": [
+      {
+        "evaluator": "corner-turned",
+        "text": "Turns the corner: passes through the corner square before reaching the exit."
+      },
+      {
+        "evaluator": "corner-route-limit",
+        "text": "Stays on the route: never strays further from the route than its limit."
+      },
+      {
+        "evaluator": "corner-wall-contact",
+        "text": "Clears the walls: never touches a wall."
+      },
+      {
+        "evaluator": "corner-fall",
+        "text": "Stays upright: the base never drops below the fall height."
+      },
+      {
+        "evaluator": "corner-exit-reached",
+        "text": "Reaches the exit in time: 5.5 m along the route, within 27 s, crossing it inside the exit segment."
+      }
+    ],
+    "grading": "One run is one or more identical trials at the exact nominal pose. The default is 1. A grading policy turns completed trial outcomes into the run grade. ERROR is a test-system status reported on the job and on the trial. It is never a robot grade and is never counted as a robot fail. If no trial completes because of test-system errors, the run is not evaluated and the grade is INSUFFICIENT_EVIDENCE. A failed trial is not retried.",
+    "time_limit_explained": "27 s is twice the time the route takes at the reference speed of 0.5 m/s, plus 5 s (2 \u00d7 5.5 m \u00f7 0.5 m/s + 5 s)."
+  },
+  "world": {
+    "id": "hallway-corner",
+    "content_version": "0.2.0",
+    "title": "Corner hallway",
+    "description": "Two straight, empty hallways, each 1.50 m wide between the walls, meeting at a right angle, with 2.50 m-high walls. The route runs 6.00 m down the middle of both: 3.00 m to the centre of the corner square, then 3.00 m to the exit. Nothing else is in it: the test is whether the robot can get around the corner. The forward traversal runs west arm to north arm using route-forward; this is the same physical fixture available for opposite traversal.",
+    "dimensions": {
+      "clear_width": {
+        "value": 1.5,
+        "unit": "m"
+      },
+      "length": {
+        "value": 6.0,
+        "unit": "m"
+      },
+      "wall_height": {
+        "value": 2.5,
+        "unit": "m"
+      },
+      "wall_thickness": {
+        "value": 0.15,
+        "unit": "m"
+      }
+    }
+  },
+  "parameters": {
+    "route_length": {
+      "value": 5.5,
+      "unit": "m"
+    },
+    "command_speed": {
+      "value": 0.5,
+      "unit": "m/s"
+    },
+    "time_limit": {
+      "value": 27,
+      "unit": "s",
+      "formula": "2 \u00d7 route_length \u00f7 command_speed + 5 s"
+    },
+    "trials": {
+      "count": 1,
+      "retries": false
+    },
+    "wall_clearance": {
+      "humanoid": {
+        "value": 0.05,
+        "unit": "m"
+      },
+      "quadruped": {
+        "value": 0.1,
+        "unit": "m"
+      }
+    }
+  },
+  "limits": {
+    "lateral_limit": {
+      "unit": "m",
+      "formula": "clear_width \u00f7 2 \u2212 robot_width \u00f7 2",
+      "inputs": {
+        "clear_width": "world clear width",
+        "robot_width": "robot profile dimensions.width"
+      },
+      "text": "How far the robot's centre may stray from the route before its side would reach a wall in a straight hallway: half the clear width minus half the robot's width. Outside the corner it is measured from the turn point, so there it is stricter than the walls.",
+      "sentence": "{robot} may stray up to {value} m from the route: half the {clear_width} m hallway, minus half its {robot_width} m width."
+    },
+    "exit_segment": {
+      "unit": "m",
+      "formula": "clear_width \u00f7 2",
+      "inputs": {
+        "clear_width": "world clear width"
+      },
+      "text": "The exit counts only when the robot's base crosses it between the walls, within half the clear width of the route."
+    },
+    "fall_height": {
+      "unit": "m",
+      "formula": "locomotion.fall_base_height",
+      "inputs": {
+        "fall_base_height": "configuration profile locomotion.fall_base_height"
+      },
+      "text": "The lowest base height that still counts as upright, declared by the selected configuration."
+    },
+    "fits_width": {
+      "unit": "m",
+      "formula": "robot_width + 2 \u00d7 wall_clearance \u2264 clear_width",
+      "inputs": {
+        "robot_width": "robot profile dimensions.width",
+        "wall_clearance": "parameters.wall_clearance for the robot class",
+        "clear_width": "world clear width"
+      },
+      "text": "Checked before any trial: the robot fits when its width plus the wall clearance on each side (0.05 m for a humanoid, 0.10 m for a quadruped) is at most the clear width. A robot that does not fit is UNSUPPORTED, not run.",
+      "sentence": "{robot} fits: {robot_width} m + 2 \u00d7 {wall_clearance} m \u2264 {clear_width} m."
+    }
+  }
+}
