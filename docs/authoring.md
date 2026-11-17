@@ -22,3 +22,8 @@ Runtime execution belongs in the released verifier linked from the matrix.
 
 For the command home and plugin concepts, see the related
 [Living Proof manual](https://docs.livingprooflabs.com/livingproof/).
+
+For opposite traversals, use one physical fixture and the
+[neutral endpoint world contract](../specs/worlds/README.md#neutral-endpoint-traversals-revision-040).
+See [reusable simple worlds](https://docs.livingprooflabs.com/collaboration-guidelines/docs/developer-interface.html#reusable-simple-worlds)
+for authoring context; do not duplicate or mirror a world to name a scenario.
