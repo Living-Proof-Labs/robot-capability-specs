@@ -16,7 +16,7 @@ const world = json(worldPath);
 const old = json('specs/scenarios/walk-corner/parameters.json');
 const oldDescription = json('specs/scenarios/walk-corner/description.json');
 const oldCases = json('specs/scenarios/walk-corner/parameter-cases.json');
-const directions = ['left'];
+const directions = ['left', 'right'];
 const place = (w,n) => w.places.find(p=>p.name===n);
 const schema = name => new Ajv2020({allErrors:true,strict:true,strictRequired:false}).compile(json(`specs/scenarios/scenario-${name}.schema.json`));
 const parameterSchema = schema('parameters'), descriptionSchema = schema('description');
@@ -114,3 +114,17 @@ for (const direction of directions) {
     assert.ok(text.includes(`"${p.places.route}"`));
   });
 }
+
+test('left and right share exact world provenance and opposite ordered routes',()=>{
+  const left=json('specs/scenarios/walk-corner-left/parameters.json');
+  const right=json('specs/scenarios/walk-corner-right/parameters.json');
+  assert.deepEqual(left.world,right.world);
+  assert.deepEqual(json('specs/scenarios/walk-corner-left/world-source.json'),json('specs/scenarios/walk-corner-right/world-source.json'));
+  assert.deepEqual(place(world,left.places.route).points,[...place(world,right.places.route).points].reverse());
+  assert.notEqual(left.scenario.id,right.scenario.id);
+  assert.notEqual(left.places.start,right.places.start);
+  assert.notEqual(left.places.exit,right.places.exit);
+  for(const key of ['parameters','inputs','limits','preconditions','checks']) assert.deepEqual(left[key],right[key]);
+  const readme=readFileSync('specs/scenarios/walk-corner-right/README.md','utf8');
+  assert.match(readme,/A passing left\s+trial is not evidence of a passing right trial/);
+});
