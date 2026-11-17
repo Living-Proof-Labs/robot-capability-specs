@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import Ajv2020 from 'ajv/dist/2020.js';
-import { traversalErrors, routeLength } from '../tooling/world-layout.mjs';
+import { layoutErrors, traversalErrors, routeLength } from '../tooling/world-layout.mjs';
 const json = p => JSON.parse(readFileSync(p, 'utf8'));
 const good = json('test/fixtures/worlds/hallway-corner-0.2.0.draft.json');
 const old = json('test/fixtures/worlds/hallway-corner-0.1.0.world.json');
@@ -57,3 +57,17 @@ test('closed traversal shape rejects unknown semantics',()=>{
     const w=structuredClone(good); mutate(w); assert.equal(validate(w),false);
   }
 });
+
+for (const direction of ['forward', 'reverse']) {
+  for (const offset of [0, 0.5e-9]) {
+    test(`reject non-adjacent repeated vertex in ${direction}, offset ${offset}`, () => {
+      const w = structuredClone(good);
+      const points = [[-3,0,0],[0,0,0],[-1,0,0],[offset,0,0],[0,3,0]];
+      const traversal = w.traversals.find(t => t.name === direction);
+      place(w, traversal.route).points = direction === 'forward' ? points : points.reverse();
+      assert.ok(validate(w), JSON.stringify(validate.errors));
+      assert.deepEqual(layoutErrors(w, traversal), [`${traversal.route}: repeated point`]);
+      assert.match(traversalErrors(w).join('\n'), /repeated point/);
+    });
+  }
+}

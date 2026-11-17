@@ -103,7 +103,7 @@ export function layoutErrors(world, { route: routeName, from = 'entrance', finis
   if (!route || route.type !== 'polyline') return [...errors, `${routeName}: route polyline missing`];
   if (route.points.length < 2) return [...errors, `${routeName}: route needs at least 2 points`];
   if (route.points.some(q => Math.abs(q[2]) > EPS)) errors.push(`${routeName}: must lie on the floor, z = 0`);
-  if (routeLegs(route).some(([a, b]) => len(sub(b, a)) <= EPS)) return [...errors, `${routeName}: repeated point`];
+  if (route.points.some((b, i) => route.points.slice(0, i).some(a => len(sub(b, a)) <= EPS))) return [...errors, `${routeName}: repeated point`];
   if (places[from]?.type === 'segment' && len(sub(route.points[0], places[from].reference)) > tol) errors.push(`${routeName}: must start at the ${from} reference`);
   if (places[finish]?.type === 'segment' && len(sub(route.points.at(-1), places[finish].reference)) > tol) errors.push(`${routeName}: must end at the ${finish} reference`);
   for (const w of walls) {
