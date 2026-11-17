@@ -65,7 +65,7 @@ export function routeLength(world, { start, route }) {
   return s.length - s.station;
 }
 
-export function layoutErrors(world, { route: routeName }) {
+export function layoutErrors(world, { route: routeName, from = 'entrance', finish = 'exit', start = 'spawn-entrance' }) {
   const errors = [];
   const d = world.dimensions, tol = world.tolerances.distance_m, angTol = world.tolerances.angle_deg;
   const names = [...world.geometry, ...world.places].map(x => x.name);
@@ -91,9 +91,9 @@ export function layoutErrors(world, { route: routeName }) {
     }
   }
   const places = Object.fromEntries(world.places.map(p => [p.name, p]));
-  for (const name of ['entrance', 'exit']) {
+  for (const name of [from, finish]) {
     const p = places[name];
-    if (!p) { errors.push(`${name}: missing`); continue; }
+    if (!p || p.type !== 'segment') { errors.push(`${name}: segment missing`); continue; }
     const [a, b] = p.points;
     if ([a, b, p.reference].some(q => Math.abs(q[2]) > EPS)) errors.push(`${name}: must lie on the floor, z = 0`);
     if (Math.abs(len(sub(b, a)) - d.clear_width) > EPS) errors.push(`${name}: must span the clear width`);
@@ -103,9 +103,9 @@ export function layoutErrors(world, { route: routeName }) {
   if (!route || route.type !== 'polyline') return [...errors, `${routeName}: route polyline missing`];
   if (route.points.length < 2) return [...errors, `${routeName}: route needs at least 2 points`];
   if (route.points.some(q => Math.abs(q[2]) > EPS)) errors.push(`${routeName}: must lie on the floor, z = 0`);
-  for (const [a, b] of routeLegs(route)) if (len(sub(b, a)) <= EPS) errors.push(`${routeName}: repeated point`);
-  if (places.entrance && len(sub(route.points[0], places.entrance.reference)) > tol) errors.push(`${routeName}: must start at the entrance reference`);
-  if (places.exit && len(sub(route.points.at(-1), places.exit.reference)) > tol) errors.push(`${routeName}: must end at the exit reference`);
+  if (route.points.some((b, i) => route.points.slice(0, i).some(a => len(sub(b, a)) <= EPS))) return [...errors, `${routeName}: repeated point`];
+  if (places[from]?.type === 'segment' && len(sub(route.points[0], places[from].reference)) > tol) errors.push(`${routeName}: must start at the ${from} reference`);
+  if (places[finish]?.type === 'segment' && len(sub(route.points.at(-1), places[finish].reference)) > tol) errors.push(`${routeName}: must end at the ${finish} reference`);
   for (const w of walls) {
     for (const [a, b] of routeLegs(route)) {
       if (legToBox(a, b, w) < d.clear_width / 2 - tol) errors.push(`${routeName}: passes closer than clear_width / 2 to ${w.name}`);
@@ -116,10 +116,10 @@ export function layoutErrors(world, { route: routeName }) {
       errors.push(`${p.name}: closer than ${SPAWN_CLEARANCE} m to a wall`);
     }
   }
-  const spawn = places['spawn-entrance'];
+  const spawn = places[start];
   if (spawn) {
     const s = stationOf(route, spawn.position);
-    if (s.distance > tol) errors.push(`spawn-entrance: must lie on ${routeName}`);
+    if (s.distance > tol) errors.push(`${start}: must lie on ${routeName}`);
     // Facing: the direction of the route leg that holds the spawn point.
     let walked = 0;
     for (const [a, b] of routeLegs(route)) {
@@ -127,7 +127,7 @@ export function layoutErrors(world, { route: routeName }) {
       if (s.station <= walked + l + EPS) {
         const heading = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
         const diff = Math.abs(((spawn.yaw_deg - heading) % 360 + 540) % 360 - 180);
-        if (diff > angTol) errors.push(`spawn-entrance: must face along ${routeName}`);
+        if (diff > angTol) errors.push(`${start}: must face along ${routeName}`);
         break;
       }
       walked += l;
@@ -187,4 +187,34 @@ export function crossesExit(p0, p1, points, exit) {
   const s0 = signed(p0), s1 = signed(p1);
   if (!(s0 < 0 && s1 >= 0)) return false;
   return Math.abs(dot(sub(xy(p1), ref), u)) <= elen / 2;
+}
+
+// Call after world-traversals.schema.json validation. No inferred/reversed routes.
+export function traversalErrors(world) {
+  const errors = [];
+  const places = Object.fromEntries(world.places.map(p => [p.name, p]));
+  const names = world.traversals.map(t => t.name);
+  if (new Set(names).size !== names.length) errors.push('traversals: names must be unique');
+  for (const t of world.traversals) {
+    let missing = false;
+    for (const [key, type] of Object.entries({from: 'segment', finish: 'segment', start: 'pose', route: 'polyline'})) {
+      if (places[t[key]]?.type !== type) { errors.push(`${t.name}: ${key} must reference a ${type}: ${t[key]}`); missing = true; }
+    }
+    if (missing) continue;
+    if (t.from === t.finish) errors.push(`${t.name}: endpoints must be distinct`);
+    errors.push(...layoutErrors(world, t).map(e => `${t.name}: ${e}`));
+    const route = places[t.route], spawn = places[t.start];
+    if (routeLegs(route).some(([a,b]) => len(sub(b,a)) <= EPS)) continue;
+    const firstLength = len(sub(route.points[1], route.points[0]));
+    const station = stationOf(route, spawn.position).station;
+    if (Math.abs(spawn.position[2]) > EPS || station <= EPS || station >= firstLength - EPS) {
+      errors.push(`${t.name}: start must lie strictly inside the first route leg on the floor`);
+    }
+    for (const [endpoint, a, b] of [[t.from, route.points[0], route.points[1]], [t.finish, route.points.at(-2), route.points.at(-1)]]) {
+      const edge = sub(places[endpoint].points[1], places[endpoint].points[0]), leg = sub(b,a);
+      const deviation = Math.asin(Math.min(1, Math.abs(dot(edge,leg)) / (len(edge)*len(leg)))) * 180 / Math.PI;
+      if (deviation > world.tolerances.angle_deg) errors.push(`${t.name}: ${endpoint} must be perpendicular to route`);
+    }
+  }
+  return errors;
 }

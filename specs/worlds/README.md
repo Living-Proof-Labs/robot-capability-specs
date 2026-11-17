@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-# World contract, revision 0.3.0
+# World contract, revision 0.4.0
 
 Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
 
@@ -74,6 +74,51 @@ Worlds written for this layout revision name the route `route-centreline`.
 `hallway-open` 0.1.0 predates that name. Its route is `passage-centreline`, and
 it conforms unchanged: its released bytes are tested against this contract,
 with a route length of 5.5 m.
+
+## Neutral endpoint traversals (revision 0.4.0)
+
+One physical fixture can serve opposite traversal scenarios without mirrored or
+copied geometry. This revision adds
+[world-traversals.schema.json](world-traversals.schema.json)
+(`livingproof-world-layout/0.2`). The earlier schema and directional rules above
+remain available for historical worlds. Consumers explicitly choose the layout
+schema; they must not infer it from place names.
+
+A neutral layout declares a nonempty `traversals` array. Each entry has a unique
+`name` and four place references: `from` and `finish` name distinct `segment`
+places, `start` names a `pose`, and `route` names a `polyline`. Unknown traversal
+fields, missing references and wrong place types are invalid. Geometry and place
+names remain unique. Validate every declared traversal.
+
+Apply the box, floor, wall, clearance, coordinate and tolerance rules in Any
+layout to each traversal, substituting its references for the historical roles.
+Each endpoint spans the clear width, has its reference at the midpoint, and is
+perpendicular to its adjacent route leg within the angular tolerance. The ordered
+route starts at `from` and ends at `finish`, on the floor. The start pose is on
+the floor and strictly inside the first route leg, not at either vertex, facing
+along that leg into the fixture. It remains at least 0.25 m from every wall.
+Travel distance is the route arc length remaining from the start pose, not the
+straight distance between endpoints. Call `traversalErrors` in
+`tooling/world-layout.mjs` after schema validation for reference checks.
+
+For the corner, `forward` binds `end-west`, `spawn-west`, `route-forward`, and
+`end-north`; `reverse` binds `end-north`, `spawn-north`, `route-reverse`, and
+`end-west`. Routes contain explicitly ordered points. Do not infer reversal or
+mirror geometry. A scenario selects matching start, route and finish references
+as one consistent tuple. This change does not alter scenario schemas, names,
+run manifests or verifier selection.
+
+### Migration and release order
+
+A consumer of layout 0.1 explicitly adds layout 0.2 support before using neutral
+places. Publish this catalog revision first. Then livingproof-worlds pins the
+actual released tag and resolved commit and publishes corner content 0.2.0 in
+world format `livingproof-world/0.3`. The draft test fixture declares an
+`unreleased` dependency: it is test data, not a release pin or runnable
+integration. Keep released world directories and historical evidence unchanged.
+
+See the published [reusable simple worlds authoring guidance](https://docs.livingprooflabs.com/collaboration-guidelines/docs/developer-interface.html#reusable-simple-worlds).
+This is a reading backlink; pinned repository guidance remains authoritative.
 
 ## Unsupported features
 
