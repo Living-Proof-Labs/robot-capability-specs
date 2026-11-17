@@ -1,0 +1,9 @@
+{
+  "repository": "Living-Proof-Labs/livingproof-worlds",
+  "tag": "v1.4.0",
+  "commit": "971b39ee845a18c50da627a7410d22e3b98171f9",
+  "path": "worlds/hallway-corner/0.2.0/world.json",
+  "sha256": "f398f2705e630750f7b7ef3035ba4b5aed076de1f417165e58540e973150678e",
+  "manifest_path": "worlds/hallway-corner/0.2.0/release.json",
+  "manifest_sha256": "035a000c5f9ae7007cda95ba55f03558115b6fa520900de9d5e063caf9c6572c"
+}

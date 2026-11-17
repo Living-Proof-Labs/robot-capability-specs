@@ -50,6 +50,8 @@ nav:
           - Configuration comparison examples: specs/scenarios/walk-hallway/compare-configurations.feature.md
           - Walk around the left corner scenario: specs/scenarios/walk-corner-left/index.md
           - Walk around the left corner examples: specs/scenarios/walk-corner-left/walk-corner-left.feature.md
+          - Walk around the right corner scenario: specs/scenarios/walk-corner-right/index.md
+          - Walk around the right corner examples: specs/scenarios/walk-corner-right/walk-corner-right.feature.md
           - Compatibility matrix: specs/matrix/index.md
           - Matrix examples: specs/matrix/reference.feature.md
       - Tasks: tasks.md

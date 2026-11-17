@@ -31,8 +31,9 @@ conformance evidence without constraining world geometry or consumers. The
 named places and its MuJoCo/Gazebo matrix. They are authored and parser-validated only;
 this catalog contains neither world assets nor engine results.
 
-Two scenarios use these contracts: [walk the open hallway](scenarios/walk-hallway/README.md)
-and [walk around the left corner](scenarios/walk-corner-left/README.md), which turns at a
+Three active scenarios use these contracts: [walk the open hallway](scenarios/walk-hallway/README.md)
+[walk around the left corner](scenarios/walk-corner-left/README.md), and
+[walk around the right corner](scenarios/walk-corner-right/README.md). The corner scenarios turn at a
 right angle between two hallways and states only the outcome, so each robot
 adapter that [declares the scenario](robots/README.md#scenario-support) drives
 its robot its own way. Each has a machine-readable parameter file in the
@@ -41,3 +42,7 @@ its robot its own way. Each has a machine-readable parameter file in the
 The active corner identity is `walk-corner-left` 0.2.0. Historical
 [`walk-corner` 0.1.0](scenarios/walk-corner/README.md) remains frozen for prior
 consumers and evidence; it is not an alias or a support declaration for the new id.
+
+Left and right select opposite traversals of the same `hallway-corner` 0.2.0
+physical fixture. Their acceptance rules match; robot support and results do not
+transfer between scenario identities.
