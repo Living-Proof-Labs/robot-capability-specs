@@ -130,7 +130,7 @@ implements. So the adapter, through its robot manifest, says which scenarios
 it supports.
 
 - **Declared in the robot manifest.** The optional `scenarios` list names each
-  scenario id the adapter implements, such as `["walk-hallway", "walk-corner"]`.
+  scenario id the adapter implements, such as `["walk-hallway", "walk-corner-left"]`.
   Ids are unique. The scenario revision comes from the specification the run
   pins, as for every other input.
 - **Undeclared is not supported.** A scenario that lists the precondition
@@ -144,6 +144,7 @@ it supports.
 
 The list is a declaration, not evidence: the run grade still comes from the
 trials. It is optional, so every existing manifest still validates.
-`walk-corner` is the first scenario to require it. `walk-hallway` does not list
+The historical `walk-corner` was the first scenario to require it. The active
+`walk-corner-left` identity requires its own declaration; do not infer support. `walk-hallway` does not list
 `scenario_supported` yet, so manifests without the list keep running it until
 the robot repositories declare it.
