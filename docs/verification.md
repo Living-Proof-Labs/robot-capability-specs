@@ -142,11 +142,15 @@ read-only observations do not replace live browser verification of a new deploym
   weekly exercise runs. Each failure or blocked step belongs in its affected
   repository with the `drift` label.
 - [Required checks coordination .github#98](https://github.com/Living-Proof-Labs/.github/issues/98):
-  that issue is closed, but the live main rules returned on 2026-11-18 include
-  pull requests and a merge queue without a `required_status_checks` rule.
-  Required-check adoption therefore remains unverified. Reconcile the outstanding
-  catalog gate with the organization policy owner before any approved settings
-  application; a closed tracking issue is not enforcement evidence.
+  the live main rules returned on 2026-11-18 include pull requests and a merge
+  queue without a `required_status_checks` rule. This matches the intentionally
+  queue-only enrollment in the [organization policy](https://github.com/Living-Proof-Labs/.github/blob/6bd97df5c46103ce6af85ea2d2a8ccc9d6487b20/config/github/repository-policy.json):
+  the catalog appears in `merge_queue_by_repository`, but not in
+  `required_checks_by_repository`. A passing settings audit establishes conformity
+  to that declared policy, not catalog test gating. Selecting and enrolling a
+  catalog verification gate is future explicitly reviewed policy work with the
+  organization policy owner, followed by the required approval before applying
+  settings. Issue #98 is closed; that state does not establish test enforcement.
 
 Before calling this migration live, the engineering lead may merge the verified
 revision once required checks pass and verification evidence is recorded. Live
