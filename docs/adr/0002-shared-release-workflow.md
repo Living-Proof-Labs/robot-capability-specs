@@ -46,6 +46,10 @@ verify the post-merge generated release and tag. Keep generated notes in GitHub
 Releases, without tracked changelogs or version-bump commits. ADR 0001's accepted
 release semantics remain; this changes ownership of machinery, not that policy.
 
-The current caller uses `semantic-release.yml@v7.10.8` after the upgrade in
+The caller moved to `semantic-release.yml@v7.10.8` in
 [PR #38](https://github.com/Living-Proof-Labs/robot-capability-specs/pull/38).
+It now uses `semantic-release.yml@v9.6.15` after
+[PR #77](https://github.com/Living-Proof-Labs/robot-capability-specs/pull/77),
+resolved to `5dfe37c3707a76498157c6ba3320ec1bf4f5d93d`. The source of the
+current pin is `.github/workflows/release.yml`.
 The historical v2.0.0 reference above records the original decision.

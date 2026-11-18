@@ -94,7 +94,7 @@ pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.
 ## Releases
 
 Shared [release policy](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/CONTRIBUTING.md#release-from-main)
-and the [v7.10.8 release implementation](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.8/docs/releases.md)
+and the [v9.6.15 release implementation](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v9.6.15/docs/releases.md)
 remain canonical; see [ADR 0002](docs/adr/0002-shared-release-workflow.md).
 The release workflow remains independently pinned in `.github/workflows/release.yml`.
 

@@ -11,6 +11,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    # Local Docker build fallback until published catalog tooling is available:
+    # https://github.com/Living-Proof-Labs/robot-capability-specs/issues/78
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
@@ -54,6 +56,7 @@ jobs:
         with:
           path: artifacts/manual/html
   deploy:
+    # Provider-only Pages deployment; project verification runs in the build job.
     needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04

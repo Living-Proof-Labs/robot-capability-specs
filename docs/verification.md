@@ -110,11 +110,47 @@ Rendered-page and browser checks guard shared colours and fonts, including
 light/dark modes. The shared stylesheet loads fonts from Google Fonts; fallback
 fonts remain available when that service is unavailable.
 
-The release caller currently uses v7.10.8; the separate dependency PR owns its
-next update. Historical adoption notes above describe their original revisions.
-Tooling-image publication, required checks, weekly drift scheduling and Pages
-HTTPS enforcement remain separate items in #44. The shared Renovate brand-lock
-updater is maintained in collaboration-guidelines, not implemented here.
+The release caller uses v9.6.15, resolved to
+`5dfe37c3707a76498157c6ba3320ec1bf4f5d93d`; see
+[ADR 0002](adr/0002-shared-release-workflow.md). The adopted guidance and brand
+remain at v7.10.9. Historical adoption notes above describe their original revisions.
+The shared Renovate brand-lock updater is maintained in collaboration-guidelines,
+not implemented here.
+
+## Remaining adoption work
+
+The 2026-11-18 audit of main `814764b1bbf8f17a33b248e56fef8381bbd05648`
+confirmed the v7.10.9 guidance, verification-agent comment requirement and brand
+lock are present. Issue #14 is closed as completed. The Pages API reports
+`https_enforced: true`. Live `build.json` identifies that same clean revision,
+and the landing page loads `assets/brand.css` with the custom palette. These
+read-only observations do not replace live browser verification of a new deployment.
+
+- [Tooling publication and consumption #78](https://github.com/Living-Proof-Labs/robot-capability-specs/issues/78):
+  CI and the devcontainer still build the catalog Dockerfile locally. This is the
+  temporary fallback pending a published multi-architecture image and verified
+  index digest. Coordinate with
+  [guidelines #47](https://github.com/Living-Proof-Labs/collaboration-guidelines/issues/47)
+  and [PR #109](https://github.com/Living-Proof-Labs/collaboration-guidelines/pull/109).
+  The guidelines image is not automatically a replacement for this catalog's
+  Node, Python and browser tooling.
+- [Weekly user-run drift #79](https://github.com/Living-Proof-Labs/robot-capability-specs/issues/79):
+  the released [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md#verification-of-user-run-paths)
+  assigns weekly quickstart/install checks to the verification agent. Rivet
+  coordinates the Vera handoff and execution mechanism. No released shared drift
+  workflow was found at v7.10.9 or v9.6.15; ordinary CI is not evidence that this
+  weekly exercise runs. Each failure or blocked step belongs in its affected
+  repository with the `drift` label.
+- [Required checks coordination .github#98](https://github.com/Living-Proof-Labs/.github/issues/98):
+  the live main rules returned on 2026-11-18 include pull requests and a merge
+  queue without a `required_status_checks` rule. This matches the intentionally
+  queue-only enrollment in the [organization policy](https://github.com/Living-Proof-Labs/.github/blob/6bd97df5c46103ce6af85ea2d2a8ccc9d6487b20/config/github/repository-policy.json):
+  the catalog appears in `merge_queue_by_repository`, but not in
+  `required_checks_by_repository`. A passing settings audit establishes conformity
+  to that declared policy, not catalog test gating. Selecting and enrolling a
+  catalog verification gate is future explicitly reviewed policy work with the
+  organization policy owner, followed by the required approval before applying
+  settings. Issue #98 is closed; that state does not establish test enforcement.
 
 Before calling this migration live, the engineering lead may merge the verified
 revision once required checks pass and verification evidence is recorded. Live
