@@ -25,4 +25,4 @@ jobs:
     permissions:
       contents: write
     # Do not retarget published source tags; adopt updates through a new PR.
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.7.2
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.7.3
