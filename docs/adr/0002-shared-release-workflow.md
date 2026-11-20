@@ -48,8 +48,8 @@ release semantics remain; this changes ownership of machinery, not that policy.
 
 The caller moved to `semantic-release.yml@v7.10.8` in
 [PR #38](https://github.com/Living-Proof-Labs/robot-capability-specs/pull/38).
-It now uses `semantic-release.yml@v9.6.15` after
+It subsequently moved to `semantic-release.yml@v9.6.15` in
 [PR #77](https://github.com/Living-Proof-Labs/robot-capability-specs/pull/77),
 resolved to `5dfe37c3707a76498157c6ba3320ec1bf4f5d93d`. The source of the
-current pin is `.github/workflows/release.yml`.
+current pin is the [release caller](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/release.yml).
 The historical v2.0.0 reference above records the original decision.

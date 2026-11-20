@@ -110,9 +110,9 @@ Rendered-page and browser checks guard shared colours and fonts, including
 light/dark modes. The shared stylesheet loads fonts from Google Fonts; fallback
 fonts remain available when that service is unavailable.
 
-The release caller uses v9.6.15, resolved to
-`5dfe37c3707a76498157c6ba3320ec1bf4f5d93d`; see
-[ADR 0002](adr/0002-shared-release-workflow.md). The adopted guidance and brand
+The [release caller](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/release.yml)
+records the independently pinned shared workflow; see
+[ADR 0002](adr/0002-shared-release-workflow.md) for adoption history. The adopted guidance and brand
 remain at v7.10.9. Historical adoption notes above describe their original revisions.
 The shared Renovate brand-lock updater is maintained in collaboration-guidelines,
 not implemented here.

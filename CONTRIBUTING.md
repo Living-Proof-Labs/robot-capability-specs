@@ -24,8 +24,8 @@ separate contract revisions and catalog bundle identity.
 Run `task verify` on the Docker/Task host, or
 `task -t Taskfile.runtime.yml verify` inside the prepared image. The manual's
 Tasks reference is generated from those actual definitions. PRs have no release
-token; catalog publication uses the v9.6.15 shared workflow, pinned independently
-in `.github/workflows/release.yml`.
+token; catalog publication uses the shared workflow pinned independently in the
+[release caller](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/release.yml).
 
 Changes to user-run paths need a verification-agent comment before merge, tied
 to the full candidate commit and reporting passed, failed, blocked and unrun
