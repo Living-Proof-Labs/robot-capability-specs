@@ -8,7 +8,17 @@ with ``status == "ERROR"``: a test-system error, never a robot grade.
 Install a released catalog tag, never a branch::
 
     pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.Y.Z#subdirectory=python"
+
+That tag is the package version: ``vX.Y.Z`` installs as ``X.Y.Z``. A checkout
+that is not exactly one release tag installs a development version instead.
 """
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("livingproof-scenario-parameters")
+except PackageNotFoundError:
+    from livingproof_scenario_parameters.versioning import resolve_version
+    __version__ = resolve_version()
 
 from livingproof_scenario_parameters.geometry import crosses_exit, distance_to_route, route_length
 from livingproof_scenario_parameters.parameters import (
@@ -23,6 +33,7 @@ from livingproof_scenario_parameters.parameters import (
 )
 
 __all__ = [
+    '__version__',
     'ScenarioParameterError',
     'crosses_exit',
     'distance_to_route',

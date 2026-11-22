@@ -89,7 +89,11 @@ a branch:
 pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.Y.Z#subdirectory=python"
 ```
 
-`vX.Y.Z` is the catalog tag that contains the package.
+`vX.Y.Z` is the catalog tag that contains the package. The built package
+version is that tag without the leading `v`: installing `vX.Y.Z` produces
+version `X.Y.Z`. A pull request, a local checkout, or any other tree that is
+not exactly one release tag installs a development version such as
+`0.0.0.dev0+g<commit>`. That development version is not a stable release.
 
 ## Releases
 

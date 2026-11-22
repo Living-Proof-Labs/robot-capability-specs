@@ -63,7 +63,7 @@ test('publication waits for local verification and retains main/off-switch restr
     'expected-version': '${{ needs.candidate.outputs.version }}',
     'expected-commit': '${{ needs.candidate.outputs.commit }}',
   });
-  const check = parity.steps.find(step => step.name === 'Check the committed Python package version before tagging');
+  const check = parity.steps.find(step => step.name === 'Check the built Python package matches the release candidate before tagging');
   assert.equal(parity.steps[0].with.ref, '${{ github.sha }}');
   assert.equal(parity.steps[0].with['persist-credentials'], false);
   assert.equal(check.run, 'python3 tooling/check-package-release.py "$GITHUB_SHA" "$CANDIDATE_COMMIT" "$CANDIDATE_VERSION" "$CANDIDATE_TAG"');
@@ -71,6 +71,7 @@ test('publication waits for local verification and retains main/off-switch restr
     CANDIDATE_VERSION: '${{ needs.candidate.outputs.version }}',
     CANDIDATE_TAG: '${{ needs.candidate.outputs.git-tag }}',
     CANDIDATE_COMMIT: '${{ needs.candidate.outputs.commit }}',
+    LIVINGPROOF_PACKAGE_VERSION: '${{ needs.candidate.outputs.pep440-version }}',
   });
   assert.deepEqual(workflow.on.push.branches, ['main']);
   assert.equal(workflow.on.pull_request, undefined);
