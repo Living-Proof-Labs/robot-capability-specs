@@ -352,15 +352,14 @@ test("repository workflows authenticate every main-freshness read", () => {
     contents: "read",
   });
   const steps = extractSteps(job.lines);
-  const guard = steps[0].join("\n");
+  const guardStep = steps.find(step => runScript(step).includes(FRESHNESS));
+  const guard = guardStep.join("\n");
   assert.match(guard, /name: Confirm this run still describes current main/);
   assert.match(guard, /GH_TOKEN:\s*\$\{\{\s*github\.token\s*\}\}/);
-  assert.match(runScript(steps[0]), /\bgh\s+api\b/);
-  assert.match(runScript(steps[0]), /git\/ref\/heads\/main/);
-  assert.doesNotMatch(runScript(steps[0]), /urlopen\s*\(\s*url\b/);
-  const deployStep = steps.find((step) => /actions\/deploy-pages@/.test(step.join("\n")));
-  assert.ok(deployStep, "expected actions/deploy-pages@ step");
-  const deploy = deployStep.join("\n");
+  assert.match(runScript(guardStep), /\bgh\s+api\b/);
+  assert.match(runScript(guardStep), /git\/ref\/heads\/main/);
+  assert.doesNotMatch(runScript(guardStep), /urlopen\s*\(\s*url\b/);
+  const deploy = steps.at(-1).join("\n");
   assert.match(deploy, /actions\/deploy-pages@/);
   assert.match(deploy, /if: steps\.freshness\.outputs\.current == 'true'/);
 });
@@ -400,14 +399,14 @@ test("contents: write fails even when the read sends a token", () => {
 });
 
 test("removing the pages freshness token fails the guard", () => {
-  const text = pagesText().replace(/\n {10}GH_TOKEN: \$\{\{ github\.token \}\}\n/, "\n");
+  const text = pagesText().replace(/(id: freshness\n        env:\n) {10}GH_TOKEN: \$\{\{ github\.token \}\}\n/, "$1");
   assert.notEqual(text, pagesText());
   const problems = freshnessProblems("pages.yml", text);
   assert.ok(problems.some((problem) => /without authentication/.test(problem)), problems.join("\n"));
 });
 
 function runGuard({ remoteSha, ghStatus }) {
-  const script = runScript(extractSteps(deployJob().lines)[0]);
+  const script = runScript(extractSteps(deployJob().lines).find(step => runScript(step).includes(FRESHNESS)));
   const dir = mkdtempSync(join(tmpdir(), "freshness-"));
   const record = join(dir, "record");
   const gh = join(dir, "gh");
@@ -433,6 +432,7 @@ printf '%s\\n' '${remoteSha}'
       GH_TOKEN: "workflow-token",
       GITHUB_REPOSITORY: "Living-Proof-Labs/robot-capability-specs",
       GITHUB_SHA: EXPECTED_SHA,
+      COMMIT: EXPECTED_SHA,
       GITHUB_OUTPUT: output,
       GITHUB_STEP_SUMMARY: summary,
     },

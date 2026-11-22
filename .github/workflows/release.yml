@@ -3,49 +3,79 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing stable release tag for an explicit manual replay
+        type: string
+        required: true
 permissions:
   contents: read
 jobs:
-  verify:
-    # Local Docker build fallback until published catalog tooling is available:
-    # https://github.com/Living-Proof-Labs/robot-capability-specs/issues/78
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
-        with:
-          version: '3.54.0'
-      - run: task verify
-
-  version:
+  candidate:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
     permissions:
       contents: read
     uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.1
     with:
-      replay-tag: ''
+      replay-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || '' }}
+
+  package-parity:
+    needs: candidate
+    if: github.event_name == 'push' && needs.candidate.outputs.version != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check the committed Python package version before tagging
+        env:
+          CANDIDATE_VERSION: ${{ needs.candidate.outputs.version }}
+          CANDIDATE_TAG: ${{ needs.candidate.outputs.git-tag }}
+          CANDIDATE_COMMIT: ${{ needs.candidate.outputs.commit }}
+        run: python3 tooling/check-package-release.py "$GITHUB_SHA" "$CANDIDATE_COMMIT" "$CANDIDATE_VERSION" "$CANDIDATE_TAG"
+
+  manual:
+    needs: candidate
+    if: github.event_name == 'workflow_dispatch' || needs.candidate.outputs.version != ''
+    permissions:
+      contents: read
+    uses: ./.github/workflows/verify.yml
+    with:
+      delivery: true
+      manual_version: ${{ needs.candidate.outputs.semver-version }}
+      source_commit: ${{ needs.candidate.outputs.commit }}
+      run_id: ${{ needs.candidate.outputs.run-id }}
+      run_attempt: ${{ needs.candidate.outputs.run-attempt }}
+
   release:
-    needs: [verify, version]
+    needs: [candidate, package-parity, manual]
     if: >-
-      github.ref == 'refs/heads/main' &&
-      needs.version.outputs.git-tag != '' &&
-      needs.version.outputs.version == needs.version.outputs.semver-version &&
-      needs.version.outputs.commit == github.sha &&
-      (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true') &&
+      needs.candidate.outputs.version != '' &&
+      needs.manual.outputs.artifact_id != '' && needs.manual.outputs.artifact_digest != '' &&
+      needs.manual.outputs.version == needs.candidate.outputs.version &&
+      needs.manual.outputs.source_commit == github.sha &&
+      needs.manual.outputs.sealed_run_id == github.run_id &&
+      needs.manual.outputs.sealed_attempt == github.run_attempt
     permissions:
       contents: write
-    # Do not retarget published source tags; adopt updates through a new PR.
+    # The sealed manual has been re-downloaded and checked by the read-only caller.
     uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.1
     with:
-      expected-version: ${{ needs.version.outputs.semver-version }}
-      expected-commit: ${{ needs.version.outputs.commit }}
+      expected-version: ${{ needs.candidate.outputs.version }}
+      expected-commit: ${{ needs.candidate.outputs.commit }}
+
   deploy-manual:
-    needs: [release, version]
+    needs: [candidate, manual, release]
     if: >-
-      needs.release.result == 'success' &&
-      needs.release.outputs.published == 'true' &&
-      needs.release.outputs.commit == needs.version.outputs.commit
+      github.event_name == 'push' && needs.release.outputs.published == 'true'
     permissions:
       contents: read
       pages: write
@@ -54,3 +84,25 @@ jobs:
     with:
       release_tag: ${{ needs.release.outputs.git-tag }}
       release_version: ${{ needs.release.outputs.version }}
+      source_commit: ${{ needs.release.outputs.commit }}
+      run_id: ${{ needs.candidate.outputs.run-id }}
+      run_attempt: ${{ needs.candidate.outputs.run-attempt }}
+      artifact_id: ${{ needs.manual.outputs.artifact_id }}
+      artifact_digest: ${{ needs.manual.outputs.artifact_digest }}
+
+  replay-manual:
+    needs: [candidate, manual]
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      release_tag: ${{ inputs.release_tag }}
+      release_version: ${{ needs.candidate.outputs.semver-version }}
+      source_commit: ${{ needs.candidate.outputs.commit }}
+      run_id: ${{ needs.candidate.outputs.run-id }}
+      run_attempt: ${{ needs.candidate.outputs.run-attempt }}
+      artifact_id: ${{ needs.manual.outputs.artifact_id }}
+      artifact_digest: ${{ needs.manual.outputs.artifact_digest }}

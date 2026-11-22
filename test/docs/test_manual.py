@@ -78,7 +78,8 @@ def test_version(output):
     build = json.loads((output / 'html/build.json').read_text())
     version = ' '.join(Document((output / 'html/version.html').read_text()).text)
     assert build['revision'] in version
-    assert 'Development documentation' in version
+    label = 'Development documentation' if build['version'] == 'development' else f'Documentation version {build["version"]}'
+    assert label in version
     assert ('with local changes' in version) == build['dirty']
     assert 'Historical rendered manuals are unavailable' in version
 
@@ -110,7 +111,9 @@ def test_navigation(browser, server, output, width):
     assert response.status == 200
     assert response.text() == (ROOT / 'specs/matrix/reference.feature').read_text()
     page.goto(server + '/version.html')
-    expect(article).to_contain_text('Development documentation')
+    identity = json.loads((output / 'html/build.json').read_text())
+    label = 'Development documentation' if identity['version'] == 'development' else identity['version']
+    expect(article).to_contain_text(label)
     (output / 'screenshots').mkdir(exist_ok=True)
     page.screenshot(path=str(output / f'screenshots/navigation-{width}.png'))
     assert not failures, failures
@@ -196,7 +199,7 @@ def test_all_pages_expose_exact_identity_and_root(output):
         text = ' '.join(doc.text)
         assert 'https://docs.livingprooflabs.com/' in doc.links, path
         assert f'https://github.com/Living-Proof-Labs/robot-capability-specs/commit/{build["revision"]}' in doc.links
-        assert f'Docs: development · {build["revision"][:12]}' in text
+        assert f'Docs: {build["version"]} · {build["revision"][:12]}' in text
         assert 'Catalog releases' in text
         assert 'https://github.com/Living-Proof-Labs/robot-capability-specs/issues' in doc.links
 
