@@ -16,14 +16,18 @@ function usesRe() {
   return /^\s+uses:\s*Living-Proof-Labs\/collaboration-guidelines\/\.github\/workflows\/([\w.-]+\.ya?ml)@(\S+)\s*$/gm;
 }
 const PRESET = /^github>Living-Proof-Labs\/collaboration-guidelines:renovate-preset#(.+)$/;
-const SHARED_RELEASE_INPUTS = new Set(["dry-run", "draft-release"]);
-const SHARED_RELEASE_OUTPUTS = new Set([
-  "draft-created",
-  "published",
-  "version",
-  "git-tag",
-  "release-url",
-]);
+const INTERFACES = {
+  'semantic-release.yml': {
+    contents: 'write',
+    inputs: new Set(['dry-run', 'draft-release', 'expected-version', 'expected-commit']),
+    outputs: new Set(['draft-created', 'published', 'version', 'git-tag', 'commit', 'release-url']),
+  },
+  'semantic-release-candidate.yml': {
+    contents: 'read',
+    inputs: new Set(['replay-tag']),
+    outputs: new Set(['semver-version', 'pep440-version', 'debian-version', 'version', 'git-tag', 'commit', 'run-id', 'run-attempt']),
+  },
+};
 
 function root() {
   let dir = dirname(fileURLToPath(import.meta.url));
@@ -131,21 +135,22 @@ test("mismatched pins are reported", { skip: skipCall }, () => {
   assert.equal(pinnedVersions(mutated, preset).size, 2);
 });
 
-test("release call uses only the shared interface", { skip: skipCall }, () => {
+test("release calls use only their shared interfaces", { skip: skipCall }, () => {
   const text = readFileSync(workflowPath(), "utf8");
   const calls = guidelineCalls(text);
   assert.ok(Object.keys(calls).length, "expected a job that uses the shared semantic-release workflow");
   for (const [name, match] of Object.entries(calls)) {
-    assert.equal(match.file, "semantic-release.yml");
+    const api = INTERFACES[match.file];
+    assert.ok(api, `unknown shared workflow ${match.file}`);
     const block = jobBlock(text, name);
     const withKeys = new Set(Object.keys(mapping(block, "with")));
-    for (const key of withKeys) assert.ok(SHARED_RELEASE_INPUTS.has(key), key);
-    assert.equal(mapping(block, "permissions").contents, "write");
+    for (const key of withKeys) assert.ok(api.inputs.has(key), key);
+    assert.equal(mapping(block, "permissions").contents, api.contents);
     const used = new Set(
       [...text.matchAll(new RegExp(`needs\\.${name}\\.outputs\\.([\\w-]+)`, "g"))].map((m) => m[1]),
     );
     for (const key of used) {
-      assert.ok(SHARED_RELEASE_OUTPUTS.has(key), `unexpected output ${key}`);
+      assert.ok(api.outputs.has(key), `unexpected output ${key}`);
     }
   }
 });
@@ -157,17 +162,20 @@ test("an unknown release output is reported", { skip: skipCall }, () => {
     : text.replace("permissions:", "needs.release.outputs.tag: placeholder\n  permissions:");
   const found = new Set([...mutated.matchAll(/needs\.release\.outputs\.([\w-]+)/g)].map((m) => m[1]));
   assert.ok(found.has("tag"));
-  assert.ok(found.has("tag") && !SHARED_RELEASE_OUTPUTS.has("tag"));
+  assert.ok(found.has("tag") && !INTERFACES["semantic-release.yml"].outputs.has("tag"));
 });
 
 test("recorded interface matches the pinned shared workflow", { skip: skipNetwork }, async () => {
   const refs = new Set(Object.values(guidelineCalls()).map((call) => call.ref));
   assert.equal(refs.size, 1);
   const [ref] = refs;
-  const url = `https://raw.githubusercontent.com/${REPO}/${ref}/.github/workflows/semantic-release.yml`;
-  const response = await fetch(url);
-  assert.ok(response.ok, `${url} -> ${response.status}`);
-  const shared = await response.text();
-  assert.deepEqual([...workflowCallKeys(shared, "inputs")].sort(), [...SHARED_RELEASE_INPUTS].sort());
-  assert.deepEqual([...workflowCallKeys(shared, "outputs")].sort(), [...SHARED_RELEASE_OUTPUTS].sort());
+  for (const file of new Set(Object.values(guidelineCalls()).map((call) => call.file))) {
+    const url = `https://raw.githubusercontent.com/${REPO}/${ref}/.github/workflows/${file}`;
+    const response = await fetch(url);
+    assert.ok(response.ok, `${url} -> ${response.status}`);
+    const shared = await response.text();
+    const api = INTERFACES[file];
+    assert.deepEqual([...workflowCallKeys(shared, "inputs")].sort(), [...api.inputs].sort());
+    assert.deepEqual([...workflowCallKeys(shared, "outputs")].sort(), [...api.outputs].sort());
+  }
 });
