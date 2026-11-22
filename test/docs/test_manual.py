@@ -76,7 +76,7 @@ def test_version(output):
     html = (output / 'html/index.html').read_text()
     assert 'href="https://docs.livingprooflabs.com/robot-capability-specs/index.html"' in html
     build = json.loads((output / 'html/build.json').read_text())
-    version = ' '.join(Document((output / 'html/version.html').read_text()).text)
+    version = ' '.join(' '.join(Document((output / 'html/version.html').read_text()).text).split())
     assert build['revision'] in version
     label = 'Development documentation' if build['version'] == 'development' else f'Documentation version {build["version"]}'
     assert label in version
