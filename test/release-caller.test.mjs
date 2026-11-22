@@ -44,7 +44,24 @@ test('shared release source is an explicit version tag, never a moving branch or
   t.diagnostic(`current workflow accepted with explicit full semver tag @${call.ref}`);
 });
 test('publication waits for local verification and retains main/off-switch restrictions', () => {
-  assert.equal(workflow.jobs.release.needs, 'verify');
+  const { candidate, 'package-parity': parity, release } = workflow.jobs;
+  assert.equal(candidate.needs, 'verify');
+  assert.equal(parity.needs, 'candidate');
+  assert.deepEqual(release.needs, ['candidate', 'package-parity']);
+  assert.match(release.if, /needs\.candidate\.outputs\.version != ''/);
+  assert.deepEqual(release.with, {
+    'expected-version': '${{ needs.candidate.outputs.version }}',
+    'expected-commit': '${{ needs.candidate.outputs.commit }}',
+  });
+  const check = parity.steps.find(step => step.name === 'Check the committed Python package version before tagging');
+  assert.equal(parity.steps[0].with.ref, '${{ github.sha }}');
+  assert.equal(parity.steps[0].with['persist-credentials'], false);
+  assert.equal(check.run, 'python3 tooling/check-package-release.py "$GITHUB_SHA" "$CANDIDATE_COMMIT" "$CANDIDATE_VERSION" "$CANDIDATE_TAG"');
+  assert.deepEqual(check.env, {
+    CANDIDATE_VERSION: '${{ needs.candidate.outputs.version }}',
+    CANDIDATE_TAG: '${{ needs.candidate.outputs.git-tag }}',
+    CANDIDATE_COMMIT: '${{ needs.candidate.outputs.commit }}',
+  });
   assert.deepEqual(workflow.on.push.branches, ['main']);
   assert.equal(workflow.on.pull_request, undefined);
   assert.equal(workflow.on.pull_request_target, undefined);
@@ -55,6 +72,8 @@ test('publication waits for local verification and retains main/off-switch restr
 test('consumer verification remains read-only and only release requests contents write', () => {
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   assert.equal(workflow.jobs.verify.permissions, undefined);
+  assert.deepEqual(workflow.jobs.candidate.permissions, { contents: 'read' });
+  assert.deepEqual(workflow.jobs['package-parity'].permissions, { contents: 'read' });
   assert.deepEqual(workflow.jobs.release.permissions, { contents: 'write' });
   assert.equal(workflow.jobs.verify.steps[0].with['persist-credentials'], false);
 });

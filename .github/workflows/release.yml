@@ -19,10 +19,37 @@ jobs:
           version: '3.54.0'
       - run: task verify
 
-  release:
+  candidate:
     needs: verify
     if: github.ref == 'refs/heads/main' && (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
+    permissions:
+      contents: read
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.1
+
+  package-parity:
+    needs: candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check the committed Python package version before tagging
+        env:
+          CANDIDATE_VERSION: ${{ needs.candidate.outputs.version }}
+          CANDIDATE_TAG: ${{ needs.candidate.outputs.git-tag }}
+          CANDIDATE_COMMIT: ${{ needs.candidate.outputs.commit }}
+        run: python3 tooling/check-package-release.py "$GITHUB_SHA" "$CANDIDATE_COMMIT" "$CANDIDATE_VERSION" "$CANDIDATE_TAG"
+
+  release:
+    needs: [candidate, package-parity]
+    if: github.ref == 'refs/heads/main' && (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true') && needs.candidate.outputs.version != ''
     permissions:
       contents: write
     # Do not retarget published source tags; adopt updates through a new PR.
     uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.1
+    with:
+      expected-version: ${{ needs.candidate.outputs.version }}
+      expected-commit: ${{ needs.candidate.outputs.commit }}
