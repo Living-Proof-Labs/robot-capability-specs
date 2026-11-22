@@ -24,7 +24,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && (vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
     permissions:
       contents: read
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.1
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.2
 
   package-parity:
     needs: candidate
@@ -49,7 +49,7 @@ jobs:
     permissions:
       contents: write
     # Do not retarget published source tags; adopt updates through a new PR.
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.1
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.2
     with:
       expected-version: ${{ needs.candidate.outputs.version }}
       expected-commit: ${{ needs.candidate.outputs.commit }}
