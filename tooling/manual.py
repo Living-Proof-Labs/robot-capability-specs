@@ -2,6 +2,7 @@
 """Stage authoritative public documents, then invoke the pinned manual generator."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -94,14 +95,27 @@ def build():
     shutil.copytree(ROOT / 'LICENSES', SOURCE / 'LICENSES')
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
-    build_info = {'revision': head, 'dirty': dirty, 'generator': 'zensical==0.0.73', 'sources': manifest, 'docs_brand': brand}
+    version = os.environ.get('MANUAL_VERSION') or 'development'
+    stable = r'(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)'
+    number = r'[1-9][0-9]*'
+    run_id, run_attempt = (os.environ.get(key, '') for key in ('MANUAL_RUN_ID', 'MANUAL_RUN_ATTEMPT'))
+    if version != 'development' and (
+        not re.fullmatch(rf'{stable}(?:-(?:pr\.{number}|main)\.{number}\.{number})?', version)
+        or not all(re.fullmatch(number, item) for item in (run_id, run_attempt))
+    ):
+        raise ValueError('A versioned manual requires its exact version, workflow run and attempt')
+    build_info = {'version': version, 'revision': head, 'dirty': dirty,
+                  'generator': 'zensical==0.0.73', 'sources': manifest, 'docs_brand': brand}
+    if version != 'development':
+        build_info.update(run_id=run_id, run_attempt=run_attempt)
     records = task_reference()
     build_info['task_sources'] = [{'path': row['path'], 'sha256': row['sha256']} for row in records]
     (SOURCE / 'task-reference.json').write_text(json.dumps(records, indent=2) + '\n')
     (SOURCE / 'tasks.md').write_text(render_tasks(records))
     (SOURCE / 'build.json').write_text(json.dumps(build_info, indent=2) + '\n')
+    title = 'Development documentation' if version == 'development' else f'Documentation version `{version}`'
     (SOURCE / 'version.md').write_text(
-        '# Documentation version\n\nDevelopment documentation from source commit '
+        f'# Documentation version\n\n{title} from source commit '
         f'[`{head}`](https://github.com/Living-Proof-Labs/robot-capability-specs/commit/{head})' + (' with local changes' if dirty else '') + '.\n\n'
         'Catalog tags version the bundle; contract revisions identify individual contracts. '
         'Historical rendered manuals are unavailable; consult '
@@ -111,7 +125,7 @@ def build():
         'are published bundle versions, not this documentation build identity.\n')
     config = (ROOT / 'zensical.yml').read_text()
     identity = (f'<a href="https://github.com/Living-Proof-Labs/robot-capability-specs/commit/{head}">'
-                f'Docs: development · {head[:12]}</a>' + (' (local changes)' if dirty else ''))
+                f'Docs: {version} · {head[:12]}</a>' + (' (local changes)' if dirty else ''))
     footer = ('<a href="https://docs.livingprooflabs.com/">Documentation home</a> · '
               '<a href="https://github.com/Living-Proof-Labs/robot-capability-specs">Source</a> · '
               '<a href="https://github.com/Living-Proof-Labs/robot-capability-specs/issues">Help / report an issue</a> · '

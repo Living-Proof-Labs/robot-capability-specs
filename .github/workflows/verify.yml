@@ -4,10 +4,64 @@ on:
     types: [opened, synchronize, reopened, edited]
   push:
     branches: ['**']
+  workflow_call:
+    inputs:
+      delivery:
+        type: boolean
+        required: true
+      manual_version:
+        type: string
+        required: true
+      source_commit:
+        type: string
+        required: true
+      run_id:
+        type: string
+        required: true
+      run_attempt:
+        type: string
+        required: true
+    outputs:
+      artifact_id:
+        value: ${{ jobs.verify.outputs.artifact_id }}
+      artifact_digest:
+        value: ${{ jobs.verify.outputs.artifact_digest }}
+      version:
+        value: ${{ jobs.verify.outputs.version }}
+      source_commit:
+        value: ${{ jobs.verify.outputs.source_commit }}
+      sealed_run_id:
+        value: ${{ jobs.verify.outputs.run_id }}
+      sealed_attempt:
+        value: ${{ jobs.verify.outputs.run_attempt }}
 permissions:
   contents: read
 jobs:
+  version:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    permissions:
+      contents: read
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.2
   verify:
+    needs: version
+    if: >-
+      !cancelled() &&
+      (needs.version.result == 'success' ||
+       (needs.version.result == 'skipped' &&
+        (github.event_name != 'pull_request' || github.base_ref != 'main')))
+    outputs:
+      artifact_id: ${{ steps.pages_artifact.outputs.artifact-id }}
+      artifact_digest: ${{ steps.seal.outputs.digest }}
+      version: ${{ steps.seal.outputs.version }}
+      source_commit: ${{ steps.seal.outputs.commit }}
+      run_id: ${{ steps.seal.outputs.run_id }}
+      run_attempt: ${{ steps.seal.outputs.run_attempt }}
+    env:
+      MANUAL_VERSION: ${{ inputs.manual_version || needs.version.outputs.semver-version }}
+      MANUAL_RUN_ID: ${{ inputs.run_id || needs.version.outputs.run-id }}
+      MANUAL_RUN_ATTEMPT: ${{ inputs.run_attempt || needs.version.outputs.run-attempt }}
+      MANUAL_COMMIT: ${{ inputs.source_commit || needs.version.outputs.commit }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     # Local Docker build fallback until published catalog tooling is available:
     # https://github.com/Living-Proof-Labs/robot-capability-specs/issues/78
     runs-on: ubuntu-latest
@@ -21,11 +75,43 @@ jobs:
           version: '3.54.0'
       - name: Validate robot manifests (G1, Go1 and T1 examples)
         run: task validate:manifests
+      - name: Require exact version plan before building
+        if: inputs.delivery || needs.version.result == 'success'
+        shell: bash
+        run: |
+          test -n "$MANUAL_VERSION"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$MANUAL_COMMIT" = "$SOURCE_SHA"
+          test "$MANUAL_RUN_ID" = "$GITHUB_RUN_ID"
+          test "$MANUAL_RUN_ATTEMPT" = "$GITHUB_RUN_ATTEMPT"
+          test -z "$(git status --porcelain --untracked-files=all)"
       - run: task verify
+      - name: Seal the exact verified manual
+        id: seal
+        if: env.MANUAL_VERSION != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain --untracked-files=all)"
+          tar --dereference --hard-dereference -C artifacts/manual/html -cf "$RUNNER_TEMP/artifact.tar" .
+          digest=$(python3 tooling/check-manual-artifact.py seal "$RUNNER_TEMP/artifact.tar" "$MANUAL_VERSION" "$MANUAL_COMMIT" "$MANUAL_RUN_ID" "$MANUAL_RUN_ATTEMPT")
+          {
+            printf 'digest=%s\nversion=%s\ncommit=%s\nrun_id=%s\nrun_attempt=%s\n' "$digest" "$MANUAL_VERSION" "$MANUAL_COMMIT" "$MANUAL_RUN_ID" "$MANUAL_RUN_ATTEMPT"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        id: pages_artifact
+        if: env.MANUAL_VERSION != ''
+        with:
+          name: github-pages-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 1
+          if-no-files-found: error
       - run: task preview
+        if: ${{ !inputs.delivery }}
         env:
           PR_TITLE: "${{ github.event.pull_request.title || 'chore: branch preview' }}"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ !inputs.delivery }}
         with:
           name: preview-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/preview.json
@@ -47,7 +133,7 @@ jobs:
         id: artifact
         if: ${{ !cancelled() }}
         with:
-          name: catalog-and-manual
+          name: ${{ inputs.delivery && format('catalog-and-manual-{0}', github.run_attempt) || 'catalog-and-manual' }}
           path: artifacts/
           retention-days: 14
           if-no-files-found: error
@@ -60,3 +146,43 @@ jobs:
           FAILED: ${{ steps.results.outputs.failed }}
           SKIPPED: ${{ steps.results.outputs.skipped }}
         run: python3 tooling/check-publication.py
+
+  artifact-readback:
+    needs: verify
+    if: >-
+      !cancelled() && needs.verify.result == 'success' &&
+      (inputs.delivery || (github.event_name == 'pull_request' && github.base_ref == 'main'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Require matching attempt and artifact identity
+        env:
+          ARTIFACT_ID: ${{ needs.verify.outputs.artifact_id }}
+          EXPECTED_COMMIT: ${{ needs.verify.outputs.source_commit }}
+          EXPECTED_RUN: ${{ needs.verify.outputs.run_id }}
+          EXPECTED_ATTEMPT: ${{ needs.verify.outputs.run_attempt }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$EXPECTED_COMMIT" = "$SOURCE_SHA"
+          test "$EXPECTED_RUN" = "$GITHUB_RUN_ID"
+          test "$EXPECTED_ATTEMPT" = "$GITHUB_RUN_ATTEMPT"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.verify.outputs.artifact_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/manual-readback
+      - name: Verify sealed bytes before any publication
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+          COMMIT: ${{ needs.verify.outputs.source_commit }}
+          RUN_ID: ${{ needs.verify.outputs.run_id }}
+          ATTEMPT: ${{ needs.verify.outputs.run_attempt }}
+          DIGEST: ${{ needs.verify.outputs.artifact_digest }}
+        run: python3 tooling/check-manual-artifact.py check "$RUNNER_TEMP/manual-readback/artifact.tar" "$VERSION" "$COMMIT" "$RUN_ID" "$ATTEMPT" "$DIGEST"

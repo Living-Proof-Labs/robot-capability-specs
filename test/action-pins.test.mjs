@@ -33,6 +33,7 @@ function actionUses(text) {
 function problems(text) {
   const found = [];
   for (const use of actionUses(text)) {
+    if (/^\.\/\.github\/workflows\/[\w.-]+\.ya?ml$/.test(use.spec)) continue;
     if (REUSABLE.test(use.action)) {
       if (!VERSION.test(use.ref)) found.push(`${use.spec} is not a full release tag`);
       continue;

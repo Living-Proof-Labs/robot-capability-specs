@@ -26,7 +26,7 @@ v2.0.3 release workflow remained unchanged. No local `.agents/skills` exist.
 | `navigation` | Desktop and mobile users reach versioned contracts | manual JUnit and screenshots |
 | `search` | Searching for inhibition opens a matching contract | manual JUnit |
 | `themes` | System preference and manual light/dark controls change readable surfaces | manual JUnit and screenshots |
-| `version` | Development identity and canonical project path are explicit | manual JUnit |
+| `version` | Version, source identity and canonical project path are explicit | manual JUnit |
 
 The inventory covers the new manual, not all catalog behavior. Gherkin parsing
 is reported separately in catalog JUnit. Runtime grades, physical robots,
@@ -70,7 +70,7 @@ these checks on the downloaded artifact and post evidence using the pinned
 [review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md).
 
 The [public manual](https://docs.livingprooflabs.com/robot-capability-specs/) is
-published from main. See [deployment and live verification](../.github/PAGES.md)
+published from a verified catalog release on main. See [deployment and live verification](../.github/PAGES.md)
 for the deployed revision and evidence. The manual identifies its source revision;
 it does not imply that every installed consumer uses that catalog version.
 

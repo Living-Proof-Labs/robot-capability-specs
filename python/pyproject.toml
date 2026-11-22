@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "livingproof-scenario-parameters"
-version = "3.1.13"
+version = "3.1.14"
 description = "Reference resolver for livingproof-scenario-parameters/0.1 and route geometry"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

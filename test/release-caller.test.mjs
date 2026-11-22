@@ -45,9 +45,19 @@ test('shared release source is an explicit version tag, never a moving branch or
 });
 test('publication waits for local verification and retains main/off-switch restrictions', () => {
   const { candidate, 'package-parity': parity, release } = workflow.jobs;
-  assert.equal(candidate.needs, 'verify');
+  const { manual, 'deploy-manual': deploy, 'replay-manual': replay } = workflow.jobs;
+  assert.deepEqual(candidate.with, { 'replay-tag': "${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || '' }}" });
+  assert.equal(manual.needs, 'candidate');
+  assert.equal(manual.uses, './.github/workflows/verify.yml');
+  assert.equal(manual.with.delivery, true);
+  assert.match(release.if, /github.event_name == 'push'/);
+  assert.match(parity.if, /github.event_name == 'push'/);
+  assert.match(deploy.if, /published == 'true'/);
+  assert.deepEqual(replay.needs, ['candidate', 'manual']);
+  assert.match(replay.if, /github.event_name == 'workflow_dispatch'/);
+  assert.equal(replay.with.release_tag, '${{ inputs.release_tag }}');
   assert.equal(parity.needs, 'candidate');
-  assert.deepEqual(release.needs, ['candidate', 'package-parity']);
+  assert.deepEqual(release.needs, ['candidate', 'package-parity', 'manual']);
   assert.match(release.if, /needs\.candidate\.outputs\.version != ''/);
   assert.deepEqual(release.with, {
     'expected-version': '${{ needs.candidate.outputs.version }}',
@@ -67,15 +77,14 @@ test('publication waits for local verification and retains main/off-switch restr
   assert.equal(workflow.on.pull_request_target, undefined);
   assert.match(workflow.jobs.release.if, /github.ref == 'refs\/heads\/main'/);
   assert.match(workflow.jobs.release.if, /vars.RELEASES_ENABLED == '' \|\| vars.RELEASES_ENABLED == 'true'/);
-  assert.ok(workflow.jobs.verify.steps.some(step => step.run === 'task verify'));
 });
 test('consumer verification remains read-only and only release requests contents write', () => {
   assert.deepEqual(workflow.permissions, { contents: 'read' });
-  assert.equal(workflow.jobs.verify.permissions, undefined);
+  assert.deepEqual(workflow.jobs.manual.permissions, { contents: 'read' });
   assert.deepEqual(workflow.jobs.candidate.permissions, { contents: 'read' });
   assert.deepEqual(workflow.jobs['package-parity'].permissions, { contents: 'read' });
   assert.deepEqual(workflow.jobs.release.permissions, { contents: 'write' });
-  assert.equal(workflow.jobs.verify.steps[0].with['persist-credentials'], false);
+  assert.equal(workflow.jobs.manual.with.source_commit, '${{ needs.candidate.outputs.commit }}');
 });
 
 const releaseCallerCases = [

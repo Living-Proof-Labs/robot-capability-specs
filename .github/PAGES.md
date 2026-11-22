@@ -1,7 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # Pages deployment and live verification
 
-The main-only `pages.yml` workflow publishes the manual after verification.
+The main-only `pages.yml` workflow publishes the sealed manual for an exact
+published catalog release; the catalog release workflow invokes it. To replay
+a delivery, run **Catalog release** on main with its existing stable tag.
+The tag must name current main. Replay verifies the release and rebuilds the
+manual without invoking the release writer.
 Repository settings were enabled separately under scoped approval.
 
 Repository settings were completed on 2026-10-27: Pages uses GitHub
@@ -14,8 +18,9 @@ API verification returned `has_pages: true`, `build_type: workflow`, and
 3. The `pages.yml` workflow is active. Only its separate
    deploy job requests `pages: write` and `id-token: write`, plus
    `contents: read` for the main-freshness read, which sends the workflow
-   token. Build remains `contents: read`. The deploy job executes no
-   checkout or project code.
+   token. Build and artifact readback remain `contents: read`. The deploy
+   job checks out the exact source to verify the tag, checks the downloaded
+   artifact against its sealed digest, and runs no project code.
 
 The published URL is `https://docs.livingprooflabs.com/robot-capability-specs/`.
 No per-project custom domain, CNAME, DNS, mail or organization setting change is
@@ -27,7 +32,7 @@ successful verification. The Pages transfer artifact contains only public HTML.
 [Pages run 40452444868](https://github.com/Living-Proof-Labs/robot-capability-specs/actions/runs/40452444868)
 published source `323ebcec62b68633987a2c44f87230639a4cb3c8` on 2026-10-27,
 also released as catalog v1.2.2. The live `build.json` records that exact revision,
-`dirty: false`, and Zensical 0.0.73. The manual follows main; subsequent deployments
+`dirty: false`, and Zensical 0.0.73. The manual follows published catalog releases; subsequent deployments
 show their own exact source identity rather than retaining a historical manual.
 
 Live reader checks on 2026-10-27 passed: authoring links to revision 1 and

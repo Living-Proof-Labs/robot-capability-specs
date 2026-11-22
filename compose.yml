@@ -6,6 +6,9 @@ services:
       secrets:
         - ca
     environment:
+      MANUAL_VERSION: "${MANUAL_VERSION:-}"
+      MANUAL_RUN_ID: "${MANUAL_RUN_ID:-}"
+      MANUAL_RUN_ATTEMPT: "${MANUAL_RUN_ATTEMPT:-}"
       PR_TITLE: "${PR_TITLE:-chore: branch preview}"
     volumes:
       - ./artifacts:/work/artifacts
