@@ -303,6 +303,29 @@ class ScenarioParameterTests(unittest.TestCase):
         self.assertIn('requires-python = ">=3.10"', text)
         self.assertIn('dependencies = []', text)
 
+    def test_package_version_matches_release_tag(self):
+        import os
+        import re
+        import subprocess
+        import tomllib
+
+        version = tomllib.loads((ROOT / 'python/pyproject.toml').read_text())['project']['version']
+        self.assertRegex(version, r'^\d+\.\d+\.\d+$')
+        ref = os.environ.get('GITHUB_REF', '')
+        if ref.startswith('refs/tags/v'):
+            self.assertEqual(version, ref.removeprefix('refs/tags/v'))
+        tags = subprocess.run(
+            ['git', 'tag', '--points-at', 'HEAD'],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if tags.returncode == 0:
+            for tag in tags.stdout.splitlines():
+                if re.fullmatch(r'v\d+\.\d+\.\d+', tag):
+                    self.assertEqual(version, tag.removeprefix('v'))
+
     def _mutated(self, edit):
         trial = copy.deepcopy(self.params)
         edit(trial)

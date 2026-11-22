@@ -4,6 +4,7 @@ on:
     types: [opened, synchronize, reopened, edited]
   push:
     branches: ['**']
+    tags: ['v*']
 permissions:
   contents: read
 jobs:
