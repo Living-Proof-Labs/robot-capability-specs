@@ -33,11 +33,14 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Check the committed Python package version before tagging
+      - name: Check the built Python package matches the release candidate before tagging
         env:
           CANDIDATE_VERSION: ${{ needs.candidate.outputs.version }}
           CANDIDATE_TAG: ${{ needs.candidate.outputs.git-tag }}
           CANDIDATE_COMMIT: ${{ needs.candidate.outputs.commit }}
+          # The release tag is created only after this job. The shared resolver's
+          # PEP 440 version is the version the build stamps.
+          LIVINGPROOF_PACKAGE_VERSION: ${{ needs.candidate.outputs.pep440-version }}
         run: python3 tooling/check-package-release.py "$GITHUB_SHA" "$CANDIDATE_COMMIT" "$CANDIDATE_VERSION" "$CANDIDATE_TAG"
 
   manual:
