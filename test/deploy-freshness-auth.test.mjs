@@ -358,7 +358,9 @@ test("repository workflows authenticate every main-freshness read", () => {
   assert.match(runScript(steps[0]), /\bgh\s+api\b/);
   assert.match(runScript(steps[0]), /git\/ref\/heads\/main/);
   assert.doesNotMatch(runScript(steps[0]), /urlopen\s*\(\s*url\b/);
-  const deploy = steps[1].join("\n");
+  const deployStep = steps.find((step) => /actions\/deploy-pages@/.test(step.join("\n")));
+  assert.ok(deployStep, "expected actions/deploy-pages@ step");
+  const deploy = deployStep.join("\n");
   assert.match(deploy, /actions\/deploy-pages@/);
   assert.match(deploy, /if: steps\.freshness\.outputs\.current == 'true'/);
 });

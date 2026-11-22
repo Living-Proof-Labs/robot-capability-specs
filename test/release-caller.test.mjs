@@ -44,7 +44,7 @@ test('shared release source is an explicit version tag, never a moving branch or
   t.diagnostic(`current workflow accepted with explicit full semver tag @${call.ref}`);
 });
 test('publication waits for local verification and retains main/off-switch restrictions', () => {
-  assert.equal(workflow.jobs.release.needs, 'verify');
+  assert.deepEqual(workflow.jobs.release.needs, ['verify', 'version']);
   assert.deepEqual(workflow.on.push.branches, ['main']);
   assert.equal(workflow.on.pull_request, undefined);
   assert.equal(workflow.on.pull_request_target, undefined);

@@ -16,13 +16,25 @@ function usesRe() {
   return /^\s+uses:\s*Living-Proof-Labs\/collaboration-guidelines\/\.github\/workflows\/([\w.-]+\.ya?ml)@(\S+)\s*$/gm;
 }
 const PRESET = /^github>Living-Proof-Labs\/collaboration-guidelines:renovate-preset#(.+)$/;
-const SHARED_RELEASE_INPUTS = new Set(["dry-run", "draft-release"]);
+const SHARED_RELEASE_INPUTS = new Set(["dry-run", "draft-release", "expected-version", "expected-commit"]);
 const SHARED_RELEASE_OUTPUTS = new Set([
   "draft-created",
   "published",
   "version",
   "git-tag",
   "release-url",
+  "commit",
+]);
+const SHARED_CANDIDATE_INPUTS = new Set(["replay-tag"]);
+const SHARED_CANDIDATE_OUTPUTS = new Set([
+  "semver-version",
+  "pep440-version",
+  "debian-version",
+  "version",
+  "git-tag",
+  "commit",
+  "run-id",
+  "run-attempt",
 ]);
 
 function root() {
@@ -136,16 +148,24 @@ test("release call uses only the shared interface", { skip: skipCall }, () => {
   const calls = guidelineCalls(text);
   assert.ok(Object.keys(calls).length, "expected a job that uses the shared semantic-release workflow");
   for (const [name, match] of Object.entries(calls)) {
-    assert.equal(match.file, "semantic-release.yml");
+    assert.ok(
+      match.file === "semantic-release.yml" || match.file === "semantic-release-candidate.yml",
+      match.file,
+    );
     const block = jobBlock(text, name);
     const withKeys = new Set(Object.keys(mapping(block, "with")));
-    for (const key of withKeys) assert.ok(SHARED_RELEASE_INPUTS.has(key), key);
-    assert.equal(mapping(block, "permissions").contents, "write");
+    const allowedInputs =
+      match.file === "semantic-release.yml" ? SHARED_RELEASE_INPUTS : SHARED_CANDIDATE_INPUTS;
+    const allowedOutputs =
+      match.file === "semantic-release.yml" ? SHARED_RELEASE_OUTPUTS : SHARED_CANDIDATE_OUTPUTS;
+    const expectedContents = match.file === "semantic-release.yml" ? "write" : "read";
+    for (const key of withKeys) assert.ok(allowedInputs.has(key), key);
+    assert.equal(mapping(block, "permissions").contents, expectedContents);
     const used = new Set(
       [...text.matchAll(new RegExp(`needs\\.${name}\\.outputs\\.([\\w-]+)`, "g"))].map((m) => m[1]),
     );
     for (const key of used) {
-      assert.ok(SHARED_RELEASE_OUTPUTS.has(key), `unexpected output ${key}`);
+      assert.ok(allowedOutputs.has(key), `unexpected output ${key}`);
     }
   }
 });

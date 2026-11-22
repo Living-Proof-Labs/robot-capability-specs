@@ -15,6 +15,7 @@ const SHA = /^[0-9a-f]{40}$/;
 const VERSION = /^v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/;
 const USES = /^[ \t]*(?:-[ \t]*)?uses:[ \t]*(\S+)(?:[ \t]+#\s*(\S+))?[ \t]*$/gm;
 const REUSABLE = /^Living-Proof-Labs\/[\w.-]+\/\.github\/workflows\/[\w.-]+\.ya?ml$/;
+const LOCAL_REUSABLE = /^\.\/\.github\/workflows\/[\w.-]+\.ya?ml$/;
 const CHECKOUT = "11d5960a326750d5838078e36cf38b85af677262";
 
 function actionUses(text) {
@@ -33,6 +34,7 @@ function actionUses(text) {
 function problems(text) {
   const found = [];
   for (const use of actionUses(text)) {
+    if (LOCAL_REUSABLE.test(use.spec)) continue;
     if (REUSABLE.test(use.action)) {
       if (!VERSION.test(use.ref)) found.push(`${use.spec} is not a full release tag`);
       continue;
