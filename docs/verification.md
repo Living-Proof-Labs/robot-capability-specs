@@ -49,8 +49,20 @@ The development container reuses the same Dockerfile. Inside it run
 Python 3.11 in the image supplies Zensical 0.0.73 and Playwright 1.64.1 from the
 hash-locked requirements. Node dependencies retain their existing lock.
 
-Download the CI preview artifact (retained for **14 days**) and extract it.
-Serve `manual/html` with an ordinary local HTTP server, for example:
+Sign in to GitHub, then download the manual artifact. An anonymous download
+returns HTTP 401.
+
+```sh
+gh auth login
+gh run download --repo Living-Proof-Labs/robot-capability-specs --name catalog-and-manual
+```
+
+The verify workflow publishes `catalog-and-manual` (retained for **14 days**).
+That artifact contains `manual/html`, the test reports, and the screenshots.
+A catalog release run publishes the same files under a name that adds the
+run attempt, such as `catalog-and-manual-1`. `gh run download` extracts one
+named artifact into the current directory. Serve `manual/html` with an
+ordinary local HTTP server, for example:
 
 ```sh
 python3 -m http.server 8000 --directory manual/html --bind 127.0.0.1
@@ -138,7 +150,8 @@ read-only observations do not replace live browser verification of a new deploym
   the released [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md#verification-of-user-run-paths)
   assigns weekly quickstart/install checks to the verification agent. Rivet
   coordinates the Vera handoff and execution mechanism. No released shared drift
-  workflow was found at v7.10.9 or v9.6.15; ordinary CI is not evidence that this
+  workflow was found at the pinned brand release v7.10.9 or the pinned shared
+  workflow release v9.9.4; ordinary CI is not evidence that this
   weekly exercise runs. Each failure or blocked step belongs in its affected
   repository with the `drift` label.
 - [Required checks coordination .github#98](https://github.com/Living-Proof-Labs/.github/issues/98):
