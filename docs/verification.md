@@ -49,8 +49,20 @@ The development container reuses the same Dockerfile. Inside it run
 Python 3.11 in the image supplies Zensical 0.0.73 and Playwright 1.64.1 from the
 hash-locked requirements. Node dependencies retain their existing lock.
 
-Download the CI preview artifact (retained for **14 days**) and extract it.
-Serve `manual/html` with an ordinary local HTTP server, for example:
+Sign in to GitHub, then download the manual artifact. An anonymous download
+returns HTTP 401.
+
+```sh
+gh auth login
+gh run download --repo Living-Proof-Labs/robot-capability-specs --name catalog-and-manual
+```
+
+The verify workflow publishes `catalog-and-manual` (retained for **14 days**).
+That artifact contains `manual/html`, the test reports, and the screenshots.
+A catalog release run publishes the same files under a name that adds the
+run attempt, such as `catalog-and-manual-1`. `gh run download` extracts one
+named artifact into the current directory. Serve `manual/html` with an
+ordinary local HTTP server, for example:
 
 ```sh
 python3 -m http.server 8000 --directory manual/html --bind 127.0.0.1
