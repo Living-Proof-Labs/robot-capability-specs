@@ -83,17 +83,21 @@ parameter file and for route distance and exit crossing. It matches
 `tooling/scenario-parameters.mjs` and the route measures in
 `tooling/world-layout.mjs`. The package uses only the Python standard library
 and requires Python 3.10 or newer. Install a released tag. Do not install from
-a branch:
+a branch. Resolve the latest release tag, then install that tag:
 
 ```sh
-pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@vX.Y.Z#subdirectory=python"
+tag=$(git ls-remote --tags --refs --sort=-v:refname \
+  https://github.com/Living-Proof-Labs/robot-capability-specs.git 'v*' \
+  | awk 'NR==1 { sub(/^.*\//, "", $2); print $2 }')
+pip install "git+https://github.com/Living-Proof-Labs/robot-capability-specs@${tag}#subdirectory=python"
 ```
 
-`vX.Y.Z` is the catalog tag that contains the package. The built package
-version is that tag without the leading `v`: installing `vX.Y.Z` produces
-version `X.Y.Z`. A pull request, a local checkout, or any other tree that is
-not exactly one release tag installs a development version such as
-`0.0.0.dev0+g<commit>`. That development version is not a stable release.
+To pin a specific version, choose a tag on the
+[Releases page](https://github.com/Living-Proof-Labs/robot-capability-specs/releases).
+The built package version is that tag without the leading `v`. A pull request,
+a local checkout, or any other tree that is not exactly one release tag
+installs a development version such as `0.0.0.dev0+g<commit>`. That
+development version is not a stable release.
 
 ## Releases
 
