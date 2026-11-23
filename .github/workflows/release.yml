@@ -18,7 +18,7 @@ jobs:
        vars.RELEASES_ENABLED == '' || vars.RELEASES_ENABLED == 'true')
     permissions:
       contents: read
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.4
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.9
     with:
       replay-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || '' }}
 
@@ -70,7 +70,7 @@ jobs:
     permissions:
       contents: write
     # The sealed manual has been re-downloaded and checked by the read-only caller.
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.4
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.9
     with:
       expected-version: ${{ needs.candidate.outputs.version }}
       expected-commit: ${{ needs.candidate.outputs.commit }}
