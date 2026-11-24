@@ -150,10 +150,12 @@ read-only observations do not replace live browser verification of a new deploym
   the released [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md#verification-of-user-run-paths)
   assigns weekly quickstart/install checks to the verification agent. Rivet
   coordinates the Vera handoff and execution mechanism. No released shared drift
-  workflow was found at the pinned brand release v7.10.9 or the pinned shared
-  workflow release v9.9.4; ordinary CI is not evidence that this
-  weekly exercise runs. Each failure or blocked step belongs in its affected
-  repository with the `drift` label.
+  workflow was found at the pinned brand release v7.10.9 or in the shared
+  workflow release pinned in the
+  [release caller](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/release.yml)
+  and the [verify workflow](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/verify.yml).
+  Ordinary CI is not evidence that this weekly exercise runs. Each failure or
+  blocked step belongs in its affected repository with the `drift` label.
 - [Required checks coordination .github#98](https://github.com/Living-Proof-Labs/.github/issues/98):
   the live main rules returned on 2026-11-18 include pull requests and a merge
   queue without a `required_status_checks` rule. This matches the intentionally
