@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// docs/verification.md used to name the shared workflow release by version.
-// Renovate bumps the workflow callers and leaves that sentence behind, so a
-// stated version must be the pin in the callers. The held docs-brand release
-// and historical adoption notes are not current-pin claims.
+// Shared-workflow versions drift when prose copies them: Renovate edits the
+// workflow callers and leaves the sentence behind. These docs name no workflow
+// version; they point at the callers. A guidelines or brand version must match
+// the held pin in docs-brand.lock.json.
+// History under docs/adr/ and files named CHANGELOG* is exempt by path.
+// `task test` loads this file through tooling/test-suite.mjs. `task check`
+// only syntax-checks it.
 
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
@@ -11,15 +14,20 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const TAG = "v(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)";
+const WINDOW = 80;
+const TAG = "(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)";
+const VERSION = new RegExp(`(?<![A-Za-z0-9])\`?v?${TAG}\`?(?![A-Za-z0-9])`, "g");
 const USES = new RegExp(
-  `uses:\\s*Living-Proof-Labs\\/collaboration-guidelines\\/\\.github\\/workflows\\/[\\w.-]+\\.ya?ml@(${TAG})`,
+  `uses:\\s*Living-Proof-Labs\\/collaboration-guidelines\\/\\.github\\/workflows\\/[\\w.-]+\\.ya?ml@(v${TAG})`,
   "g",
 );
-const CLAIM = new RegExp(
-  `(?:(?:pinned\\s+)?shared\\s+workflow(?:\\s+release)?|workflow\\s+release)\\s+(${TAG})`,
-  "gi",
-);
+const ANCHORS = [
+  [/semantic-release[\w.-]*\.ya?ml@/gi, "workflow"],
+  [/collaboration-guidelines/gi, "guidelines"],
+  [/(?<!collaboration-)\bguidelines\b/gi, "guidelines"],
+  [/\bbrand\b/gi, "guidelines"],
+  [/\bworkflow\b/gi, "workflow"],
+];
 
 function workflowPins(texts) {
   const pins = new Set();
@@ -27,17 +35,6 @@ function workflowPins(texts) {
     for (const match of text.matchAll(USES)) pins.add(match[1]);
   }
   return pins;
-}
-
-function claimedVersions(text) {
-  return [...text.matchAll(CLAIM)].map((match) => match[1]);
-}
-
-function mismatches(text, pins) {
-  const actual = pins.size ? [...pins].sort().join(", ") : "none";
-  return claimedVersions(text)
-    .filter((version) => pins.size !== 1 || !pins.has(version))
-    .map((version) => `shared workflow release ${version} is not the pinned shared workflow (${actual})`);
 }
 
 function workflowTexts() {
@@ -48,51 +45,169 @@ function workflowTexts() {
     .map((name) => readFileSync(join(dir, name), "utf8"));
 }
 
-function markdownFiles(dir) {
+function loadPins() {
+  const pins = workflowPins(workflowTexts());
+  assert.equal(pins.size, 1, [...pins].sort().join(", "));
+  const brand = JSON.parse(readFileSync(join(ROOT, "docs-brand.lock.json"), "utf8")).version;
+  assert.match(brand, new RegExp(`^v${TAG}$`));
+  return { workflow: [...pins][0], brand };
+}
+
+function normalize(token) {
+  const bare = token.replaceAll("`", "");
+  return bare.startsWith("v") ? bare : `v${bare}`;
+}
+
+function mentions(text) {
+  return [...text.matchAll(VERSION)].map((match) => ({
+    version: normalize(match[0]),
+    start: match.index,
+    end: match.index + match[0].length,
+  }));
+}
+
+function anchors(text) {
   const found = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === "artifacts" || entry.name === ".git") continue;
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) found.push(...markdownFiles(path));
-    else if (entry.name.endsWith(".md")) found.push(path);
+  for (const [pattern, kind] of ANCHORS) {
+    for (const match of text.matchAll(pattern)) {
+      found.push({ kind, start: match.index, end: match.index + match[0].length });
+    }
   }
   return found;
 }
 
-function livePins() {
-  const pins = workflowPins(workflowTexts());
-  assert.equal(pins.size, 1, [...pins].sort().join(", "));
-  return pins;
+function gap(anchor, mention) {
+  if (anchor.end <= mention.start) return mention.start - anchor.end;
+  if (mention.end <= anchor.start) return anchor.start - mention.end;
+  return 0;
 }
 
-test("docs do not state a shared workflow version other than the pin", () => {
-  const pins = livePins();
+function nearestAnchor(mention, found) {
+  let best = null;
+  for (const anchor of found) {
+    const distance = gap(anchor, mention);
+    if (distance > WINDOW) continue;
+    if (!best || distance < best.distance) best = { kind: anchor.kind, distance };
+  }
+  return best;
+}
+
+function isHistory(relativePath) {
+  const path = relativePath.replaceAll("\\", "/").replace(/^\.\//, "");
+  if (path === "docs/adr" || path.startsWith("docs/adr/")) return true;
+  const base = path.slice(path.lastIndexOf("/") + 1);
+  return /^changelog/i.test(base);
+}
+
+// Generated manual output is the repository-root artifacts directory.
+// A documentation folder that is also named artifacts stays in the scan.
+function isGeneratedOutput(relativePath) {
+  const path = relativePath.replaceAll("\\", "/").replace(/^\.\//, "");
+  return path === "artifacts" || path.startsWith("artifacts/");
+}
+
+function problems(relativePath, text, pins) {
+  if (isHistory(relativePath)) return [];
+  const found = anchors(text);
+  const reported = [];
+  for (const mention of mentions(text)) {
+    const anchor = nearestAnchor(mention, found);
+    if (!anchor) continue;
+    if (anchor.kind === "workflow") {
+      reported.push(
+        `${relativePath}: shared workflow version ${mention.version} is hardcoded; the callers pin ${pins.workflow}`,
+      );
+    } else if (mention.version !== pins.brand) {
+      reported.push(
+        `${relativePath}: guidelines version ${mention.version} is not the held pin ${pins.brand}`,
+      );
+    }
+  }
+  return reported;
+}
+
+function markdownFiles(dir, rel = "") {
+  const found = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name === ".git") continue;
+    const relPath = rel ? `${rel}/${entry.name}` : entry.name;
+    if (isGeneratedOutput(relPath)) continue;
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...markdownFiles(full, relPath));
+    else if (entry.name.endsWith(".md") || /^changelog/i.test(entry.name)) found.push(relPath);
+  }
+  return found;
+}
+
+function assertStale(phrase) {
+  const found = problems("docs/verification.md", phrase, loadPins());
+  assert.ok(found.some((item) => item.includes("v9.9.4")), `${phrase}\n${found.join("\n")}`);
+}
+
+test("docs do not state a shared-workflow or guidelines version other than the held pin", () => {
+  const pins = loadPins();
   const found = [];
   for (const path of markdownFiles(ROOT)) {
-    for (const problem of mismatches(readFileSync(path, "utf8"), pins)) {
-      found.push(`${path.slice(ROOT.length + 1)}: ${problem}`);
-    }
+    found.push(...problems(path, readFileSync(join(ROOT, path), "utf8"), pins));
   }
   assert.deepEqual(found, []);
 });
 
-test("a shared workflow version other than the pin is reported", () => {
-  const pins = livePins();
-  const [pin] = pins;
-  const wrongVersion = pin === "v9.9.4" ? "v0.0.1" : "v9.9.4";
-  const wrong = [
-    "No released shared drift workflow was found at the pinned brand release v7.10.9",
-    `or the pinned shared workflow release ${wrongVersion}.`,
+test("the release workflow vX is reported", () => {
+  assertStale("the release workflow v9.9.4 is pinned");
+});
+
+test("a semantic-release.yml ref is reported", () => {
+  assertStale("the caller uses `semantic-release.yml@v9.9.4`");
+});
+
+test("a backticked version is reported", () => {
+  assertStale("the shared workflow release `v9.9.4`");
+});
+
+test("a version without v is reported", () => {
+  assertStale("the shared workflow release 9.9.4");
+});
+
+test("a collaboration-guidelines version is reported", () => {
+  assertStale("pinned to collaboration-guidelines v9.9.4");
+});
+
+test("a version after pinned at is reported", () => {
+  assertStale("the shared workflow release is pinned at v9.9.4");
+});
+
+test("ADR and CHANGELOG history is not flagged", () => {
+  const pins = loadPins();
+  const adr = "docs/adr/0002-shared-release-workflow.md";
+  assert.deepEqual(problems(adr, readFileSync(join(ROOT, adr), "utf8"), pins), []);
+  const stale = [
+    "the release workflow v9.9.4 is pinned",
+    "the caller uses `semantic-release.yml@v9.9.4`",
+    "the shared workflow release `v9.9.4`",
+    "the shared workflow release 9.9.4",
+    "pinned to collaboration-guidelines v9.9.4",
+    "the shared workflow release is pinned at v9.9.4",
   ].join("\n");
-  assert.deepEqual(claimedVersions(wrong), [wrongVersion]);
-  assert.deepEqual(mismatches(wrong, pins), [
-    `shared workflow release ${wrongVersion} is not the pinned shared workflow (${pin})`,
-  ]);
-  assert.deepEqual(mismatches(wrong.replace(wrongVersion, pin), pins), []);
-  assert.deepEqual(
-    mismatches("the shared workflow release pinned in the release caller", pins),
-    [],
-  );
-  assert.deepEqual(mismatches("That adoption left release workflow v2.0.3 unchanged.", pins), []);
-  assert.deepEqual(mismatches("The caller moved to `semantic-release.yml@v9.6.15`.", pins), []);
+  assert.deepEqual(problems("CHANGELOG.md", stale, pins), []);
+  assert.deepEqual(problems("docs/CHANGELOG-1.md", stale, pins), []);
+  assert.ok(problems("README.md", stale, pins).length >= 6);
+});
+
+test("only the generated artifacts directory is skipped", () => {
+  assert.equal(isGeneratedOutput("artifacts"), true);
+  assert.equal(isGeneratedOutput("artifacts/manual/page.md"), true);
+  assert.equal(isGeneratedOutput("docs/artifacts/note.md"), false);
+  assert.equal(isGeneratedOutput("nested/artifacts/note.md"), false);
+  const stale = "the release workflow v9.9.4 is pinned";
+  assert.ok(problems("docs/artifacts/note.md", stale, loadPins()).length > 0);
+  assert.ok(problems("nested/artifacts/note.md", stale, loadPins()).length > 0);
+});
+
+test("task test executes this file through the catalog suite", () => {
+  const suite = readFileSync(join(ROOT, "tooling/test-suite.mjs"), "utf8");
+  assert.match(suite, /endsWith\(\s*['"]\.test\.mjs['"]\s*\)/);
+  assert.ok(readdirSync(join(ROOT, "test")).includes("workflow-pin-docs.test.mjs"));
+  const taskfile = readFileSync(join(ROOT, "Taskfile.runtime.yml"), "utf8");
+  assert.match(taskfile, /tooling\/test-suite\.mjs/);
 });

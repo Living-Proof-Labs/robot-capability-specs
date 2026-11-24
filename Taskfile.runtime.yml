@@ -22,6 +22,8 @@ tasks:
       - python3 -m compileall -q python test/python tooling/run-python-tests.py tooling/check-publication.py
       - git diff --check
 
+  # Executes every test/*.test.mjs, including workflow-pin-docs, via tooling/test-suite.mjs.
+  # The check task only syntax-checks that file with node --check.
   test:
     desc: Run consumer validation and release-caller contract tests
     cmds:

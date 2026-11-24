@@ -12,10 +12,10 @@ CLI or runtime in this repository; no command or API reference is invented.
 
 The initial gaps were no browsable manual, no authoring entry point, no manual
 artifact or browser checks, and no development-container configuration. This
-initial #14 change adopted the shared working baseline from v4.1.0 to
-[v5.0.0](https://github.com/Living-Proof-Labs/collaboration-guidelines/tree/v5.0.0),
-resolved to `dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. At that time, the separately pinned
-v2.0.3 release workflow remained unchanged. No local `.agents/skills` exist.
+initial #14 change adopted the shared working baseline resolved to
+`dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. At that time, the separately pinned
+release workflow remained unchanged. Later workflow pins are recorded in
+[ADR 0002](adr/0002-shared-release-workflow.md). No local `.agents/skills` exist.
 
 ## Bounded feature inventory
 
@@ -89,12 +89,13 @@ it does not imply that every installed consumer uses that catalog version.
 ## Documentation ownership adoption
 
 Issue [#16](https://github.com/Living-Proof-Labs/robot-capability-specs/issues/16)
-adopts guidelines v6.0.0, resolved to
+adopts the guidelines release resolved to
 `52a2f274576dab20e96ee1152b6c8d187cfbf377`. Shared mechanics now link to their
 released owner; catalog semantics, source paths, historical headings and the
 maintainer-approval override stay here. The prepared #14 publication cleanup is
-included rather than published as a second PR. That adoption left release workflow v2.0.3 and
-executable example pins unchanged.
+included rather than published as a second PR. That adoption left the release
+workflow and executable example pins unchanged. Workflow pin history is in
+[ADR 0002](adr/0002-shared-release-workflow.md).
 
 The manual adds common root/source/help/license navigation and exact documentation
 identity on every page. Catalog releases remain a separate link, not a badge
