@@ -14,7 +14,8 @@ The initial gaps were no browsable manual, no authoring entry point, no manual
 artifact or browser checks, and no development-container configuration. This
 initial #14 change adopted the shared working baseline resolved to
 `dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. At that time, the separately pinned
-release workflow remained unchanged. Later workflow pins are recorded in
+release workflow remained unchanged. That pin, and the workflow pins that
+followed it, are recorded in
 [ADR 0002](adr/0002-shared-release-workflow.md). No local `.agents/skills` exist.
 
 ## Bounded feature inventory

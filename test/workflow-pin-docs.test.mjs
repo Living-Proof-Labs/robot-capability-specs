@@ -3,9 +3,10 @@
 // workflow callers and leaves the sentence behind. These docs name no workflow
 // version; they point at the callers. A guidelines or brand version must match
 // the held pin in docs-brand.lock.json.
-// History under docs/adr/ and files named CHANGELOG* is exempt by path.
-// `task test` loads this file through tooling/test-suite.mjs. `task check`
-// only syntax-checks it.
+// History under docs/adr/ and the root CHANGELOG.md is exempt by path.
+// A version is tied to a trigger in the same sentence, including a wrapped
+// line. The next sentence is a different claim. `task test` loads this file
+// through tooling/test-suite.mjs. `task check` only syntax-checks it.
 
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
@@ -14,7 +15,6 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const WINDOW = 80;
 const TAG = "(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)";
 const VERSION = new RegExp(`(?<![A-Za-z0-9])\`?v?${TAG}\`?(?![A-Za-z0-9])`, "g");
 const USES = new RegExp(
@@ -27,6 +27,7 @@ const ANCHORS = [
   [/(?<!collaboration-)\bguidelines\b/gi, "guidelines"],
   [/\bbrand\b/gi, "guidelines"],
   [/\bworkflow\b/gi, "workflow"],
+  [/\bcallers?\b/gi, "workflow"],
 ];
 
 function workflowPins(texts) {
@@ -82,11 +83,39 @@ function gap(anchor, mention) {
   return 0;
 }
 
-function nearestAnchor(mention, found) {
+function isSentenceEnd(text, index) {
+  const mark = text[index];
+  if (mark === "\n" && text[index + 1] === "\n") return true;
+  if (!/[.!?]/.test(mark)) return false;
+  if (mark === "." && /\d/.test(text[index - 1] ?? "") && /\d/.test(text[index + 1] ?? "")) return false;
+  const next = text[index + 1];
+  return next === undefined || /[\s"'”)\]*]/.test(next);
+}
+
+function sentenceSpan(text, index) {
+  let start = 0;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    if (isSentenceEnd(text, i)) {
+      start = i + 1;
+      break;
+    }
+  }
+  let end = text.length;
+  for (let i = index; i < text.length; i += 1) {
+    if (isSentenceEnd(text, i)) {
+      end = i + 1;
+      break;
+    }
+  }
+  return { start, end };
+}
+
+function nearestAnchor(text, mention, found) {
+  const span = sentenceSpan(text, mention.start);
   let best = null;
   for (const anchor of found) {
+    if (anchor.start < span.start || anchor.start >= span.end) continue;
     const distance = gap(anchor, mention);
-    if (distance > WINDOW) continue;
     if (!best || distance < best.distance) best = { kind: anchor.kind, distance };
   }
   return best;
@@ -95,8 +124,8 @@ function nearestAnchor(mention, found) {
 function isHistory(relativePath) {
   const path = relativePath.replaceAll("\\", "/").replace(/^\.\//, "");
   if (path === "docs/adr" || path.startsWith("docs/adr/")) return true;
-  const base = path.slice(path.lastIndexOf("/") + 1);
-  return /^changelog/i.test(base);
+  // Only the repository changelog. docs/changelog-policy.md is ordinary prose.
+  return path === "CHANGELOG.md";
 }
 
 // Generated manual output is the repository-root artifacts directory.
@@ -111,7 +140,7 @@ function problems(relativePath, text, pins) {
   const found = anchors(text);
   const reported = [];
   for (const mention of mentions(text)) {
-    const anchor = nearestAnchor(mention, found);
+    const anchor = nearestAnchor(text, mention, found);
     if (!anchor) continue;
     if (anchor.kind === "workflow") {
       reported.push(
@@ -177,6 +206,17 @@ test("a version after pinned at is reported", () => {
   assertStale("the shared workflow release is pinned at v9.9.4");
 });
 
+test("the release caller pins vX is reported", () => {
+  assertStale("the release caller pins v9.9.4");
+});
+
+test("a version is tied to a trigger in the same sentence", () => {
+  const pad = "word ".repeat(30);
+  assertStale(`the release caller ${pad}pins v9.9.4`);
+  const next = "See the release caller. Unrelated catalog tag v1.2.2 stands alone.";
+  assert.deepEqual(problems("README.md", next, loadPins()), []);
+});
+
 test("ADR and CHANGELOG history is not flagged", () => {
   const pins = loadPins();
   const adr = "docs/adr/0002-shared-release-workflow.md";
@@ -188,10 +228,19 @@ test("ADR and CHANGELOG history is not flagged", () => {
     "the shared workflow release 9.9.4",
     "pinned to collaboration-guidelines v9.9.4",
     "the shared workflow release is pinned at v9.9.4",
+    "the release caller pins v9.9.4",
   ].join("\n");
   assert.deepEqual(problems("CHANGELOG.md", stale, pins), []);
-  assert.deepEqual(problems("docs/CHANGELOG-1.md", stale, pins), []);
-  assert.ok(problems("README.md", stale, pins).length >= 6);
+  assert.ok(problems("README.md", stale, pins).length >= 7);
+});
+
+test("a changelog-prefixed doc outside the root changelog is reported", () => {
+  const stale = "the release caller pins v9.9.4";
+  const pins = loadPins();
+  assert.deepEqual(problems("CHANGELOG.md", stale, pins), []);
+  assert.ok(problems("docs/changelog-policy.md", stale, pins).length > 0);
+  assert.ok(problems("docs/CHANGELOG-1.md", stale, pins).length > 0);
+  assert.ok(problems("docs/CHANGELOG.md", stale, pins).length > 0);
 });
 
 test("only the generated artifacts directory is skipped", () => {
