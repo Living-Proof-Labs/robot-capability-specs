@@ -34,6 +34,10 @@ def test_sources(output):
     assert build['revision'] == subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
     assert build['generator'] == 'zensical==0.0.73'
     assert len(build['sources']) >= 15
+    paths = {item['path'] for item in build['sources']}
+    # One Apache-2.0 LICENSE is the only license source (collaboration-guidelines#162).
+    assert 'LICENSE' in paths
+    assert not any(p == 'LICENSE.md' or p.startswith('LICENSES/') for p in paths)
     def without_links(text):
         return re.sub(r'\]\([^)]*\)', ']', text)
     for item in build['sources']:
@@ -43,6 +47,12 @@ def test_sources(output):
         if item['path'].endswith('.feature'):
             assert original in staged
             assert (output / 'html' / item['path']).read_text() == original
+        elif item['path'] == 'LICENSE':
+            # The plain-text Apache-2.0 LICENSE is wrapped verbatim in a code
+            # block under the legacy #license-scope anchor.
+            assert item['page'] == 'LICENSE.md'
+            assert original.rstrip() in staged
+            assert '<a id="license-scope"></a>' in staged
         else:
             assert without_links(original) == without_links(staged)
 
