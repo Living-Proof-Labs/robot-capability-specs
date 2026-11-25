@@ -12,10 +12,11 @@ CLI or runtime in this repository; no command or API reference is invented.
 
 The initial gaps were no browsable manual, no authoring entry point, no manual
 artifact or browser checks, and no development-container configuration. This
-initial #14 change adopted the shared working baseline from v4.1.0 to
-[v5.0.0](https://github.com/Living-Proof-Labs/collaboration-guidelines/tree/v5.0.0),
-resolved to `dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. At that time, the separately pinned
-v2.0.3 release workflow remained unchanged. No local `.agents/skills` exist.
+initial #14 change adopted the shared working baseline resolved to
+`dd4b0391a9a66fa7944f6655aac57c67d3f8c002`. At that time, the separately pinned
+release workflow remained unchanged. That pin, and the workflow pins that
+followed it, are recorded in
+[ADR 0002](adr/0002-shared-release-workflow.md). No local `.agents/skills` exist.
 
 ## Bounded feature inventory
 
@@ -89,12 +90,13 @@ it does not imply that every installed consumer uses that catalog version.
 ## Documentation ownership adoption
 
 Issue [#16](https://github.com/Living-Proof-Labs/robot-capability-specs/issues/16)
-adopts guidelines v6.0.0, resolved to
+adopts the guidelines release resolved to
 `52a2f274576dab20e96ee1152b6c8d187cfbf377`. Shared mechanics now link to their
 released owner; catalog semantics, source paths, historical headings and the
 maintainer-approval override stay here. The prepared #14 publication cleanup is
-included rather than published as a second PR. That adoption left release workflow v2.0.3 and
-executable example pins unchanged.
+included rather than published as a second PR. That adoption left the release
+workflow and executable example pins unchanged. Workflow pin history is in
+[ADR 0002](adr/0002-shared-release-workflow.md).
 
 The manual adds common root/source/help/license navigation and exact documentation
 identity on every page. Catalog releases remain a separate link, not a badge
@@ -150,10 +152,12 @@ read-only observations do not replace live browser verification of a new deploym
   the released [independent review procedure](https://github.com/Living-Proof-Labs/collaboration-guidelines/blob/v7.10.9/docs/independent-review.md#verification-of-user-run-paths)
   assigns weekly quickstart/install checks to the verification agent. Rivet
   coordinates the Vera handoff and execution mechanism. No released shared drift
-  workflow was found at the pinned brand release v7.10.9 or the pinned shared
-  workflow release v9.9.4; ordinary CI is not evidence that this
-  weekly exercise runs. Each failure or blocked step belongs in its affected
-  repository with the `drift` label.
+  workflow was found at the pinned brand release v7.10.9 or in the shared
+  workflow release pinned in the
+  [release caller](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/release.yml)
+  and the [verify workflow](https://github.com/Living-Proof-Labs/robot-capability-specs/blob/main/.github/workflows/verify.yml).
+  Ordinary CI is not evidence that this weekly exercise runs. Each failure or
+  blocked step belongs in its affected repository with the `drift` label.
 - [Required checks coordination .github#98](https://github.com/Living-Proof-Labs/.github/issues/98):
   the live main rules returned on 2026-11-18 include pull requests and a merge
   queue without a `required_status_checks` rule. This matches the intentionally
