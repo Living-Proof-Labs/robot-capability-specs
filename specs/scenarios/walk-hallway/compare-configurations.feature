@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @walk_hallway @compare_configurations
 Feature: Compare configuration profiles on one robot
   The robot, world, placement, simulator and scenario stay fixed. Only the selected configuration profile changes.

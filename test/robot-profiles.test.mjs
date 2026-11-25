@@ -98,7 +98,7 @@ test('walk-hallway examples parse with no numeric literals', async () => {
   for (const file of ['walk-hallway.feature', 'compare-configurations.feature']) {
     const path = 'specs/scenarios/walk-hallway/' + file;
     const source = await readFile(path, 'utf8');
-    assert.match(source, /SPDX-License-Identifier: CC-BY-4.0/);
+    assert.match(source, /SPDX-License-Identifier: Apache-2.0/);
     assert.doesNotMatch(source.replace(/^#.*$/m, ''), /\b\d+(\.\d+)?\s*(m|s|m\/s)\b/);
     assert.ok((await pickles(path)).length >= 3, file);
   }

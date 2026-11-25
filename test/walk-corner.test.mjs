@@ -180,7 +180,7 @@ test('walk-corner description validates, is in journey order and matches hallway
 test('walk-corner Gherkin parses, uses the step vocabulary and names every evaluator', async () => {
   const path = CORNER + 'walk-corner.feature';
   const source = await readFile(path, 'utf8');
-  assert.match(source, /SPDX-License-Identifier: CC-BY-4.0/);
+  assert.match(source, /SPDX-License-Identifier: Apache-2.0/);
   assert.ok(source.endsWith('\n'));
   assert.doesNotMatch(source, /\t| +$/m);
   assert.doesNotMatch(source.replace(/^#.*$/m, ''), /\b\d+(\.\d+)?\s*(m|s|m\/s|rad\/s)\b/);

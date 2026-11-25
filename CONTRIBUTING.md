@@ -32,7 +32,6 @@ to the full candidate commit and reporting passed, failed, blocked and unrun
 checks. Request Light verification for documentation and styling changes; see
 the shared independent review procedure above.
 
-Contribute only work you have the right to publish. Preserve
-[path-specific licenses and attribution](LICENSE.md): specifications are CC BY 4.0,
-while original tooling and project documentation are Apache-2.0. Keep credentials,
-private datasets, proprietary SDKs and robot adapters outside this catalog.
+Contribute only work you have the right to publish under
+[Apache-2.0](LICENSE). Keep credentials, private datasets, proprietary SDKs and
+robot adapters outside this catalog.

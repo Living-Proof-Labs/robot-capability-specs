@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Strict pause demonstration, revision 2.0.0
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../LICENSE).
 
 This opt-in revision preserves revision 1.0.0 unchanged. It requires the same
 observations and assessments as [revision 1](../v1/README.md), but the elapsed

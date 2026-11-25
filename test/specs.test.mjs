@@ -17,7 +17,7 @@ test('reference Gherkin parses into five executable examples', async () => {
 test('reference documents have license notices and clean whitespace', async () => {
   for (const file of ['specs/v1/README.md', 'specs/v1/reference.feature']) {
     const source = await readFile(file, 'utf8');
-    assert.match(source, /SPDX-License-Identifier: CC-BY-4.0/);
+    assert.match(source, /SPDX-License-Identifier: Apache-2.0/);
     assert.ok(source.endsWith('\n'));
     assert.doesNotMatch(source, /\t| +$/m);
   }

@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Released pause execution compatibility examples
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../LICENSE).
 
 These examples explain existing released contracts; they introduce no new pause
 criteria or observation schema. They are fixture demonstrations, not robot safety

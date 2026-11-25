@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Reference contracts, revision 1.0.0
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../LICENSE).
 Catalog release tags identify the complete bundle; each contract below is revision
 1.0.0. These are fixture demonstration contracts, not robot safety certification.
 Runtime adapters, bindings and evaluators belong outside this catalog.

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @hallway_fixture
 Feature: Open hallway world
   The selected open hallway retains its own geometry, named-place, and collision expectations.

@@ -118,9 +118,8 @@ versions/downstream outputs remain a separate follow-up.
 
 ## Licensing
 
-Original specification content under `specs/` is CC BY 4.0. Original tooling and
-project documentation elsewhere are Apache-2.0. See [LICENSE.md](LICENSE.md) for
-precise scope and attribution. Dependency and license texts retain their own terms.
+Original specification content under `specs/`, original tooling, and project
+documentation are [Apache-2.0](LICENSE). Dependency texts retain their own terms.
 
 ## Execution compatibility matrix
 

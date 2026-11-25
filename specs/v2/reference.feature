@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @reference_v2
 Feature: Strict pause evidence has an explicit tighter limit
   Scenario Outline: The strict pause limit is inclusive
