@@ -210,6 +210,19 @@ test("the release caller pins vX is reported", () => {
   assertStale("the release caller pins v9.9.4");
 });
 
+test("the release callers pin vX is reported", () => {
+  assertStale("the release callers pin v9.9.4");
+});
+
+test("a single line break does not end the caller sentence", () => {
+  assertStale("the release caller\npins v9.9.4");
+});
+
+test("a blank line keeps the next paragraph from the caller", () => {
+  const phrase = "The release caller explains the pin\n\nUnrelated catalog tag v1.2.2 stands alone.";
+  assert.deepEqual(problems("README.md", phrase, loadPins()), []);
+});
+
 test("a version is tied to a trigger in the same sentence", () => {
   const pad = "word ".repeat(30);
   assertStale(`the release caller ${pad}pins v9.9.4`);
