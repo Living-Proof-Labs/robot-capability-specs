@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Walk around the corner, scenario 0.1.0
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../../LICENSE).
 
 The robot walks down one hallway, turns the corner, and reaches the end of the
 next hallway. It uses the controller in its selected configuration profile to

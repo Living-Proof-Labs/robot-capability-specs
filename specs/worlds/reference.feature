@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @world_contract
 Feature: Versioned world contract
   A world contract defines selection and evidence independently of geometry or consumer implementation.

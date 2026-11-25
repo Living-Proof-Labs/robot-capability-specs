@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @walk_hallway
 Feature: Walk the open hallway
   A robot uses the controller in its selected configuration profile to walk from the entrance to the exit.

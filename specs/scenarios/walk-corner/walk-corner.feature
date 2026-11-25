@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @walk_corner
 Feature: Walk around the corner
   The robot walks down one hallway, turns the corner, and reaches the end of the next hallway.

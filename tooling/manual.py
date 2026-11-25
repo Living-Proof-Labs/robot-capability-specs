@@ -61,7 +61,7 @@ def build():
     shutil.rmtree(SOURCE, ignore_errors=True)
     SOURCE.mkdir()
     brand = stage_brand()
-    paths = [ROOT / p for p in ('README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'LICENSE.md')]
+    paths = [ROOT / p for p in ('README.md', 'AGENTS.md', 'CONTRIBUTING.md')]
     paths += sorted((ROOT / 'docs').rglob('*.md'))
     paths += sorted((ROOT / 'specs').rglob('*.md'))
     paths += [ROOT / '.github/PAGES.md']
@@ -72,7 +72,9 @@ def build():
         target.parent.mkdir(parents=True, exist_ok=True)
         # Preserve prose; only repository-relative link destinations change.
         text = re.sub(r'(?<=\()([^\s)]*)(?=\))', lambda m: m[0] if '://' in m[0] else
-                      m[0].replace('README.md', 'index.md').replace('.github/', 'github/').replace('.feature', '.feature.md'), path.read_text())
+                      re.sub(r'(^|/)LICENSE$', r'\1LICENSE.md',
+                             m[0].replace('README.md', 'index.md').replace('.github/', 'github/').replace('.feature', '.feature.md')),
+                      path.read_text())
         target.write_text(text)
         manifest.append({'path': str(relative), 'page': str(target.relative_to(SOURCE)),
                          'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
@@ -92,7 +94,12 @@ def build():
         shutil.copyfile(path, SOURCE / relative)
         manifest.append({'path': str(relative), 'page': str(relative),
                          'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
-    shutil.copytree(ROOT / 'LICENSES', SOURCE / 'LICENSES')
+    license_path = ROOT / 'LICENSE'
+    (SOURCE / 'LICENSE.md').write_text(
+        f'# License\n\n<a id="license-scope"></a>\n\n```text\n{license_path.read_text().rstrip()}\n```\n'
+    )
+    manifest.append({'path': 'LICENSE', 'page': 'LICENSE.md',
+                     'sha256': hashlib.sha256(license_path.read_bytes()).hexdigest()})
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
     version = os.environ.get('MANUAL_VERSION') or 'development'

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0
 @reference_v1
 Feature: Evidence-based capability verification
   Scenario Outline: Pause evidence is assessed without hiding negative results

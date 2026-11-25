@@ -1,8 +1,8 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Scope of the capability catalog
 
-Copyright 2026 Living Proof Labs contributors. Licensed under CC BY 4.0;
-see [license scope and attribution](../LICENSE.md).
+Copyright 2026 Living Proof Labs contributors. Licensed under
+[Apache-2.0](../LICENSE).
 
 A capability describes an observable ability, its required conditions, and criteria
 for accepting evidence. It does not prescribe a robot SDK, transport, controller,

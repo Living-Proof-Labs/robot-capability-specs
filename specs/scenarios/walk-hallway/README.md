@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Walk the open hallway, scenario 0.1.0
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../../LICENSE).
 
 A robot uses the controller in its selected configuration profile to walk the
 [open hallway world](../../worlds/hallways.md) from `spawn-entrance` to `exit`.

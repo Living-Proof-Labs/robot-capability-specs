@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Robot and configuration profiles, revision 0.1.0
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../LICENSE).
 
 This document defines how a robot, the configurations it can run with, and one
 run of a scenario are described. Terms are defined in the

@@ -22,7 +22,7 @@ independent work covered by available instructions. Do not substitute `main` or
   Run `task verify` (container build, checks, and tests); individual commands are `task setup`, `task check`,
   and `task test`. Use native provider CLIs when authenticated appropriately.
 - Keep robot adapters and proprietary SDK code outside this catalog. Preserve
-  the path-specific licenses in [LICENSE.md](LICENSE.md).
+  the [Apache-2.0 license](LICENSE).
 
 ## Local overrides
 

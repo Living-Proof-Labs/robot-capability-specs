@@ -1,7 +1,7 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Open hallway world, revision 0.3.0
 
-Copyright 2026 Living Proof Labs contributors. [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt).
+Copyright 2026 Living Proof Labs contributors. [Apache-2.0](../../LICENSE).
 
 Document revision 0.3.0 versions this specification text (0.3.0 adds the shared
 result contract and probe parameters). It is separate from
